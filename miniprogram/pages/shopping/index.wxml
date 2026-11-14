@@ -1,0 +1,17 @@
+<view class="screen">
+  <view class="page-head">
+    <view class="headline">采购清单</view>
+    <view wx:if="{{items.length}}" class="subtle">待买 {{items.length}} 项</view>
+  </view>
+  <view wx:if="{{!items.length}}" class="empty">从菜谱详情加入缺少的食材。</view>
+  <view wx:for="{{items}}" wx:key="key" class="purchase-row">
+    <view class="row">
+      <text class="recipe-name">{{item.name}}</text>
+      <text class="quantity">{{item.quantity || item.amount + ' ' + item.unit}}{{item.count > 1 ? ' × ' + item.count + ' 项' : ''}}</text>
+    </view>
+    <view class="actions">
+      <button class="primary" bindtap="markBought" data-key="{{item.key}}" aria-label="已买{{item.name}}，加入冰箱">已买入库</button>
+      <button class="link" bindtap="removeItem" data-key="{{item.key}}" aria-label="从清单移除{{item.name}}">移除</button>
+    </view>
+  </view>
+</view>

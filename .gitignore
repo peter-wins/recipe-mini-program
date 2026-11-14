@@ -1,0 +1,14 @@
+# 微信开发者工具本地配置
+project.private.config.json
+
+# 菜谱图片（331MB / 3158 张，由独立图床托管，不入库）
+recipe-covers/
+
+# 系统文件
+.DS_Store
+
+# 依赖
+node_modules/
+
+# 日志
+*.log

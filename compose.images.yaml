@@ -1,0 +1,12 @@
+services:
+  recipe-images:
+    image: nginx:alpine
+    ports:
+      - "192.168.1.81:8088:80"
+    volumes:
+      - type: bind
+        source: ./recipe-covers
+        target: /usr/share/nginx/html
+        read_only: true
+        bind:
+          create_host_path: false

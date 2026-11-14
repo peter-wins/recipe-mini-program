@@ -1,0 +1,10 @@
+{
+  "pages": ["pages/home/index", "pages/recipe/index", "pages/shopping/index", "pages/records/index"],
+  "usingComponents": { "recipe-cover": "/components/recipe-cover/index" },
+  "window": {
+    "navigationBarTitleText": "美味厨房",
+    "navigationBarBackgroundColor": "#FFF8F0",
+    "navigationBarTextStyle": "black",
+    "backgroundColor": "#FFF8F0"
+  }
+}

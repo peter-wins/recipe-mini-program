@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<title>首页设计评测稿</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: #e9e2da; font-family: -apple-system, "PingFang SC", system-ui, sans-serif; display: flex; gap: 40px; padding: 40px; justify-content: center; }
+  .phone-wrap { text-align: center; }
+  .phone-label { font-size: 15px; color: #5D4037; font-weight: 700; margin-bottom: 12px; }
+  .phone { width: 375px; height: 760px; background: #FFF8F0; border-radius: 24px; overflow: hidden; box-shadow: 0 10px 30px rgba(120,80,40,.2); position: relative; text-align: left; }
+  .screen { padding: 10px 16px 96px; max-width: 450px; }
+
+  /* 问候区 */
+  .home-greeting { margin: 4px 1px 7px; }
+  .greeting-line { display: flex; align-items: center; gap: 6px; }
+  .greeting-text { font-size: 18px; font-weight: 750; color: #5D4037; }
+  .greeting-festival { flex-shrink: 0; padding: 1.5px 7px; border-radius: 999px; background: #ffe3ca; color: #994017; font-size: 11.5px; font-weight: 650; }
+  .greeting-date { margin-left: auto; color: #a08c7c; font-size: 12px; }
+  .greeting-quote { margin-top: 3px; color: #75665e; font-size: 13px; }
+
+  /* 推荐横幅 */
+  .feature-banner { position: relative; display: block; margin-bottom: 12px; overflow: hidden; border-radius: 11px; border: 1px solid #f0e4d8; background: #fff; color: #5D4037; }
+  .feature-image { display: block; width: 100%; height: 158px; object-fit: cover; }
+  .banner-caption { position: relative; padding: 10px 32px 11px 12px; }
+  .feature-title { margin: 0 0 3px; font-size: 18.5px; font-weight: 750; line-height: 1.25; }
+  .feature-reason { margin-top: 3px; color: #994017; font-size: 13px; font-weight: 600; }
+  .banner-meta { color: #75665e; font-size: 13px; }
+  .feature-arrow { position: absolute; top: 50%; right: 12px; transform: translateY(-50%); color: #a57455; font-size: 19px; }
+  .feature-badge { position: absolute; display: flex; align-items: center; gap: 2.5px; top: 10px; right: 10px; z-index: 1; padding: 1.5px 7px; border-radius: 999px; background: #FF8A3D; color: #43251b; font-size: 11.5px; font-weight: 650; }
+
+  /* 区块标题 */
+  .list-heading { display: flex; justify-content: space-between; align-items: center; margin-top: 18px; padding-bottom: 8px; }
+  .section { font-weight: 750; font-size: 17px; color: #5D4037; }
+  .match-group-title { color: #75665e; font-size: 13px; font-weight: 650; }
+  .more-recipes-link { color: #6B7280; font-size: 12px; }
+  .match-group + .match-group { margin-top: 10px; }
+  .match-group-head { min-height: 32px; margin-bottom: 4px; display: flex; justify-content: space-between; align-items: center; }
+
+  /* 卡片网格 */
+  .discovery-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 7px; }
+  .discovery-tile { overflow: hidden; border: 1px solid #f0e4d8; border-radius: 10px; background: #fff; }
+  .discovery-photo { display: block; width: 100%; height: 96px; object-fit: cover; background: #f4e5d7; }
+  .discovery-body { padding: 8px 9px; }
+  .discovery-name { overflow: hidden; font-size: 15.5px; font-weight: 700; line-height: 1.4; text-overflow: ellipsis; white-space: nowrap; }
+  .discovery-meta { margin-top: 2px; color: #75665e; font-size: 12px; display: flex; justify-content: space-between; align-items: center; }
+  .card-fact { display: flex; align-items: center; gap: 3px; }
+  .fact-clock { position: relative; flex-shrink: 0; width: 9.5px; height: 9.5px; box-sizing: border-box; border: 1px solid currentColor; border-radius: 50%; }
+  .fact-clock::after { position: absolute; top: 1px; left: 3px; width: 2px; height: 3px; border-left: 1px solid currentColor; border-bottom: 1px solid currentColor; content: ''; }
+  .difficulty-dot { flex-shrink: 0; width: 6px; height: 6px; border-radius: 50%; background: #59a16b; }
+
+  /* 只差一样 */
+  .missing-list { overflow: hidden; border: 1px solid #f0e4d8; border-radius: 10px; background: #fff; }
+  .missing-row { display: flex; align-items: center; gap: 7px; min-height: 47px; padding: 6px 11px; box-sizing: border-box; }
+  .missing-row + .missing-row { border-top: 1px solid #f0e4d8; }
+  .missing-thumb { display: block; flex-shrink: 0; width: 38px; height: 38px; overflow: hidden; border-radius: 6px; object-fit: cover; background: #f4e5d7; }
+  .missing-dish { flex: 1; min-width: 0; }
+  .missing-name { font-size: 15px; font-weight: 650; }
+  .missing-dish .banner-meta { font-size: 13px; }
+  .missing-label { max-width: 42%; color: #994017; font-size: 13px; text-align: right; }
+  .missing-arrow { color: #a57455; font-size: 16.5px; }
+
+  /* 底部导航 */
+  .bottom-nav { position: absolute; left: 14px; right: 14px; bottom: 12px; background: rgba(255,255,255,0.97); border-radius: 20px; box-shadow: 0 6px 16px rgba(150,80,30,0.18); padding: 5px; box-sizing: border-box; }
+  .nav-inner { display: flex; gap: 3px; }
+  .nav-item { flex: 1; text-align: center; line-height: 42px; font-size: 14px; border-radius: 16px; background: transparent; color: #8a7a68; }
+  .nav-item.nav-current { background: #ffe8d5; color: #994017; font-weight: 700; }
+</style>
+</head>
+<body>
+
+<div class="phone-wrap">
+  <div class="phone-label">状态一 · 普通日（冰箱有货）</div>
+  <div class="phone">
+    <div class="screen">
+      <div class="home-greeting">
+        <div class="greeting-line">
+          <span class="greeting-text">晚上好</span>
+          <span class="greeting-date">11月15日 星期日</span>
+        </div>
+        <div class="greeting-quote">🍳「在外卖与做饭之间，我选择了做饭」</div>
+      </div>
+
+      <div class="feature-banner">
+        <img class="feature-image" src="../recipe-covers/ai-generated/vegetable_dish_xi-hong-shi-chao-ji-dan.jpg">
+        <span class="feature-badge">★ 推荐</span>
+        <div class="banner-caption">
+          <div class="feature-title">西红柿炒鸡蛋</div>
+          <div class="feature-reason">冰箱里的番茄、鸡蛋都能用上</div>
+          <div class="banner-meta">冰箱食材齐全 · 15 分钟 · 简单</div>
+          <span class="feature-arrow">›</span>
+        </div>
+      </div>
+
+      <div class="match-group">
+        <div class="match-group-head">
+          <span class="match-group-title">食材齐全</span>
+          <span class="more-recipes-link">查看全部 ›</span>
+        </div>
+        <div class="discovery-grid">
+          <div class="discovery-tile">
+            <img class="discovery-photo" src="../recipe-covers/ai-generated/meat_dish_ke-le-ji-chi.jpg">
+            <div class="discovery-body">
+              <div class="discovery-name">可乐鸡翅</div>
+              <div class="discovery-meta"><span class="card-fact"><span class="fact-clock"></span>30 分钟</span><span class="card-fact"><span class="difficulty-dot"></span>简单</span></div>
+            </div>
+          </div>
+          <div class="discovery-tile">
+            <img class="discovery-photo" src="../recipe-covers/ai-generated/other_tang-cu-pai-gu.jpg">
+            <div class="discovery-body">
+              <div class="discovery-name">糖醋排骨</div>
+              <div class="discovery-meta"><span class="card-fact"><span class="fact-clock"></span>45 分钟</span><span class="card-fact"><span class="difficulty-dot difficulty-medium"></span>中等</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="match-group">
+        <div class="match-group-head">
+          <span class="match-group-title">只差一样</span>
+          <span class="more-recipes-link">查看全部 ›</span>
+        </div>
+        <div class="missing-list">
+          <div class="missing-row">
+            <img class="missing-thumb" src="../recipe-covers/ai-generated/other_qing-zheng-lu-yu.jpg">
+            <div class="missing-dish"><div class="missing-name">清蒸鲈鱼</div><div class="banner-meta">20 分钟</div></div>
+            <span class="missing-label">缺鲈鱼</span><span class="missing-arrow">›</span>
+          </div>
+          <div class="missing-row">
+            <img class="missing-thumb" src="../recipe-covers/ai-generated/meat_dish_huang-men-ji.jpg">
+            <div class="missing-dish"><div class="missing-name">黄焖鸡</div><div class="banner-meta">40 分钟</div></div>
+            <span class="missing-label">缺香菇</span><span class="missing-arrow">›</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="bottom-nav"><div class="nav-inner">
+      <div class="nav-item nav-current">首页</div><div class="nav-item">菜谱</div><div class="nav-item">轻食</div><div class="nav-item">我的</div>
+    </div></div>
+  </div>
+</div>
+
+<div class="phone-wrap">
+  <div class="phone-label">状态二 · 冬至（节日应节推荐）</div>
+  <div class="phone">
+    <div class="screen">
+      <div class="home-greeting">
+        <div class="greeting-line">
+          <span class="greeting-text">早上好</span>
+          <span class="greeting-festival">冬至</span>
+          <span class="greeting-date">12月22日 星期二</span>
+        </div>
+        <div class="greeting-quote">🥟「冬至不端饺子碗，冻掉耳朵没人管」</div>
+      </div>
+
+      <div class="feature-banner">
+        <img class="feature-image" src="../recipe-covers/ai-generated/other_yang-rou-tang.jpg">
+        <span class="feature-badge">★ 推荐</span>
+        <div class="banner-caption">
+          <div class="feature-title">羊肉汤</div>
+          <div class="feature-reason">冬至进补，来碗热乎的正合适</div>
+          <div class="banner-meta">冰箱食材齐全 · 60 分钟 · 简单</div>
+          <span class="feature-arrow">›</span>
+        </div>
+      </div>
+
+      <div class="match-group">
+        <div class="match-group-head">
+          <span class="match-group-title">食材齐全</span>
+          <span class="more-recipes-link">查看全部 ›</span>
+        </div>
+        <div class="discovery-grid">
+          <div class="discovery-tile">
+            <img class="discovery-photo" src="../recipe-covers/ai-generated/vegetable_dish_xi-hong-shi-chao-ji-dan.jpg">
+            <div class="discovery-body">
+              <div class="discovery-name">西红柿炒鸡蛋</div>
+              <div class="discovery-meta"><span class="card-fact"><span class="fact-clock"></span>15 分钟</span><span class="card-fact"><span class="difficulty-dot"></span>简单</span></div>
+            </div>
+          </div>
+          <div class="discovery-tile">
+            <img class="discovery-photo" src="../recipe-covers/ai-generated/meat_dish_ke-le-ji-chi.jpg">
+            <div class="discovery-body">
+              <div class="discovery-name">可乐鸡翅</div>
+              <div class="discovery-meta"><span class="card-fact"><span class="fact-clock"></span>30 分钟</span><span class="card-fact"><span class="difficulty-dot"></span>简单</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="match-group">
+        <div class="match-group-head">
+          <span class="match-group-title">只差一样</span>
+          <span class="more-recipes-link">查看全部 ›</span>
+        </div>
+        <div class="missing-list">
+          <div class="missing-row">
+            <img class="missing-thumb" src="../recipe-covers/ai-generated/other_qing-zheng-lu-yu.jpg">
+            <div class="missing-dish"><div class="missing-name">清蒸鲈鱼</div><div class="banner-meta">20 分钟</div></div>
+            <span class="missing-label">缺鲈鱼</span><span class="missing-arrow">›</span>
+          </div>
+          <div class="missing-row">
+            <img class="missing-thumb" src="../recipe-covers/ai-generated/meat_dish_huang-men-ji.jpg">
+            <div class="missing-dish"><div class="missing-name">黄焖鸡</div><div class="banner-meta">40 分钟</div></div>
+            <span class="missing-label">缺香菇</span><span class="missing-arrow">›</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="bottom-nav"><div class="nav-inner">
+      <div class="nav-item nav-current">首页</div><div class="nav-item">菜谱</div><div class="nav-item">轻食</div><div class="nav-item">我的</div>
+    </div></div>
+  </div>
+</div>
+
+</body>
+</html>

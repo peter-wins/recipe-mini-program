@@ -1,0 +1,205 @@
+<template name="discoveryTile">
+  <navigator class="discovery-tile" url="/pages/recipe/index?id={{recipe.id}}" hover-class="card-pressed">
+    <recipe-cover wx:if="{{recipe.image}}" class="discovery-photo" src="{{recipe.image}}" lazy="{{true}}"/>
+    <view wx:else class="discovery-photo discovery-no-photo">
+      <image src="/assets/icon-cookbook.svg" aria-hidden="true"/>
+      <text>{{recipe.category}}</text>
+    </view>
+    <view class="discovery-body">
+      <view class="discovery-name">{{recipe.name}}</view>
+      <view class="discovery-meta card-facts">
+        <view class="card-fact"><view class="fact-clock" aria-hidden="true"></view><text>{{recipe.minutes}} 分钟</text></view>
+        <view class="card-fact"><view class="difficulty-dot {{recipe.difficulty === '中等' ? 'difficulty-medium' : ''}}" aria-hidden="true"></view><text>{{recipe.difficulty}}</text></view>
+      </view>
+    </view>
+  </navigator>
+</template>
+
+<template name="matchRecipes">
+  <view wx:if="{{group.showMissing}}" class="missing-list">
+    <navigator wx:for="{{group.recipes}}" wx:key="id" class="missing-row" url="/pages/recipe/index?id={{item.id}}" hover-class="card-pressed">
+      <recipe-cover wx:if="{{item.image}}" class="missing-thumb" src="{{item.image}}" lazy="{{true}}"/>
+      <view wx:else class="missing-thumb missing-thumb-empty" aria-hidden="true">
+        <image src="/assets/icon-cookbook.svg" aria-hidden="true"/>
+      </view>
+      <view class="missing-dish"><view class="missing-name">{{item.name}}</view><view class="banner-meta">{{item.minutes}} 分钟</view></view>
+      <text class="missing-label">缺{{item.missingText}}</text>
+      <text class="missing-arrow" aria-hidden="true">›</text>
+    </navigator>
+  </view>
+  <view wx:else class="discovery-grid">
+    <template wx:for="{{group.recipes}}" wx:key="id" is="discoveryTile" data="{{recipe: item}}"/>
+  </view>
+</template>
+
+<view class="screen has-nav">
+  <block wx:if="{{view === 'match'}}">
+    <view class="home-greeting">
+      <view class="greeting-line">
+        <text class="greeting-text">{{greeting.text}}</text>
+        <text wx:if="{{greeting.festivalName}}" class="greeting-festival">{{greeting.festivalName}}</text>
+        <text class="greeting-date">{{greeting.dateText}}</text>
+      </view>
+      <view class="greeting-quote">{{greeting.quoteEmoji}}「{{greeting.quoteText}}」</view>
+    </view>
+    <navigator wx:if="{{featured}}" class="feature-banner {{featured.image ? 'feature-with-photo' : ''}}" url="/pages/recipe/index?id={{featured.id}}" hover-class="feature-tap" aria-label="{{'今日推荐：' + featured.name + '，看做法'}}">
+      <recipe-cover wx:if="{{featured.image}}" class="feature-image" src="{{featured.image}}"/>
+      <view class="feature-badge"><text class="feature-badge-icon" aria-hidden="true">★</text><text>今日推荐</text></view>
+      <view class="banner-caption">
+        <view class="feature-title">{{featured.name}}</view>
+        <view wx:if="{{featured.reason}}" class="feature-reason">{{featured.reason}}</view>
+        <view class="banner-meta">{{featured.missingCount > 1 ? '还差' + featured.missingCount + '样，先看看做法' : featured.missingCount ? '只差' + featured.missingText + '，补一样就能做' : '冰箱食材齐全'}} · {{featured.minutes}} 分钟 · {{featured.difficulty}}</view>
+        <text class="feature-arrow" aria-hidden="true">›</text>
+      </view>
+    </navigator>
+    <view wx:else class="fridge-starter">
+      <view class="starter-heading">
+        <view class="starter-icon"><image src="/assets/icon-fridge.svg" aria-hidden="true"/></view>
+        <view>
+          <view class="starter-title">{{selected.length ? '暂时没有合适的推荐' : '冰箱里有什么？'}}</view>
+          <view class="subtle">{{selected.length ? '再加几样手边的食材，看看还能做什么。' : '选几样手边食材，看看今晚能做什么。'}}</view>
+        </view>
+      </view>
+      <button class="primary starter-button" bindtap="openFridge">{{selected.length ? '补充冰箱食材' : '添加冰箱食材'}}</button>
+    </view>
+
+    <block wx:if="{{homeGroups.length}}">
+      <view class="list-heading discovery-heading"><text class="section">按冰箱食材找菜</text></view>
+      <view wx:for="{{homeGroups}}" wx:key="id" wx:for-item="group" class="match-group">
+        <view class="row match-group-head">
+          <text class="match-group-title">{{group.title}}</text>
+          <button wx:if="{{group.hasMore}}" class="more-recipes-link" data-id="{{group.id}}" bindtap="openMatchGroup" aria-label="查看全部{{group.title}}的菜谱">查看全部 <text class="more-recipes-arrow" aria-hidden="true">›</text></button>
+        </view>
+        <template is="matchRecipes" data="{{group}}"/>
+      </view>
+    </block>
+    <block wx:if="{{!selected.length && quickRecipes.length}}">
+      <view class="list-heading discovery-heading"><text class="section">先看看快手菜</text></view>
+      <view class="discovery-grid">
+        <template wx:for="{{quickRecipes}}" wx:key="id" is="discoveryTile" data="{{recipe: item}}"/>
+      </view>
+    </block>
+  </block>
+
+  <block wx:elif="{{view === 'matches' && matchList}}">
+    <view class="row match-group-head match-list-head">
+      <text class="library-count">{{matchList.total}} 道菜</text>
+      <button class="more-recipes-link" data-view="match" bindtap="switchView">返回首页</button>
+    </view>
+    <view wx:if="{{!matchList.total}}" class="empty">目前没有符合条件的菜谱。</view>
+    <template wx:else is="matchRecipes" data="{{group: matchList}}"/>
+    <button wx:if="{{matchList.recipes.length < matchList.total}}" class="link match-list-more" bindtap="loadMoreMatches">加载更多</button>
+  </block>
+
+  <block wx:elif="{{view === 'library'}}">
+    <view class="recipe-search">
+      <view class="search-mark" aria-hidden="true"></view>
+      <input class="recipe-search-input" value="{{librarySearch}}" bindinput="searchLibrary" confirm-type="search" placeholder="搜索菜谱、食材"/>
+      <button wx:if="{{librarySearch}}" class="link" bindtap="clearLibrarySearch">清除</button>
+    </view>
+    <scroll-view class="category-scroll library-tabs" scroll-x enhanced show-scrollbar="{{false}}" scroll-into-view="{{'library-category-' + categoryIndex}}" aria-label="菜谱分类">
+      <view class="category-track">
+        <button wx:for="{{categoryOptions}}" wx:key="index" id="library-category-{{item.index}}" class="library-tab {{categoryIndex === item.index ? 'library-selected' : ''}}" data-index="{{item.index}}" bindtap="changeCategory">{{item.name}}</button>
+      </view>
+    </scroll-view>
+    <view class="row library-toolbar">
+      <text class="library-count">{{results.length}} 道菜</text>
+      <view class="library-filters">
+        <picker range="{{timeOptions}}" value="{{minutesIndex}}" bindchange="changeTime">
+          <view class="library-filter {{minutesIndex ? 'library-selected' : ''}}">{{minutesIndex ? timeOptions[minutesIndex] : '耗时'}} ⌄</view>
+        </picker>
+        <button class="library-filter {{readyOnly ? 'library-selected' : ''}}" bindtap="toggleReadyOnly" aria-pressed="{{readyOnly}}">食材齐全</button>
+      </view>
+    </view>
+    <view wx:if="{{libraryFilterText}}" class="row library-applied">
+      <text>{{libraryFilterText}}</text>
+      <button class="more-recipes-link" bindtap="resetFilters">清除筛选</button>
+    </view>
+    <view wx:if="{{!results.length}}" class="empty library-empty">
+      <text>{{readyOnly && !selected.length ? '先添加冰箱食材，就能筛出食材齐全的菜。' : '没有找到符合条件的菜谱。'}}</text>
+      <button wx:if="{{readyOnly && !selected.length}}" class="link" bindtap="openFridge">添加食材</button>
+    </view>
+    <view wx:else class="discovery-grid library-grid">
+      <template wx:for="{{libraryCards}}" wx:key="id" is="discoveryTile" data="{{recipe: item}}"/>
+    </view>
+    <button wx:if="{{libraryCards.length < results.length}}" class="link" bindtap="loadMoreRecipes">加载更多</button>
+  </block>
+
+  <light-meals wx:elif="{{view === 'meals'}}" inventory="{{selected}}" inventory-ready="{{inventoryReady}}"/>
+
+  <block wx:elif="{{view === 'fridge'}}">
+    <view class="fridge-card">
+      <view class="fridge-card-head">
+        <view class="fridge-icon"><image src="/assets/icon-fridge.svg" aria-hidden="true"/></view>
+        <view class="fridge-card-copy">
+          <view class="fridge-title">手边食材</view>
+          <view class="fridge-count">{{fridgeSummary.count}} 种食材<text wx:if="{{fridgeSummary.staples}}"> · {{fridgeSummary.staples}} 样常备</text></view>
+        </view>
+        <button wx:if="{{fridgeSummary.ready || fridgeSummary.almost}}" class="fridge-go" data-view="match" bindtap="switchView">看推荐 ›</button>
+      </view>
+      <view wx:if="{{selected.length}}" class="fridge-picked">
+        <block wx:for="{{selectedItems}}" wx:key="id">
+          <button wx:if="{{showAllSelected || index < 8}}" class="fridge-picked-chip" data-id="{{item.id}}" bindtap="toggleIngredient" aria-label="移除{{item.name}}">{{item.name}}<text aria-hidden="true"> ×</text></button>
+        </block>
+        <button wx:if="{{selected.length > 8}}" class="fridge-expand" bindtap="toggleSelectedIngredients" aria-expanded="{{showAllSelected}}">{{showAllSelected ? '收起' : '还有 ' + (selected.length - 8) + ' 样'}}</button>
+        <button wx:if="{{selected.length <= 8 || showAllSelected}}" class="fridge-clear" bindtap="clearInventory">清空</button>
+      </view>
+      <view wx:else class="fridge-hint">点选家里现有的食材，看看能做什么。</view>
+    </view>
+
+    <view class="recipe-search fridge-search">
+      <view class="search-mark" aria-hidden="true"></view>
+      <input class="recipe-search-input" value="{{search}}" bindinput="searchIngredients" confirm-type="search" placeholder="搜索食材，如 茄子、牛腩"/>
+      <button wx:if="{{search}}" class="link" bindtap="clearIngredientSearch">清除</button>
+    </view>
+
+    <view class="fridge-picker">
+      <view class="fridge-picker-head">
+        <text class="fridge-title">{{searching ? '搜索结果' : '常用食材'}}</text>
+        <text wx:if="{{!searching}}" class="fridge-picker-note">点选即保存</text>
+      </view>
+      <scroll-view wx:if="{{!searching}}" class="fridge-tabs" scroll-x enhanced show-scrollbar="{{false}}">
+        <view class="fridge-tabs-track">
+          <button wx:for="{{fridgeGroupNames}}" wx:key="*this" class="fridge-tab {{fridgeGroupIndex === index ? 'fridge-tab-active' : ''}}" data-index="{{index}}" bindtap="selectIngredientGroup" aria-pressed="{{fridgeGroupIndex === index}}">{{item}}</button>
+        </view>
+      </scroll-view>
+      <view wx:if="{{!visibleIngredients.length}}" class="empty fridge-empty">没找到这个食材，试试其他叫法。</view>
+      <view wx:else class="fridge-options">
+        <button wx:for="{{visibleIngredients}}" wx:key="id" class="fridge-option {{item.checked ? 'fridge-option-checked' : ''}}" data-id="{{item.id}}" bindtap="toggleIngredient" aria-pressed="{{item.checked}}">
+          <text class="fridge-option-name">{{item.name}}</text>
+          <text class="fridge-option-mark" aria-hidden="true">{{item.checked ? '✓' : '+'}}</text>
+        </button>
+      </view>
+      <button wx:if="{{hasMoreIngredients}}" class="link fridge-more" bindtap="loadMoreIngredients">显示更多结果</button>
+    </view>
+  </block>
+
+  <block wx:elif="{{view === 'profile'}}">
+    <view class="profile-head">
+      <view class="profile-avatar"><image src="/assets/icon-chef.svg" aria-hidden="true"/></view>
+      <view class="profile-name">我的厨房</view>
+    </view>
+    <view class="profile-stats">
+      <navigator class="profile-stat" url="/pages/records/index?type=favorites" hover-class="none"><text class="stat-count">{{favorites.length}}</text>收藏</navigator>
+      <navigator class="profile-stat" url="/pages/records/index?type=history" hover-class="none"><text class="stat-count">{{history.length}}</text>浏览历史</navigator>
+      <navigator class="profile-stat" url="/pages/records/index?type=cooked" hover-class="none"><text class="stat-count">{{cooked.length}}</text>做过</navigator>
+    </view>
+    <view class="profile-links">
+      <navigator class="profile-row" url="/pages/records/index?type=favorites" hover-class="pressed"><image src="/assets/icon-favorites.svg" aria-hidden="true"/>我的收藏<text class="profile-arrow">›</text></navigator>
+      <navigator class="profile-row" url="/pages/records/index?type=history" hover-class="pressed"><image src="/assets/icon-history.svg" aria-hidden="true"/>浏览历史<text class="profile-arrow">›</text></navigator>
+      <navigator class="profile-row" url="/pages/records/index?type=cooked" hover-class="pressed"><image src="/assets/icon-chef.svg" class="chef-list-icon" aria-hidden="true"/>做过的菜<text class="profile-arrow">›</text></navigator>
+      <button class="profile-row" data-view="fridge" bindtap="switchView"><image src="/assets/icon-fridge.svg" aria-hidden="true"/>冰箱食材<text class="profile-arrow">›</text></button>
+      <navigator class="profile-row" url="/pages/shopping/index" hover-class="pressed"><image src="/assets/icon-cart.svg" aria-hidden="true"/>采购清单<text class="profile-arrow">›</text></navigator>
+    </view>
+  </block>
+
+</view>
+
+<view class="bottom-nav main-nav">
+  <view class="nav-inner">
+    <button class="nav-item {{view === 'match' || view === 'matches' ? 'nav-current' : ''}}" data-view="match" bindtap="switchView"><image src="/assets/icon-home.svg" aria-hidden="true"/>首页</button>
+    <button class="nav-item {{view === 'library' ? 'nav-current' : ''}}" data-view="library" bindtap="switchView"><image src="/assets/icon-cookbook.svg" aria-hidden="true"/>菜谱</button>
+    <button class="nav-item {{view === 'meals' ? 'nav-current' : ''}}" data-view="meals" bindtap="switchView"><image src="/assets/icon-light-meal.svg" aria-hidden="true"/>轻食</button>
+    <button class="nav-item {{view === 'profile' ? 'nav-current' : ''}}" data-view="profile" bindtap="switchView"><image src="/assets/icon-profile.svg" aria-hidden="true"/>我的</button>
+  </view>
+</view>

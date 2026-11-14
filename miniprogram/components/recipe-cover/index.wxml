@@ -1,0 +1,3 @@
+<image wx:if="{{src && !failed}}" class="cover {{mode === 'widthFix' ? 'cover-fluid' : ''}}" src="{{downloadedSrc || src}}" data-url="{{downloadedSrc || src}}" mode="{{mode}}" lazy-load="{{lazy}}" aria-label="{{label}}" binderror="imageFailed"/>
+<block wx:elif="{{textFallback}}"><slot/></block>
+<view wx:else class="placeholder" aria-hidden="true"><image src="/assets/icon-cookbook.svg"/></view>

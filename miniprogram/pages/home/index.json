@@ -1,0 +1,5 @@
+{
+  "usingComponents": {
+    "light-meals": "/pages/meals/index"
+  }
+}

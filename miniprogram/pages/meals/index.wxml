@@ -1,0 +1,28 @@
+<view>
+  <view class="subtle meal-intro">耗时按各道菜依次制作估算，米饭按已有熟米饭计算。油盐等调味料请另行确认。</view>
+  <view class="meal-filters">
+    <picker range="{{timeLabels}}" value="{{minutesIndex}}" bindchange="changeTime">
+      <view class="meal-filter {{minutesIndex ? 'chosen' : ''}}">{{timeLabels[minutesIndex]}} ⌄</view>
+    </picker>
+    <button wx:if="{{inventoryReady}}" class="meal-filter {{readyOnly ? 'chosen' : ''}}" bindtap="toggleReadyOnly" aria-pressed="{{readyOnly}}">食材齐全</button>
+  </view>
+  <view wx:if="{{!plans.length}}" class="empty">
+    没有符合条件的搭配。
+    <button class="link" bindtap="resetFilters">重置筛选</button>
+  </view>
+  <view wx:for="{{plans}}" wx:key="id" wx:for-item="plan" class="meal-card">
+    <view class="row">
+      <text class="section">{{plan.title}}</text>
+      <text class="subtle meal-time">约 {{plan.minutes}} 分钟</text>
+    </view>
+    <view wx:if="{{inventoryReady}}" class="meal-status {{plan.missingCount ? 'missing' : ''}}">
+      {{plan.missingCount === 0 ? '食材齐全' : (plan.missingCount === 1 ? '只差 ' : '缺 ') + plan.missingText}}
+    </view>
+    <navigator wx:for="{{plan.dishes}}" wx:key="id" class="meal-dish" url="/pages/recipe/index?id={{item.id}}" hover-class="pressed">
+      <text>{{item.name}}</text><text class="subtle">看做法 ›</text>
+    </navigator>
+    <view wx:if="{{plan.rice}}" class="meal-dish">
+      <text>配熟米饭</text>
+    </view>
+  </view>
+</view>
