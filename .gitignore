@@ -12,3 +12,8 @@ node_modules/
 
 # 日志
 *.log
+
+# 文档与设计稿（本地保留，不入库）
+design-assets/
+docs/
+meiweichufang-design-context/
