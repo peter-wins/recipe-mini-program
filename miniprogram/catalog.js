@@ -24,7 +24,7 @@ function ingredientIds(id) {
   return compositeIngredients.get(id) || [canonicalIngredientId(id)]
 }
 
-const sections = [['required', '必需食材'], ['optional', '可选食材'], ['pantry', '基础调味料及用水']]
+const sections = [['required', '必需食材'], ['optional', '可选食材'], ['pantry', '辅料']]
 const recipes = sourceRecipes.map(recipe => {
   const groups = { required: [], optional: [], pantry: [] }
   for (const [key] of sections) {
@@ -61,7 +61,7 @@ const ingredientGroups = [
   ['蔬菜', [
     'tomato', 'cucumber', 'cabbage', 'bokchoy', 'broccoli', 'carrot', 'pepper', 'onion',
     'spinach', 'corn', 'beanSprout', 'zucchini', 'pumpkin', 'peas', 'eggplant', 'greenBean',
-    'celery', 'lettuce', 'babyCabbage'
+    'celery', 'lettuce', 'babyCabbage', 'loofah', 'celeryStalk'
   ]],
   ['菌菇和根茎', [
     'potato', 'mushroom', 'enoki', 'lotusRoot', 'radish', 'winterMelon', 'yam', 'sweetPotato'
@@ -73,7 +73,7 @@ const ingredientGroups = [
   ]],
   ['米面和主食', [
     'rice', 'noodles', 'nori', 'vermicelli', 'riceNoodle', 'flour', 'steamedBun',
-    'dumplingWrapper', 'riceCake'
+    'dumplingWrapper', 'riceCake', 'brownRiceCooked', 'rolledOats', 'wholeWheatFlour', 'konjacNoodles'
   ]],
   ['厨房常备', [
     'scallion', 'vibe-e5a4a7e891b1', 'garlic', 'ginger', 'chili', 'cilantro',
@@ -85,6 +85,11 @@ const ingredientGroups = [
 const stapleIds = new Set([
   'oil', 'salt', 'soy', 'darkSoy', 'vinegar', 'sugar', 'rockSugar',
   'starch', 'wine', 'oysterSauce', 'sesame', 'whitePepper', 'starAnise'
+])
+// 这些佐料仍可算作缺料，但库存里只有佐料时不推荐这道菜。
+const seasoningIds = new Set([
+  ...stapleIds, 'scallion', 'vibe-e5a4a7e891b1', 'garlic', 'ginger',
+  'chili', 'cilantro', 'vibe-e5b08fe7b1b3e8bea3'
 ])
 // 水不进清单：没人会记录“我家有水”
 const hiddenIds = new Set(['water'])
@@ -144,16 +149,17 @@ function getRecipe(id, selection) {
     missingItems: groups.find(group => group.key === 'required').items.filter(item => item.missing),
     steps: recipe.steps.map(([title, body], index) => {
       const number = index + 1
-      return { number, title, body, image: recipeImage('steps/' + recipe.id + '/step_' + number + '.jpg') }
+      const image = recipe.stepImages === false ? '' : recipeImage('steps/' + recipe.id + '/step_' + number + '.jpg')
+      return { number, title, body, image }
     })
   }
 }
 
-function matchRecipes(selection, { category, maxMinutes, readyOnly, search = '', rankByStock = true } = {}) {
+function matchRecipes(selection, { category, maxMinutes, readyOnly, lightOnly, search = '', rankByStock = true } = {}) {
   const query = search.trim().toLowerCase()
   const available = availableIngredients(selection)
   const matches = recipes.filter(recipe =>
-    (!category || recipe.category === category) && (!maxMinutes || recipe.minutes <= maxMinutes) &&
+    (!lightOnly || recipe.light) && (!category || recipe.category === category) && (!maxMinutes || recipe.minutes <= maxMinutes) &&
     (!query || recipe.name.includes(query) || recipe.required.concat(recipe.optional).some(([id]) => {
       const item = ingredientById[id]
       return [item.name, ...item.aliases].some(name => name.toLowerCase().includes(query))
@@ -165,6 +171,8 @@ function matchRecipes(selection, { category, maxMinutes, readyOnly, search = '',
       id: recipe.id, name: recipe.name, category: recipe.category, minutes: recipe.minutes,
       difficulty: recipe.difficulty, required,
       image: recipeImage(recipe.coverPath),
+      ...(recipe.nutrition ? { calories: recipe.calories, nutrition: recipe.nutrition, servings: recipe.servings } : {}),
+      hasMatchingMainIngredient: required.some(id => available.has(id) && !seasoningIds.has(id)),
       missingCount: missing.length,
       missingText: missing.map(id => ingredientById[id].name).join('、')
     }
@@ -172,7 +180,19 @@ function matchRecipes(selection, { category, maxMinutes, readyOnly, search = '',
   return rankByStock ? matches.sort((left, right) => left.missingCount - right.missingCount) : matches
 }
 
+function groupFridgeMatches(matches) {
+  const categories = ['水产', '荤菜', '素菜', '汤', '主食', '早餐', '其他']
+  const candidates = matches.filter(recipe =>
+    categories.includes(recipe.category) &&
+    recipe.missingCount <= 1 && recipe.required.length > recipe.missingCount
+  ).sort((left, right) => left.minutes - right.minutes)
+  return {
+    ready: candidates.filter(recipe => recipe.missingCount === 0),
+    almost: candidates.filter(recipe => recipe.missingCount === 1 && recipe.hasMatchingMainIngredient)
+  }
+}
+
 module.exports = {
   getIngredientOptions, getIngredientGroups, searchIngredientOptions, getRecipeCategories, getRecipe, matchRecipes,
-  stapleIds, resolveRecipeId, ingredientIds
+  groupFridgeMatches, stapleIds, resolveRecipeId, ingredientIds
 }

@@ -1,80 +1,63 @@
-const { getIngredientOptions, getIngredientGroups, searchIngredientOptions, getRecipeCategories, getRecipe, matchRecipes, stapleIds } = require('../../catalog')
+const { themes, saveTheme, applyTheme } = require('../../theme')
+const { getRecipeCategories, getRecipe, matchRecipes, groupFridgeMatches } = require('../../catalog')
 const { readFavorites } = require('../../favorites')
-const { readInventory, saveInventory } = require('../../inventory')
+const { readInventory, summarizeInventory } = require('../../inventory')
 const { readActivity } = require('../../activity')
-const { localRecipeDay, dailyRecipe, previewRecipes, festivalRecipe, featuredReason } = require('../../daily-recipe')
+const { localRecipeDay, dailyRecipe, previewRecipes, festivalRecipe } = require('../../daily-recipe')
 const { festivalOf } = require('../../festival')
 const { greetingInfo } = require('../../home-greeting')
+const { rotateLightInspiration } = require('../../meal-plans')
 
-const categories = ['全部分类', ...getRecipeCategories()]
-const minutes = [0, 10, 15, 20, 30, 60]
-const timeOptions = ['不限耗时', ...minutes.slice(1).map(limit => `${limit} 分钟内`)]
-const defaultFilters = { categoryIndex: 0, minutesIndex: 0, readyOnly: false }
+const primaryCategories = ['荤菜', '素菜', '主食', '汤', '水产', '早餐']
+const recipeCategories = getRecipeCategories()
+const categories = [
+  '全部分类',
+  ...primaryCategories.filter(name => recipeCategories.includes(name)),
+  ...recipeCategories.filter(name => !primaryCategories.includes(name))
+]
 const initialRecipes = matchRecipes([])
 const libraryPageSize = 24
-const matchGroups = [
-  { id: 'ready', title: '食材齐全', showMissing: false, previewSize: 4 },
-  { id: 'almost', title: '只差一样', showMissing: true, previewSize: 3 }
-]
-const options = getIngredientOptions()
-const fridgeGroups = getIngredientGroups()
-const ingredientPageSize = 24
+const homeMatchLimit = 2
+const quickRecipe = getRecipe('tomato-eggs')
+const lightRotationKey = 'recipe-light-inspiration-v1'
+const mealCategories = new Set(['素菜', '荤菜', '水产', '汤', '主食'])
+const quickDishIds = new Set(initialRecipes.filter(recipe =>
+  recipe.required.length && recipe.minutes <= 20 && mealCategories.has(recipe.category)
+).map(recipe => recipe.id))
 const viewTitles = {
-  match: '美味厨房', matches: '按冰箱食材找菜', library: '你想吃什么？', fridge: '冰箱食材',
-  meals: '轻食搭配', profile: '我的'
-}
-
-function ingredientView(selected, search, groupIndex, limit) {
-  const searching = Boolean(search.trim())
-  const items = searching ? searchIngredientOptions(search) : fridgeGroups[groupIndex].items
-  return {
-    searching,
-    visibleIngredients: items.slice(0, limit).map(({ id, name }) => ({ id, name, checked: selected.includes(id) })),
-    hasMoreIngredients: items.length > limit
-  }
+  match: '美味厨房', library: '菜谱库',
+  meals: '轻食', profile: '我的'
 }
 
 Page({
   data: {
     view: 'match',
+    themeOptions: themes,
     selected: [],
     greeting: greetingInfo(new Date(), 0),
     inventoryReady: false,
-    selectedItems: [],
-    search: '',
-    fridgeGroupNames: fridgeGroups.map(group => group.name),
-    fridgeGroupIndex: 0,
-    ingredientLimit: ingredientPageSize,
-    showAllSelected: false,
-    fridgeSummary: { count: 0, staples: 0, ready: 0, almost: 0 },
+    fridgeSummary: summarizeInventory([]),
     librarySearch: '',
-    libraryFilterText: '',
-    ...ingredientView([], '', 0, ingredientPageSize),
+    librarySearchFocused: false,
     results: initialRecipes,
     libraryCards: initialRecipes.slice(0, libraryPageSize),
-    quickRecipes: ['tomato-eggs', 'steamed-egg'].map(id => getRecipe(id)),
+    quickRecipe,
+    lightInspiration: null,
+    suggestedRecipes: [],
     featured: null,
-    homeGroups: [],
-    matchList: null,
-    categoryOptions: categories.map((name, index) => ({
-      name: index ? name : '全部',
-      index
-    })),
-    timeOptions,
-    ...defaultFilters,
+    homeMatches: [],
+    categories,
+    categoryIndex: 0,
     favorites: [],
     history: [],
     cooked: []
   },
 
   onShow() {
-    const selectedForGreeting = this.data.selected.length ? this.data.selected : (() => {
-      try { return readInventory() } catch { return [] }
-    })()
-    this.setData({ greeting: greetingInfo(new Date(), selectedForGreeting.length) })
+    applyTheme(this)
     try {
       const selected = readInventory()
-      this.setData({ inventoryReady: true })
+      this.setData({ inventoryReady: true, greeting: greetingInfo(new Date(), selected.length) })
       if (selected.join(',') !== this.data.selected.join(',') || this.recipeDay !== localRecipeDay()) {
         this.updateSelection(selected)
       }
@@ -96,6 +79,56 @@ Page({
     } catch {
       wx.showToast({ title: '暂时无法读取使用记录', icon: 'none' })
     }
+    this.refreshHomeSuggestions()
+    if (this.data.view === 'match') this.refreshLightInspiration()
+  },
+
+  refreshLightInspiration() {
+    if (this.lightRotation === undefined) {
+      try {
+        this.lightRotation = wx.getStorageSync(lightRotationKey) || null
+      } catch {
+        this.lightRotation = null
+      }
+    }
+
+    const previous = this.lightRotation
+    const { recipe, rotation } = rotateLightInspiration(this.data.selected, previous)
+    this.lightRotation = rotation
+    const current = this.data.lightInspiration
+    if ((recipe && recipe.id) !== (current && current.id)) this.setData({ lightInspiration: recipe })
+    if (rotation === previous) return
+    try {
+      wx.setStorageSync(lightRotationKey, rotation)
+    } catch {
+      // This session can still rotate using its in-memory state.
+    }
+  },
+
+  refreshHomeSuggestions() {
+    const { featured, homeMatches, favorites, cooked } = this.data
+    const shown = new Set([(featured || quickRecipe).id, ...homeMatches.map(recipe => recipe.id)])
+    const preferred = new Set([...favorites, ...cooked].map(recipe => recipe.category))
+    const candidates = this.inventoryMatches || initialRecipes
+    const suggestedRecipes = candidates.filter(recipe => quickDishIds.has(recipe.id) && !shown.has(recipe.id)).sort((left, right) =>
+      Number(preferred.has(right.category)) - Number(preferred.has(left.category))
+    ).slice(0, 2)
+    this.setData({ suggestedRecipes })
+  },
+
+  changeTheme(event) {
+    const { id } = event.currentTarget.dataset
+    if (id === this.data.themeId) return
+    try {
+      const theme = saveTheme(id)
+      if (theme) applyTheme(this, theme)
+    } catch {
+      wx.showToast({ title: '主题未保存，请重试', icon: 'none' })
+    }
+  },
+
+  openProfileThemes() {
+    wx.pageScrollTo({ selector: '#profile-themes', duration: 240 })
   },
 
   switchView(event) {
@@ -105,83 +138,52 @@ Page({
   showView(view, update = {}) {
     if (!viewTitles[view] || (view === this.data.view && !Object.keys(update).length)) return
     if (view === 'match' && this.recipeDay !== localRecipeDay()) this.updateSelection(this.data.selected)
-    this.updateResults({ view, matchList: null, ...update }, () => {
-      wx.setNavigationBarTitle({ title: view === 'matches' && this.data.matchList ? this.data.matchList.title : viewTitles[view] })
+    this.updateResults({ view, librarySearchFocused: false, ...update }, () => {
+      if (view === 'match') this.refreshLightInspiration()
+      wx.setNavigationBarTitle({ title: viewTitles[view] })
       wx.pageScrollTo({ scrollTop: 0, duration: 0 })
     })
   },
 
-  openMatchGroup(event) {
-    const { id } = event.currentTarget.dataset
-    const matchList = this.getMatchList(id, libraryPageSize)
-    if (matchList) this.showView('matches', { matchList })
-  },
-
-  getMatchList(id, limit) {
-    const group = this.fullMatchGroups && this.fullMatchGroups.find(item => item.id === id)
-    return group ? { ...group, total: group.recipes.length, recipes: group.recipes.slice(0, limit) } : null
-  },
-
-  loadMoreMatches() {
-    const { matchList } = this.data
-    if (matchList) this.setData({ matchList: this.getMatchList(matchList.id, matchList.recipes.length + libraryPageSize) })
-  },
-
-  searchIngredients(event) {
-    this.applyIngredientView({ search: event.detail.value, ingredientLimit: ingredientPageSize })
-  },
-
-  clearIngredientSearch() {
-    this.applyIngredientView({ search: '', ingredientLimit: ingredientPageSize })
-  },
-
-  selectIngredientGroup(event) {
-    this.applyIngredientView({ fridgeGroupIndex: Number(event.currentTarget.dataset.index), ingredientLimit: ingredientPageSize })
-  },
-
-  loadMoreIngredients() {
-    this.applyIngredientView({ ingredientLimit: this.data.ingredientLimit + ingredientPageSize })
-  },
-
-  applyIngredientView(patch) {
-    const { selected, search, fridgeGroupIndex, ingredientLimit } = { ...this.data, ...patch }
-    this.setData({ ...patch, ...ingredientView(selected, search, fridgeGroupIndex, ingredientLimit) })
-  },
-
-  toggleSelectedIngredients() {
-    this.setData({ showAllSelected: !this.data.showAllSelected })
-  },
-
-  clearInventory() {
-    wx.showModal({
-      title: '清空冰箱食材？',
-      confirmText: '清空',
-      success: ({ confirm }) => {
-        if (!confirm) return
-        try {
-          saveInventory([])
-          this.updateSelection([])
-        } catch {
-          wx.showToast({ title: '食材未保存，请重试', icon: 'none' })
-        }
-      }
+  openFridgeMatches() {
+    if (!this.data.selected.length) {
+      this.openFridge()
+      return
+    }
+    wx.navigateTo({
+      url: '/pages/fridge-matches/index',
+      fail: () => wx.showToast({ title: '暂时无法打开，请重试', icon: 'none' })
     })
   },
 
-  toggleIngredient(event) {
-    const { id } = event.currentTarget.dataset
-    const { selected } = this.data
-    const updated = selected.includes(id) ? selected.filter(item => item !== id) : [...selected, id]
-    try {
-      saveInventory(updated)
-      this.updateSelection(updated)
-    } catch {
-      wx.showToast({ title: '食材未保存，请重试', icon: 'none' })
-    }
+  openFridge() {
+    wx.navigateTo({
+      url: '/pages/fridge/index',
+      fail: () => wx.showToast({ title: '暂时无法打开冰箱，请重试', icon: 'none' })
+    })
   },
 
-  openFridge() {
-    this.showView('fridge')
+  openRecommendations() {
+    wx.navigateTo({
+      url: '/pages/recommend/index',
+      fail: () => wx.showToast({ title: '暂时无法打开推荐页，请重试', icon: 'none' })
+    })
+  },
+
+  showShortcutUnavailable() {
+    wx.showToast({ title: '功能在开发中', icon: 'none' })
+  },
+
+  openRecipeSearch() {
+    this.showView('library', { categoryIndex: 0, librarySearch: '', librarySearchFocused: true })
+  },
+
+  openAllRecipes() {
+    this.showView('library', { categoryIndex: 0, librarySearch: '' })
+  },
+
+  blurLibrarySearch() {
+    this.setData({ librarySearchFocused: false })
   },
 
   searchLibrary(event) {
@@ -193,19 +195,7 @@ Page({
   },
 
   changeCategory(event) {
-    this.updateResults({ categoryIndex: Number(event.currentTarget.dataset.index) })
-  },
-
-  changeTime(event) {
-    this.updateResults({ minutesIndex: Number(event.detail.value) })
-  },
-
-  toggleReadyOnly() {
-    this.updateResults({ readyOnly: !this.data.readyOnly })
-  },
-
-  resetFilters() {
-    this.updateResults(defaultFilters)
+    this.updateResults({ categoryIndex: Number(event.detail.value) })
   },
 
   loadMoreRecipes() {
@@ -215,71 +205,36 @@ Page({
 
   updateSelection(selected) {
     const day = localRecipeDay()
-    const matches = selected.length ? matchRecipes(selected) : []
-    const candidates = matches.filter(recipe =>
-      ['水产', '荤菜', '素菜', '汤', '主食', '早餐', '其他'].includes(recipe.category) &&
-      recipe.missingCount <= 1 && recipe.required.length > recipe.missingCount
-    ).sort((left, right) => left.missingCount - right.missingCount || left.minutes - right.minutes)
-    const ready = candidates.filter(recipe => recipe.missingCount === 0)
-    const almost = candidates.filter(recipe => recipe.missingCount === 1)
+    this.inventoryMatches = selected.length ? matchRecipes(selected) : null
+    const { ready, almost } = groupFridgeMatches(this.inventoryMatches || [])
     const festival = festivalOf()
     const festivalPick = festival && festivalRecipe(festival, ready, almost, matchRecipes([]))
-    let featured = festivalPick
-      ? { ...festivalPick.recipe, reason: festivalPick.reason }
-      : dailyRecipe(ready, almost, day)
-    if (featured && !featured.reason) featured = { ...featured, reason: featuredReason(featured, day) }
-    const featuredId = featured && featured.id
-    const recipesByGroup = { ready, almost }
-    this.fullMatchGroups = matchGroups.map(group => ({
-      ...group,
-      recipes: recipesByGroup[group.id]
-    }))
-    const homeGroups = this.fullMatchGroups.map(group => {
-      const alternatives = group.recipes.filter(recipe => recipe.id !== featuredId)
-      return {
-        ...group,
-        recipes: previewRecipes(group.recipes, group.previewSize, featured, group.id === 'ready'),
-        hasMore: alternatives.length > group.previewSize
-      }
-    }).filter(group => group.recipes.length)
-    const { view, matchList } = this.data
+    const featured = festivalPick || dailyRecipe(ready, almost, day)
+    const hero = featured || quickRecipe
+    const readyPreview = previewRecipes(ready, homeMatchLimit, hero, true)
+    const homeMatches = readyPreview.concat(previewRecipes(almost, homeMatchLimit - readyPreview.length, hero, false))
+    const visibleLibraryCards = Math.max(libraryPageSize, this.data.libraryCards.length)
     this.recipeDay = day
     this.updateResults({
       selected,
       featured,
-      homeGroups,
-      matchList: view === 'matches' && matchList ? this.getMatchList(matchList.id, Math.max(matchList.recipes.length, libraryPageSize)) : null,
-      selectedItems: options.filter(item => selected.includes(item.id)).map(({ id, name }) => ({ id, name })),
-      showAllSelected: selected.length > 8 && this.data.showAllSelected,
-      fridgeSummary: {
-        count: selected.filter(id => !stapleIds.has(id)).length,
-        staples: selected.filter(id => stapleIds.has(id)).length,
-        ready: ready.length,
-        almost: almost.length
-      },
-      ...ingredientView(selected, this.data.search, this.data.fridgeGroupIndex, this.data.ingredientLimit)
-    })
+      homeMatches,
+      fridgeSummary: summarizeInventory(selected)
+    }, () => this.refreshHomeSuggestions(), visibleLibraryCards)
   },
 
-  updateResults(update, afterUpdate) {
-    const { view, selected, categoryIndex, minutesIndex, librarySearch, readyOnly } = { ...this.data, ...update }
+  updateResults(update, afterUpdate, limit = libraryPageSize) {
+    const { view, selected, categoryIndex, librarySearch } = { ...this.data, ...update }
     const inLibrary = view === 'library'
     const results = matchRecipes(selected, {
       category: inLibrary && categoryIndex ? categories[categoryIndex] : null,
-      maxMinutes: inLibrary ? minutes[minutesIndex] : 0,
-      readyOnly: inLibrary && readyOnly,
       search: inLibrary ? librarySearch : '',
       rankByStock: !inLibrary
     })
     this.setData({
       ...update,
       results,
-      libraryCards: inLibrary ? results.slice(0, libraryPageSize) : [],
-      libraryFilterText: [
-        categoryIndex ? categories[categoryIndex] : '',
-        minutesIndex ? timeOptions[minutesIndex] : '',
-        readyOnly ? '食材齐全' : ''
-      ].filter(Boolean).join(' · ')
+      libraryCards: inLibrary ? results.slice(0, limit) : []
     }, afterUpdate)
   }
 })

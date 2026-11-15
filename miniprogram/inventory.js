@@ -1,8 +1,13 @@
-const { getIngredientOptions, ingredientIds } = require('./catalog')
+const { getIngredientOptions, ingredientIds, stapleIds } = require('./catalog')
 
 const legacyKey = 'fridge-ingredient-ids-v1'
 const key = 'recipe-kitchen-v1'
-const validIds = new Set(getIngredientOptions().map(item => item.id))
+const ingredientNames = new Map(getIngredientOptions().map(item => [item.id, item.name]))
+const ingredientPreviewLimit = 3
+const ingredientIcons = new Map([
+  ['egg', '🥚'], ['tomato', '🍅'], ['broccoli', '🥦'], ['enoki', '🍄'],
+  ['potato', '🥔'], ['carrot', '🥕'], ['shrimp', '🦐'], ['cucumber', '🥒']
+])
 
 function restoreShopping(stored) {
   if (!Array.isArray(stored && stored.shopping)) return []
@@ -27,7 +32,7 @@ function readKitchen() {
   const stored = wx.getStorageSync(key)
   const ids = stored ? stored.inventory : wx.getStorageSync(legacyKey)
   return {
-    inventory: Array.isArray(ids) ? [...new Set(ids.flatMap(ingredientIds).filter(id => validIds.has(id)))] : [],
+    inventory: Array.isArray(ids) ? [...new Set(ids.flatMap(ingredientIds).filter(id => ingredientNames.has(id)))] : [],
     shopping: restoreShopping(stored)
   }
 }
@@ -44,4 +49,17 @@ function saveInventory(ids) {
   saveKitchen({ ...readKitchen(), inventory: ids })
 }
 
-module.exports = { readKitchen, saveKitchen, readInventory, saveInventory }
+function summarizeInventory(ids) {
+  const staples = ids.filter(id => stapleIds.has(id)).length
+  return { count: ids.length - staples, staples }
+}
+
+function previewInventory(ids) {
+  const ordered = ids.slice().sort((left, right) => Number(stapleIds.has(left)) - Number(stapleIds.has(right)))
+  const inventoryPreview = ordered.slice(0, ingredientPreviewLimit).map(id => ({
+    id, name: ingredientNames.get(id), icon: ingredientIcons.get(id) || ''
+  }))
+  return { inventoryPreview, extraIngredients: ordered.length - inventoryPreview.length }
+}
+
+module.exports = { readKitchen, saveKitchen, readInventory, saveInventory, summarizeInventory, previewInventory }

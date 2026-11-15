@@ -1,3 +1,4 @@
+const { applyTheme } = require('../../theme')
 const { readActivity } = require('../../activity')
 const { getRecipe } = require('../../catalog')
 const { readFavorites } = require('../../favorites')
@@ -14,6 +15,7 @@ Page({
   },
 
   onShow() {
+    applyTheme(this)
     try {
       const { type } = this.data
       const ids = type === 'favorites' ? readFavorites() : readActivity()[type]

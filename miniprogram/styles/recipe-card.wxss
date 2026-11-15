@@ -1,0 +1,58 @@
+.discovery-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 22rpx 18rpx; }
+.discovery-tile { min-width: 0; overflow: hidden; border-radius: var(--card-radius, 28rpx); background: var(--theme-surface, #fff); box-shadow: 0 7rpx 20rpx rgba(72, 48, 34, .045); }
+.discovery-tile.card-pressed { background: var(--theme-soft, #fff3e8); }
+.discovery-media { position: relative; padding-top: 71%; overflow: hidden; }
+.discovery-photo { position: absolute; inset: 0; display: block; width: 100%; height: 100%; background: var(--theme-placeholder, #f4e5d7); }
+.discovery-no-photo { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10rpx; color: var(--theme-muted, #75665e); font-size: 25rpx; }
+.discovery-no-photo image { width: 44rpx; height: 44rpx; }
+.discovery-body { padding: 17rpx 18rpx 20rpx; }
+.discovery-name { overflow: hidden; font-size: 28rpx; font-weight: 650; line-height: 1.4; text-overflow: ellipsis; white-space: nowrap; }
+.discovery-meta { display: flex; align-items: center; gap: 6rpx; margin-top: 8rpx; color: var(--theme-muted, #75665e); font-size: 24rpx; }
+.discovery-clock {
+  position: relative;
+  flex: 0 0 19rpx;
+  height: 19rpx;
+  box-sizing: border-box;
+  border: 2rpx solid currentColor;
+  border-radius: 50%;
+}
+.discovery-clock::after {
+  position: absolute;
+  top: 2rpx;
+  left: 6rpx;
+  width: 4rpx;
+  height: 6rpx;
+  border-left: 2rpx solid currentColor;
+  border-bottom: 2rpx solid currentColor;
+  content: '';
+}
+.discovery-nutrition {
+  display: flex;
+  flex-wrap: wrap;
+  column-gap: 12rpx;
+  margin-top: 6rpx;
+  color: var(--theme-muted, #75665e);
+  font-size: 23rpx;
+}
+.discovery-stock { display: flex; align-items: center; gap: 7rpx; margin-top: 10rpx; color: var(--stock-ready, #397454); font-size: 23rpx; overflow-wrap: anywhere; }
+.discovery-stock text { min-width: 0; }
+.discovery-stock-check {
+  position: relative;
+  flex: 0 0 20rpx;
+  height: 20rpx;
+  box-sizing: border-box;
+  border: 2rpx solid currentColor;
+  border-radius: 50%;
+}
+.discovery-stock-check::after {
+  position: absolute;
+  top: 3rpx;
+  left: 5rpx;
+  width: 4rpx;
+  height: 7rpx;
+  border: solid currentColor;
+  border-width: 0 2rpx 2rpx 0;
+  transform: rotate(45deg);
+  content: '';
+}
+.discovery-stock-missing { color: var(--stock-missing, #c04040); }

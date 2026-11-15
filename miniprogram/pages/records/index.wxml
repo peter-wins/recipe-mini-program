@@ -1,3 +1,4 @@
+<view class="theme-page theme-{{themeId}}">
 <view class="screen">
   <view wx:if="{{!recipes.length}}" class="empty">{{type === 'favorites' ? '收藏的菜谱会出现在这里。' : type === 'history' ? '打开过的菜谱会出现在这里。' : '完成分步烹饪后，菜谱会出现在这里。'}}</view>
   <navigator wx:for="{{recipes}}" wx:key="id" class="recipe-card" url="/pages/recipe/index?id={{item.id}}" hover-class="card-pressed">
@@ -10,4 +11,5 @@
       <text>{{item.minutes}} 分钟</text><text class="arrow" aria-hidden="true">›</text>
     </view>
   </navigator>
+</view>
 </view>

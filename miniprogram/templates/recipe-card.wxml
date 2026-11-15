@@ -1,0 +1,25 @@
+<template name="discoveryTile">
+  <navigator class="discovery-tile" url="/pages/recipe/index?id={{recipe.id}}" hover-class="card-pressed">
+    <view class="discovery-media">
+      <recipe-cover wx:if="{{recipe.image}}" class="discovery-photo" src="{{recipe.image}}" lazy="{{true}}"/>
+      <view wx:else class="discovery-photo discovery-no-photo">
+        <image src="/assets/icon-cookbook.svg" aria-hidden="true"/>
+        <text>{{recipe.category}}</text>
+      </view>
+    </view>
+    <view class="discovery-body">
+      <view class="discovery-name">{{recipe.name}}</view>
+      <view class="discovery-meta">
+        <view class="discovery-clock" aria-hidden="true"></view>
+        <text>{{showNutrition ? '约 ' : ''}}{{recipe.minutes}} 分钟 · {{showNutrition ? recipe.servings + ' 人份' : recipe.difficulty}}</text>
+      </view>
+      <view wx:if="{{showNutrition && recipe.nutrition}}" class="discovery-nutrition">
+        <text>{{recipe.calories}} 千卡</text><text>蛋白质 {{recipe.nutrition.protein}} 克</text>
+      </view>
+      <view wx:if="{{showStock}}" class="discovery-stock {{recipe.missingCount ? 'discovery-stock-missing' : ''}}">
+        <view wx:if="{{!recipe.missingCount}}" class="discovery-stock-check" aria-hidden="true"></view>
+        <text>{{recipe.missingCount > 2 ? '缺：' + recipe.missingCount + ' 样食材' : recipe.missingCount ? '缺：' + recipe.missingText : '食材齐全'}}</text>
+      </view>
+    </view>
+  </navigator>
+</template>

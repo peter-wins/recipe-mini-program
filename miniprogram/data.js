@@ -1,3 +1,5 @@
+const { lightIngredients, lightRecipes } = require('./light-recipes')
+
 const ingredients = {
   "egg": [
     "鸡蛋",
@@ -3042,4 +3044,4 @@ const legacyRecipeIds = {
   "cold-enoki": "vegetable_dish_liang-ban-jin-zhen-gu"
 }
 
-module.exports = { ingredients, recipes, legacyRecipeIds }
+module.exports = { ingredients: { ...ingredients, ...lightIngredients }, recipes: recipes.concat(lightRecipes), legacyRecipeIds }

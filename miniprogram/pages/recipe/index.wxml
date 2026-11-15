@@ -1,3 +1,4 @@
+<view class="theme-page theme-{{themeId}}">
 <view class="screen recipe-screen {{recipe ? 'has-nav' : ''}}">
   <block wx:if="{{recipe}}">
     <view class="recipe-cover {{recipe.image ? 'recipe-cover-photo' : ''}}">
@@ -9,7 +10,7 @@
     </view>
 
     <view class="recipe-content {{recipe.image ? 'recipe-content-overlap' : ''}}">
-      <view class="recipe-facts {{recipe.calories > 0 ? 'recipe-facts-with-energy' : ''}}">
+      <view class="recipe-facts {{recipe.calories > 0 && !recipe.nutrition ? 'recipe-facts-with-energy' : ''}}">
         <view class="recipe-fact">
           <image class="fact-icon" src="/assets/icon-recipe-clock.svg" aria-hidden="true"/>
           <text class="fact-label">烹饪时长</text>
@@ -25,10 +26,23 @@
           <view class="fact-label">份量</view>
           <view class="fact-value">{{recipe.servings}} 人份</view>
         </view>
-        <view wx:if="{{recipe.calories > 0}}" class="recipe-fact">
+        <view wx:if="{{recipe.calories > 0 && !recipe.nutrition}}" class="recipe-fact">
           <view class="fact-icon fact-energy-icon" aria-hidden="true"></view>
           <text class="fact-label">参考热量</text>
           <text class="fact-value">{{recipe.calories}}<text class="fact-unit"> 千卡</text></text>
+        </view>
+      </view>
+
+      <view wx:if="{{recipe.nutrition}}" class="recipe-nutrition">
+        <view class="row">
+          <text class="section">每份参考营养</text>
+          <text class="subtle">约 {{recipe.nutrition.servingGrams}} 克</text>
+        </view>
+        <view class="recipe-nutrition-values">
+          <view><text>{{recipe.calories}} 千卡</text><text class="subtle">热量</text></view>
+          <view><text>{{recipe.nutrition.protein}} 克</text><text class="subtle">蛋白质</text></view>
+          <view><text>{{recipe.nutrition.carbs}} 克</text><text class="subtle">碳水</text></view>
+          <view><text>{{recipe.nutrition.fat}} 克</text><text class="subtle">脂肪</text></view>
         </view>
       </view>
 
@@ -46,7 +60,7 @@
       <view class="ingredient-list">
         <block wx:for="{{recipe.groups}}" wx:key="key" wx:for-item="group">
           <view wx:if="{{group.items.length}}" class="ingredient-section {{group.key === 'optional' ? 'ingredient-continuation' : ''}}">
-            <view wx:if="{{group.key !== 'optional'}}" class="ingredient-heading">{{group.key === 'required' ? '食材' : '调料及用水'}}</view>
+            <view wx:if="{{group.key !== 'optional'}}" class="ingredient-heading">{{group.key === 'required' ? '食材' : group.label}}</view>
             <block wx:for="{{group.items}}" wx:key="rowKey">
               <button wx:if="{{inventoryReady && group.key === 'required'}}" class="ingredient-line purchase-line" bindtap="togglePurchaseItem" data-id="{{item.id}}" aria-pressed="{{!!purchaseNeeded[item.id]}}" aria-label="{{item.name + (purchaseNeeded[item.id] ? '，待买，点按取消勾选' : '，手边有，点按勾选为待买')}}">
                 <template is="ingredientText" data="{{item, showStatus: true, needed: purchaseNeeded[item.id]}}"/>
@@ -99,6 +113,8 @@
     <button class="primary" bindtap="nextStep">{{cookingIndex === recipe.steps.length - 1 ? '完成' : '下一步'}}</button>
   </block>
 </view>
+</view>
+
 <template name="recipeStep">
   <recipe-cover wx:if="{{step.image && !showStepText}}" class="step-photo" src="{{step.image}}" mode="widthFix" label="{{'第' + step.number + '步：' + step.title}}" lazy="{{lazy}}" text-fallback="{{true}}">
     <template is="stepText" data="{{step}}"/>
@@ -109,7 +125,7 @@
   <view class="step">
     <text class="step-number">{{step.number}}</text>
     <view class="step-content">
-      <view class="step-title">{{step.title}}</view>
+      <view wx:if="{{step.title}}" class="step-title">{{step.title}}</view>
       <view>{{step.body}}</view>
     </view>
   </view>

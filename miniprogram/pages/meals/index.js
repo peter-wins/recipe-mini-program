@@ -1,6 +1,5 @@
 const { getMealPlans } = require('../../meal-plans')
-
-const minutes = [0, 20, 30, 45, 60]
+const { matchRecipes } = require('../../catalog')
 
 Component({
   properties: {
@@ -9,41 +8,47 @@ Component({
   },
 
   data: {
-    plans: [],
-    minutesIndex: 0,
-    readyOnly: false,
-    timeLabels: ['不限耗时', ...minutes.slice(1).map(limit => `${limit} 分钟内`)]
+    recipes: [], plans: [], quickOnly: false, readyOnly: false,
+    planPreviewLimit: 2, showAllPlans: false
   },
 
   observers: {
     'inventory, inventoryReady'(inventory, inventoryReady) {
-      this.updatePlans(inventoryReady ? {} : { readyOnly: false })
+      this.updateMeals(inventoryReady && inventory.length ? {} : { readyOnly: false })
     }
   },
 
   lifetimes: {
     attached() {
-      this.updatePlans({})
+      this.updateMeals({})
     }
   },
 
   methods: {
-    changeTime(event) {
-      this.updatePlans({ minutesIndex: Number(event.detail.value) })
+    togglePlans() {
+      this.setData({ showAllPlans: !this.data.showAllPlans })
+    },
+
+    toggleQuickOnly() {
+      this.updateMeals({ quickOnly: !this.data.quickOnly })
     },
 
     toggleReadyOnly() {
-      this.updatePlans({ readyOnly: !this.data.readyOnly })
+      this.updateMeals({ readyOnly: !this.data.readyOnly })
     },
 
     resetFilters() {
-      this.updatePlans({ minutesIndex: 0, readyOnly: false })
+      this.updateMeals({ quickOnly: false, readyOnly: false })
     },
 
-    updatePlans(update) {
-      const { inventory, minutesIndex, readyOnly } = { ...this.data, ...update }
-      const plans = getMealPlans(inventory, { maxMinutes: minutes[minutesIndex], readyOnly })
-      this.setData({ ...update, plans })
+    updateMeals(update) {
+      const { inventory, quickOnly, readyOnly } = { ...this.data, ...update }
+      const options = { maxMinutes: quickOnly ? 30 : 0, readyOnly }
+      const recipes = matchRecipes(inventory, { ...options, lightOnly: true, rankByStock: false })
+      if (inventory.length) {
+        recipes.sort((left, right) => left.missingCount - right.missingCount || left.minutes - right.minutes)
+      }
+      this.setData({ ...update, recipes, plans: getMealPlans(inventory, options) })
     }
   }
 })

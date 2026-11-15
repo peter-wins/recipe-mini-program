@@ -1,8 +1,5 @@
-const { getIngredientOptions, stapleIds } = require('./catalog')
-
 const dinnerDishes = new Set(['水产', '荤菜', '素菜'])
 const aromatics = new Set(['scallion', 'vibe-e5a4a7e891b1', 'ginger', 'garlic', 'cilantro', 'chili'])
-const ingredientNames = new Map(getIngredientOptions().map(item => [item.id, item.name]))
 
 function mealCategory(recipe) {
   if (recipe.category === '其他' && /汤羹?$/.test(recipe.name || '')) return '汤'
@@ -57,20 +54,11 @@ function festivalRecipe(festival, ready, almost, all) {
     for (const pool of [ready, almost, all]) {
       for (const dish of tier.dishes) {
         const hit = pool.find(recipe => recipe.name.includes(dish))
-        if (hit) return { recipe: hit, reason: tier.reason }
+        if (hit) return hit
       }
     }
   }
   return null
-}
-
-function featuredReason(recipe, day) {
-  // 推荐理由：能说食材就说食材（只有这个 app 说得出），说不出就用通用文案。
-  const mains = recipe.required.filter(id => !aromatics.has(id) && !stapleIds.has(id) && ingredientNames.has(id))
-  if (!mains.length) return day % 2 ? '简单快手，今晚正好' : '冰箱里翻一翻，这碗正合适'
-  const names = mains.slice(0, 3).map(id => ingredientNames.get(id))
-  if (recipe.missingCount === 1) return `冰箱里的${names.join('、')}都在，就差${recipe.missingText}了`
-  return names.length === 1 ? `冰箱里的${names[0]}正好能用上` : `冰箱里的${names.join('、')}都能用上`
 }
 
 function previewRecipes(recipes, limit, featured, includeSoup) {
@@ -110,5 +98,5 @@ function previewRecipes(recipes, limit, featured, includeSoup) {
   return picked
 }
 
-module.exports = { localRecipeDay, dailyRecipe, previewRecipes, festivalRecipe, featuredReason }
+module.exports = { localRecipeDay, dailyRecipe, previewRecipes, festivalRecipe }
 

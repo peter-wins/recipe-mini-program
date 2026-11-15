@@ -1,4 +1,4 @@
-const { getRecipe, getIngredientOptions } = require('./catalog')
+const { getRecipe, getIngredientOptions, matchRecipes } = require('./catalog')
 
 const plans = [
   { id: 'fish-rice', title: '蒸鱼青菜饭', recipes: ['other_qing-zheng-lu-yu', 'vegetable_dish_chao-qing-cai'], rice: true },
@@ -21,7 +21,7 @@ function getMealPlans(selection, { maxMinutes, readyOnly } = {}) {
     return {
       id: plan.id,
       title: plan.title,
-      dishes,
+      dishes: dishes.map(({ id, name, image }) => ({ id, name, image })),
       rice: Boolean(plan.rice),
       minutes: dishes.reduce((total, dish) => total + dish.minutes, 0),
       missingCount: missing.length,
@@ -31,4 +31,24 @@ function getMealPlans(selection, { maxMinutes, readyOnly } = {}) {
     .sort((left, right) => left.missingCount - right.missingCount || left.minutes - right.minutes)
 }
 
-module.exports = { getMealPlans }
+const minute = 60 * 1000
+
+function rotateLightInspiration(selection, previous, now = Date.now(), random = Math.random) {
+  const recipes = matchRecipes(selection, { lightOnly: true, rankByStock: false })
+  const current = previous && recipes.find(recipe => recipe.id === previous.id)
+  if (current && previous.expiresAt > now && previous.expiresAt <= now + 60 * minute) {
+    return { recipe: current, rotation: previous }
+  }
+
+  const alternatives = recipes.length > 1 ? recipes.filter(recipe => !current || recipe.id !== current.id) : recipes
+  const ready = alternatives.filter(recipe => !recipe.missingCount)
+  const almost = alternatives.filter(recipe => recipe.hasMatchingMainIngredient && recipe.missingCount === 1)
+  const pool = ready.length ? ready : almost.length ? almost : alternatives
+  if (!pool.length) return { recipe: null, rotation: null }
+
+  const recipe = pool[Math.floor(random() * pool.length)]
+  const interval = 5 + Math.floor(random() * 56)
+  return { recipe, rotation: { id: recipe.id, expiresAt: now + interval * minute } }
+}
+
+module.exports = { getMealPlans, rotateLightInspiration }

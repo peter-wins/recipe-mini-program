@@ -1,3 +1,4 @@
+const { applyTheme } = require('../../theme')
 const { getRecipe } = require('../../catalog')
 const { readFavorites, toggleFavorite } = require('../../favorites')
 const { readKitchen } = require('../../inventory')
@@ -45,6 +46,7 @@ Page({
   },
 
   onShow() {
+    applyTheme(this)
     if (!this.data.recipe) return
     try {
       const { inventory: selection, shopping } = readKitchen()

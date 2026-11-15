@@ -1,0 +1,35 @@
+<import src="../../templates/recipe-card.wxml"/>
+<import src="../../templates/fridge-preview.wxml"/>
+
+<view class="theme-page theme-{{themeId}}">
+  <view class="screen">
+    <template is="fridgePreview" data="{{inventoryPreview, extraIngredients, inventoryReady: !!groupId, emptyInventoryText: '先登记手边食材，再来看看能做什么。'}}"/>
+    <block wx:if="{{inventoryPreview.length}}">
+      <view class="row match-toolbar">
+        <view class="section match-count">为你找到 {{total}} 道菜</view>
+        <view class="match-tabs">
+          <button wx:for="{{tabs}}" wx:key="id" class="match-tab {{groupId === item.id ? 'match-tab-active' : ''}}" data-id="{{item.id}}" bindtap="changeGroup" aria-pressed="{{groupId === item.id}}">{{item.title}}</button>
+        </view>
+      </view>
+      <view wx:if="{{!total}}" class="empty">目前没有符合条件的菜谱。</view>
+      <view wx:elif="{{groupId === 'almost'}}">
+        <navigator wx:for="{{recipes}}" wx:key="id" class="missing-row" url="/pages/recipe/index?id={{item.id}}" hover-class="card-pressed">
+          <recipe-cover wx:if="{{item.image}}" class="missing-thumb" src="{{item.image}}" lazy="{{true}}"/>
+          <view wx:else class="missing-thumb missing-thumb-empty" aria-hidden="true">
+            <image src="/assets/icon-cookbook.svg" aria-hidden="true"/>
+          </view>
+          <view class="missing-dish">
+            <view class="missing-name">{{item.name}}</view>
+            <view class="banner-meta">约 {{item.minutes}} 分钟</view>
+            <view class="missing-label">缺：{{item.missingText}}</view>
+          </view>
+          <text class="missing-arrow" aria-hidden="true">›</text>
+        </navigator>
+      </view>
+      <view wx:else class="discovery-grid">
+        <template wx:for="{{recipes}}" wx:key="id" is="discoveryTile" data="{{recipe: item}}"/>
+      </view>
+      <button wx:if="{{recipes.length < total}}" class="link match-list-more" bindtap="loadMore">加载更多</button>
+    </block>
+  </view>
+</view>

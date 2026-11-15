@@ -1,0 +1,25 @@
+.match-fridge {
+  margin-bottom: 28rpx;
+  padding: 18rpx 24rpx 24rpx;
+  border-radius: var(--card-radius, 28rpx);
+  background: var(--theme-surface, #fff);
+}
+.match-fridge-header { gap: 12rpx; }
+.match-fridge-link {
+  padding: 0;
+  font-size: 26rpx;
+  line-height: 66rpx;
+}
+.match-fridge-items { display: flex; flex-wrap: wrap; gap: 10rpx; margin-top: 10rpx; }
+.match-fridge-chip {
+  box-sizing: border-box;
+  max-width: 100%;
+  padding: 8rpx 16rpx;
+  border-radius: 999rpx;
+  background: var(--theme-neutral, #f2eee4);
+  color: var(--theme-text, #5d4037);
+  font-size: 24rpx;
+  overflow-wrap: anywhere;
+}
+.match-fridge-extra, .match-fridge-empty { color: var(--theme-muted, #75665e); }
+.match-fridge-empty { margin-top: 6rpx; font-size: 25rpx; }

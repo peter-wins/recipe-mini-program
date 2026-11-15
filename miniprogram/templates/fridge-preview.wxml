@@ -1,0 +1,15 @@
+<template name="fridgePreview">
+  <view class="match-fridge">
+    <view class="row match-fridge-header">
+      <text class="section">我的冰箱</text>
+      <button class="link match-fridge-link" bindtap="openFridge">管理食材 <text aria-hidden="true">›</text></button>
+    </view>
+    <view wx:if="{{inventoryPreview.length}}" class="match-fridge-items">
+      <view wx:for="{{inventoryPreview}}" wx:key="id" class="match-fridge-chip">
+        <text wx:if="{{item.icon}}" aria-hidden="true">{{item.icon}} </text><text>{{item.name}}</text>
+      </view>
+      <text wx:if="{{extraIngredients}}" class="match-fridge-chip match-fridge-extra">还有 {{extraIngredients}} 样</text>
+    </view>
+    <view wx:elif="{{inventoryReady}}" class="match-fridge-empty">{{emptyInventoryText}}</view>
+  </view>
+</template>

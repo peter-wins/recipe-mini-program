@@ -1,0 +1,72 @@
+<import src="../../templates/fridge-preview.wxml"/>
+<import src="../../templates/recipe-card.wxml"/>
+
+<view class="theme-page theme-{{themeId}}">
+  <view class="recommend-nav" style="padding-top: {{nav.status}}px;">
+    <view class="recommend-nav-bar" style="height: {{nav.height}}px; padding: 0 {{nav.inset}}px;">
+      <button class="recommend-nav-back" bindtap="goBack" aria-label="返回">
+        <view class="recommend-nav-chevron" aria-hidden="true"></view>
+      </button>
+      <image class="recommend-nav-icon" src="/assets/icon-sparkles.svg" aria-hidden="true"/>
+      <text class="recommend-nav-title">AI 智能推荐</text>
+    </view>
+  </view>
+  <view class="screen">
+    <view class="row">
+      <view class="headline">今天想吃点什么？</view>
+      <button class="link recommend-reset" bindtap="resetPreferences" aria-label="重置推荐偏好"><text aria-hidden="true">↺</text> 重置</button>
+    </view>
+    <view class="subtle recommend-intro">根据冰箱食材和你的偏好，从本地菜谱库推荐</view>
+    <view class="recommend-modes">
+      <button wx:for="{{modes}}" wx:key="value" class="recommend-mode {{mode === item.value ? 'recommend-mode-selected' : ''}}" data-key="mode" data-value="{{item.value}}" bindtap="setPreference" aria-pressed="{{mode === item.value}}">
+        <view wx:if="{{item.icon === 'chat'}}" class="recommend-chat-icon" aria-hidden="true"></view>
+        <image wx:else class="recommend-icon" src="/assets/icon-{{item.icon}}.svg" aria-hidden="true"/>
+        <text>{{item.label}}</text>
+      </button>
+    </view>
+
+    <template is="fridgePreview" data="{{inventoryPreview, extraIngredients, inventoryReady, emptyInventoryText: '冰箱还没登记食材，也可以先按偏好找菜。'}}"/>
+
+    <view class="recommend-panel">
+      <view class="section">推荐偏好</view>
+      <view class="recommend-label">烹饪时间</view>
+      <view class="recommend-times">
+        <button wx:for="{{timeOptions}}" wx:key="value" class="recommend-option {{maxMinutes === item.value ? 'recommend-time-selected' : ''}}" data-key="maxMinutes" data-value="{{item.value}}" bindtap="setPreference" aria-pressed="{{maxMinutes === item.value}}">{{item.label}}</button>
+      </view>
+
+      <view class="recommend-label">用餐人数</view>
+      <view class="recommend-people">
+        <button class="recommend-step" data-change="{{-1}}" bindtap="changePeople" disabled="{{people <= 1}}" aria-label="减少一人">−</button>
+        <text>{{people}} 人</text>
+        <button class="recommend-step" data-change="{{1}}" bindtap="changePeople" disabled="{{people >= 12}}" aria-label="增加一人">+</button>
+      </view>
+
+      <view class="recommend-label">口味偏好</view>
+      <view class="recommend-tastes">
+        <button wx:for="{{tasteOptions}}" wx:key="value" class="recommend-option {{taste === item.value ? 'recommend-taste-selected' : ''}}" data-key="taste" data-value="{{item.value}}" bindtap="setPreference" aria-pressed="{{taste === item.value}}">{{item.label}}</button>
+      </view>
+    </view>
+
+    <view class="recommend-panel recommend-notes">
+      <textarea class="recommend-input" value="{{notes}}" bindinput="updateNotes" maxlength="120" placeholder="还想补充什么？例如：想吃豆腐，不要香菜" aria-label="补充想吃或想避开的食材" show-confirm-bar="{{false}}"/>
+      <view class="subtle recommend-hint">{{modeHint}}</view>
+    </view>
+
+    <button class="primary recommend-submit" bindtap="runRecommendations">
+      <image class="recommend-icon" src="/assets/icon-sparkles.svg" aria-hidden="true"/>
+      <text>{{hasRun && mode === 'pick' ? '再帮我选一次' : '开始智能推荐'}}</text>
+    </button>
+
+    <view wx:if="{{hasRun}}" id="recommend-results" class="recommend-results">
+      <view class="section">{{recommendations.length ? '为你推荐' : '暂时没有符合条件的菜'}}</view>
+      <view wx:if="{{ignoredNotes}}" class="subtle recommend-result-note">暂未识别「{{ignoredNotes}}」</view>
+      <block wx:if="{{recommendations.length}}">
+        <view class="subtle recommend-result-note">优先匹配 {{people}} 人用餐，具体份量见菜谱详情。</view>
+        <view class="discovery-grid">
+          <template wx:for="{{recommendations}}" wx:key="id" is="discoveryTile" data="{{recipe: item, showStock: !!selected.length}}"/>
+        </view>
+      </block>
+      <view wx:else class="subtle recommend-result-note">试试放宽烹饪时间或口味，也可以调整想吃的食材。</view>
+    </view>
+  </view>
+</view>

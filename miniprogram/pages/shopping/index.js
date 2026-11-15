@@ -1,9 +1,11 @@
+const { applyTheme } = require('../../theme')
 const { listShopping, removeShoppingItem } = require('../../shopping')
 
 Page({
   data: { items: [] },
 
   onShow() {
+    applyTheme(this)
     try {
       this.setData({ items: listShopping() })
     } catch {

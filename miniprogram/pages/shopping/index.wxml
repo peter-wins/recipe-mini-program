@@ -1,3 +1,4 @@
+<view class="theme-page theme-{{themeId}}">
 <view class="screen">
   <view class="page-head">
     <view class="headline">采购清单</view>
@@ -14,4 +15,5 @@
       <button class="link" bindtap="removeItem" data-key="{{item.key}}" aria-label="从清单移除{{item.name}}">移除</button>
     </view>
   </view>
+</view>
 </view>

@@ -1,5 +1,5 @@
 {
-  "pages": ["pages/home/index", "pages/recipe/index", "pages/shopping/index", "pages/records/index"],
+  "pages": ["pages/home/index", "pages/fridge/index", "pages/fridge-matches/index", "pages/recommend/index", "pages/recipe/index", "pages/shopping/index", "pages/records/index"],
   "usingComponents": { "recipe-cover": "/components/recipe-cover/index" },
   "window": {
     "navigationBarTitleText": "美味厨房",
