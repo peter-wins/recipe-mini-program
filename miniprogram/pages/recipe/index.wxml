@@ -85,7 +85,7 @@
       </view>
       <block wx:if="{{cookingIndex >= 0}}">
         <view class="cooking-progress step-progress">第 {{cookingIndex + 1}} / {{recipe.steps.length}} 步</view>
-        <template is="recipeStep" data="{{step: recipe.steps[cookingIndex], showStepText}}"/>
+        <template is="recipeStep" data="{{step: recipe.steps[cookingIndex], showStepText, cooking: true}}"/>
       </block>
       <block wx:else>
         <template wx:for="{{recipe.steps}}" wx:key="number" is="recipeStep" data="{{step: item, showStepText, lazy: true}}"/>
@@ -121,6 +121,7 @@
   </block>
   <block wx:else>
     <button class="detail-prev" disabled="{{cookingIndex === 0}}" bindtap="previousStep">上一步</button>
+    <button wx:if="{{recipe.steps[cookingIndex].seconds}}" class="detail-timer" bindtap="startStepTimer" data-step="{{recipe.steps[cookingIndex].number}}" data-seconds="{{recipe.steps[cookingIndex].seconds}}" data-label="{{recipe.steps[cookingIndex].timerText}}" aria-label="为当前步骤计时 {{recipe.steps[cookingIndex].timerText}}">⏱ 计时</button>
     <button class="primary" bindtap="nextStep">{{cookingIndex === recipe.steps.length - 1 ? '完成' : '下一步'}}</button>
   </block>
 </view>
@@ -131,7 +132,7 @@
     <template is="stepText" data="{{step}}"/>
   </recipe-cover>
   <template wx:else is="stepText" data="{{step}}"/>
-  <button wx:if="{{step.seconds}}" class="step-timer-button" bindtap="startStepTimer" data-step="{{step.number}}" data-seconds="{{step.seconds}}" data-label="{{step.timerText}}" aria-label="为第 {{step.number}} 步计时 {{step.timerText}}">⏱ 计时 {{step.timerText}}</button>
+  <button wx:if="{{step.seconds && !cooking}}" class="step-timer-button" bindtap="startStepTimer" data-step="{{step.number}}" data-seconds="{{step.seconds}}" data-label="{{step.timerText}}" aria-label="为第 {{step.number}} 步计时 {{step.timerText}}">⏱ 计时 {{step.timerText}}</button>
 </template>
 <template name="stepText">
   <view class="step">

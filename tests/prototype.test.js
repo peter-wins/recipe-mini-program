@@ -1149,3 +1149,18 @@ test('虚高时长改成动手时间，未拆的长菜标明含等待', () => {
   assert.equal(getRecipe(rabbit.id).durationLabel, '预计总时长')
   assert.equal(getRecipe(rabbit.id).durationNote, '含等待')
 })
+
+test('烹饪模式计时按钮在下一步旁边，步骤内的按钮只在看全部时出现', () => {
+  const fs = require('node:fs')
+  const wxml = fs.readFileSync(require.resolve('../miniprogram/pages/recipe/index.wxml'), 'utf8')
+  const nav = wxml.slice(wxml.indexOf('<block wx:else>', wxml.indexOf('class="bottom-nav')), wxml.indexOf('</view>\n</view>\n\n<template name="recipeStep"'))
+  assert.ok(nav.includes('class="detail-timer"'))
+  assert.ok(nav.includes('bindtap="startStepTimer"'))
+  assert.ok(nav.includes('recipe.steps[cookingIndex].seconds'))
+  assert.ok(nav.indexOf('class="detail-timer"') < nav.indexOf("'下一步'"))
+
+  const start = wxml.indexOf('<template name="recipeStep">')
+  const end = wxml.indexOf('<template name="stepText">')
+  assert.ok(wxml.slice(start, end).includes('step.seconds && !cooking'))
+  assert.ok(wxml.includes('step: recipe.steps[cookingIndex], showStepText, cooking: true'))
+})

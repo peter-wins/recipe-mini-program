@@ -150,6 +150,20 @@
 .detail-saved image { filter: brightness(.72) sepia(.8) saturate(3); }
 .detail-prev { color: var(--theme-accent-text, #994017); line-height: 86rpx; }
 .detail-prev[disabled] { background: transparent; color: #8a7b70; }
+.detail-bar .detail-prev { flex: 0 0 118rpx; }
+.detail-timer {
+  flex: 0 0 130rpx;
+  min-height: 64rpx;
+  margin: 0;
+  padding: 0;
+  border: 1rpx solid var(--theme-accent, #FF8A3D);
+  border-radius: 999rpx;
+  background: #fff;
+  color: var(--theme-accent-text, #994017);
+  font-size: 26rpx;
+  font-weight: 600;
+  line-height: 62rpx;
+}
 
 .recipe-screen.timer-visible { padding-bottom: calc(300rpx + env(safe-area-inset-bottom)); }
 .step-timer-button {
