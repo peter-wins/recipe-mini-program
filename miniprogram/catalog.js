@@ -1,7 +1,6 @@
 const { ingredients, recipes: sourceRecipes, legacyRecipeIds } = require('./data')
 const { recipeImage } = require('./recipe-image')
 const { stepTimer } = require('./step-timer')
-const { getDietTags, tagsFor, matchesTag } = require('./diet-tags')
 const equivalentNames = new Map([
   ['青葱', 'scallion'], ['葱段', 'scallion'],
   ['大葱葱白', 'vibe-e5a4a7e891b1'],
@@ -187,7 +186,6 @@ function getRecipe(id, selection) {
 
   return {
     ...recipe,
-    tags: tagsFor(recipe),
     image: recipeImage(recipe.coverPath),
     durationLabel: durationLabel(recipe),
     durationNote: !recipe.waitMinutes && recipe.minutes > 60 ? '含等待' : '',
@@ -204,14 +202,13 @@ function getRecipe(id, selection) {
   }
 }
 
-function matchRecipes(selection, { category, maxMinutes, readyOnly, lightOnly, tag, search = '', rankByStock = true, avoidIds = [] } = {}) {
+function matchRecipes(selection, { category, maxMinutes, readyOnly, lightOnly, search = '', rankByStock = true, avoidIds = [] } = {}) {
   const query = search.trim().toLowerCase()
   const available = availableIngredients(selection)
   const avoided = new Set(avoidIds.flatMap(id => ingredientIds(id)))
   const matches = recipes.filter(recipe =>
     (!avoided.size || !recipe.required.some(([id]) => avoided.has(canonicalIngredientId(id)))) &&
-    (!lightOnly || recipe.light) && (!tag || matchesTag(recipe, tag)) &&
-    (!category || recipe.category === category) && (!maxMinutes || recipe.minutes <= maxMinutes) &&
+    (!lightOnly || recipe.light) && (!category || recipe.category === category) && (!maxMinutes || recipe.minutes <= maxMinutes) &&
     (!query || recipe.name.includes(query) || recipe.required.concat(recipe.optional).some(([id]) => {
       const item = ingredientById[id]
       return [item.name, ...item.aliases].some(name => name.toLowerCase().includes(query))
@@ -223,7 +220,6 @@ function matchRecipes(selection, { category, maxMinutes, readyOnly, lightOnly, t
       id: recipe.id, name: recipe.name, category: recipe.category, minutes: recipe.minutes,
       timeText: durationText(recipe),
       difficulty: recipe.difficulty, required,
-      tags: tagsFor(recipe),
       image: recipeImage(recipe.coverPath),
       ...(recipe.nutrition ? { calories: recipe.calories, nutrition: recipe.nutrition, servings: recipe.servings } : {}),
       hasMatchingMainIngredient: required.some(id => available.has(id) && !seasoningIds.has(id)),
@@ -270,6 +266,5 @@ function avoidIdsFromNotes(notes) {
 
 module.exports = {
   getIngredientOptions, getIngredientGroups, searchIngredientOptions, getRecipeCategories, getRecipe, matchRecipes,
-  groupFridgeMatches, stapleIds, resolveRecipeId, ingredientIds, availableIngredients, avoidIdsFromNotes,
-  getDietTags, tagsFor, matchesTag
+  groupFridgeMatches, stapleIds, resolveRecipeId, ingredientIds, availableIngredients, avoidIdsFromNotes
 }

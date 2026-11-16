@@ -1,5 +1,5 @@
 const { themes, saveTheme, applyTheme } = require('../../theme')
-const { getRecipeCategories, getRecipe, matchRecipes, groupFridgeMatches, avoidIdsFromNotes, getDietTags } = require('../../catalog')
+const { getRecipeCategories, getRecipe, matchRecipes, groupFridgeMatches, avoidIdsFromNotes } = require('../../catalog')
 const { preferTaste } = require('../../recipe-recommendations')
 const { readPreferences, preferenceSummary } = require('../../preferences')
 const { readFavorites } = require('../../favorites')
@@ -19,8 +19,7 @@ const categories = [
 ]
 const initialRecipes = matchRecipes([])
 const libraryPageSize = 24
-const dietTags = ['全部', ...getDietTags()]
-const defaultLibraryFilters = { librarySearch: '', librarySearchFocused: false, categoryIndex: 0, dietTagIndex: 0 }
+const defaultLibraryFilters = { librarySearch: '', librarySearchFocused: false, categoryIndex: 0 }
 const homeMatchLimit = 2
 const defaultRecipe = getRecipe('tomato-eggs')
 const lightRotationKey = 'recipe-light-inspiration-v1'
@@ -54,7 +53,6 @@ Page({
     homeMatches: [],
     preferenceSummary: '',
     categories,
-    dietTags,
     favorites: [],
     history: [],
     cooked: []
@@ -237,10 +235,6 @@ Page({
     this.updateResults({ categoryIndex: Number(event.detail.value) })
   },
 
-  changeDietTag(event) {
-    this.updateResults({ dietTagIndex: Number(event.currentTarget.dataset.index) })
-  },
-
   loadMoreRecipes() {
     const { results, libraryCards } = this.data
     this.setData({ libraryCards: results.slice(0, libraryCards.length + libraryPageSize) })
@@ -292,11 +286,10 @@ Page({
   },
 
   updateResults(update, afterUpdate, limit = libraryPageSize) {
-    const { view, selected, categoryIndex, dietTagIndex, librarySearch } = { ...this.data, ...update }
+    const { view, selected, categoryIndex, librarySearch } = { ...this.data, ...update }
     const inLibrary = view === 'library'
     const results = matchRecipes(selected, {
       category: inLibrary && categoryIndex ? categories[categoryIndex] : null,
-      tag: inLibrary && dietTagIndex ? dietTags[dietTagIndex] : null,
       search: inLibrary ? librarySearch : '',
       rankByStock: !inLibrary,
       avoidIds: this.avoidIds || []
