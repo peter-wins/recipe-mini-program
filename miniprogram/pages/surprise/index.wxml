@@ -12,7 +12,7 @@
       <view class="surprise-body">
         <view class="surprise-name">{{recipe.name}}</view>
         <view class="surprise-reason">{{reason}}</view>
-        <view class="surprise-meta">{{recipe.minutes}} 分钟 · {{recipe.difficulty}} · {{recipe.servings}} 人份</view>
+        <view class="surprise-meta">{{recipe.timeText}} · {{recipe.difficulty}} · {{recipe.servings}} 人份</view>
       </view>
     </view>
 

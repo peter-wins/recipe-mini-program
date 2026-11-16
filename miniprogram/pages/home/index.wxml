@@ -17,7 +17,7 @@
     <view class="banner-caption">
       <text class="feature-badge">{{isRecommended ? '今日灵感' : '快手菜'}}</text>
       <view class="feature-title">{{recipe.name}}</view>
-      <view class="feature-meta">{{recipe.minutes}} 分钟 · {{recipe.difficulty}}</view>
+      <view class="feature-meta">{{recipe.timeText}} · {{recipe.difficulty}}</view>
     </view>
   </navigator>
 </template>

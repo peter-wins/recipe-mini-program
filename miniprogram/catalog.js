@@ -155,6 +155,18 @@ function formatWait(minutes) {
   return (Math.round(minutes / 6) / 10) + ' 小时'
 }
 
+// 原始数据显示「预计总时长（含等待）」；拆分过的显示动手时间；短菜保持原说法。
+function durationLabel(recipe) {
+  if (recipe.waitMinutes) return '动手时间'
+  return recipe.minutes > 60 ? '预计总时长' : '烹饪时长'
+}
+
+function durationText(recipe) {
+  if (recipe.waitMinutes) return recipe.minutes + ' 分钟动手'
+  if (recipe.minutes > 60) return '约 ' + recipe.minutes + ' 分钟（含等待）'
+  return recipe.minutes + ' 分钟'
+}
+
 function getRecipe(id, selection) {
   const recipe = recipeById.get(resolveRecipeId(id))
   if (!recipe) return null
@@ -175,6 +187,9 @@ function getRecipe(id, selection) {
   return {
     ...recipe,
     image: recipeImage(recipe.coverPath),
+    durationLabel: durationLabel(recipe),
+    durationNote: !recipe.waitMinutes && recipe.minutes > 60 ? '含等待' : '',
+    timeText: durationText(recipe),
     ...(recipe.waitMinutes ? { waitText: formatWait(recipe.waitMinutes) } : {}),
     groups,
     missingItems: groups.find(group => group.key === 'required').items.filter(item => item.missing),
@@ -203,6 +218,7 @@ function matchRecipes(selection, { category, maxMinutes, readyOnly, lightOnly, s
     const missing = required.filter(id => !available.has(id))
     return {
       id: recipe.id, name: recipe.name, category: recipe.category, minutes: recipe.minutes,
+      timeText: durationText(recipe),
       difficulty: recipe.difficulty, required,
       image: recipeImage(recipe.coverPath),
       ...(recipe.nutrition ? { calories: recipe.calories, nutrition: recipe.nutrition, servings: recipe.servings } : {}),

@@ -20,7 +20,7 @@
           </view>
           <view class="missing-dish">
             <view class="missing-name">{{item.name}}</view>
-            <view class="banner-meta">约 {{item.minutes}} 分钟</view>
+            <view class="banner-meta">{{item.timeText}}</view>
             <view class="missing-label">缺：{{item.missingText}}</view>
           </view>
           <text class="missing-arrow" aria-hidden="true">›</text>

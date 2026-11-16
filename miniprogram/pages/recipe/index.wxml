@@ -13,9 +13,10 @@
       <view class="recipe-facts {{recipe.calories > 0 && !recipe.nutrition ? 'recipe-facts-with-energy' : ''}}">
         <view class="recipe-fact">
           <image class="fact-icon" src="/assets/icon-recipe-clock.svg" aria-hidden="true"/>
-          <text class="fact-label">{{recipe.waitMinutes ? '动手时间' : '烹饪时长'}}</text>
+          <text class="fact-label">{{recipe.durationLabel}}</text>
           <text class="fact-value">{{recipe.minutes}} 分钟</text>
           <text wx:if="{{recipe.waitText}}" class="fact-note">另需等待 {{recipe.waitText}}</text>
+          <text wx:elif="{{recipe.durationNote}}" class="fact-note">{{recipe.durationNote}}</text>
         </view>
         <view class="recipe-fact">
           <image class="fact-icon" src="/assets/icon-recipe-difficulty.svg" aria-hidden="true"/>

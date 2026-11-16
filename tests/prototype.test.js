@@ -846,7 +846,7 @@ test('旧库存数量不再参与推荐，已排好的采购量在升级后保�
 test('菜谱分类不再堆积在「其他」，长耗时菜拆出等待时间', () => {
   assert.equal(recipes.filter(recipe => recipe.category === '其他').length, 0)
   const slow = recipes.filter(recipe => recipe.waitMinutes)
-  assert.equal(slow.length, 22)
+  assert.equal(slow.length, 28)
   const jiuNiang = recipes.find(recipe => recipe.name === '酒酿醪糟')
   assert.equal(jiuNiang.minutes, 30)
   assert.equal(jiuNiang.totalMinutes, 2880)
@@ -1127,4 +1127,25 @@ test('看图步骤的图片加载完成后计时按钮依然显示', () => {
   assert.ok(block.includes('</recipe-cover>'))
   assert.ok(block.indexOf('step-timer-button') > block.indexOf('</recipe-cover>'))
   assert.equal((wxml.match(/step-timer-button/g) || []).length, 1)
+})
+
+test('虚高时长改成动手时间，未拆的长菜标明含等待', () => {
+  const find = name => matchRecipes([]).find(recipe => recipe.name === name)
+  const fishHead = find('红烧鱼头')
+  assert.equal(fishHead.minutes, 40)
+  assert.equal(fishHead.timeText, '40 分钟')
+  assert.equal(getRecipe(fishHead.id).durationLabel, '烹饪时长')
+
+  const curry = find('巴基斯坦牛肉咖喱')
+  assert.equal(curry.minutes, 45)
+  assert.equal(getRecipe(curry.id).totalMinutes, 150)
+  assert.equal(getRecipe(curry.id).waitMinutes, 105)
+  assert.equal(getRecipe(curry.id).waitText, '1.8 小时')
+  assert.equal(curry.timeText, '45 分钟动手')
+
+  const rabbit = find('冷吃兔')
+  assert.equal(rabbit.minutes, 90)
+  assert.equal(rabbit.timeText, '约 90 分钟（含等待）')
+  assert.equal(getRecipe(rabbit.id).durationLabel, '预计总时长')
+  assert.equal(getRecipe(rabbit.id).durationNote, '含等待')
 })

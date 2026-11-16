@@ -11,7 +11,7 @@
       <view class="recipe-note">{{item.category}}</view>
     </view>
     <view class="recipe-aside">
-      <text>{{item.minutes}} 分钟</text><text class="arrow" aria-hidden="true">›</text>
+      <text>{{item.timeText}}</text><text class="arrow" aria-hidden="true">›</text>
     </view>
   </navigator>
 </view>

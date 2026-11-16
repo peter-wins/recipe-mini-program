@@ -11,7 +11,7 @@
       <view class="discovery-name">{{recipe.name}}</view>
       <view class="discovery-meta">
         <view class="discovery-clock" aria-hidden="true"></view>
-        <text>{{showNutrition ? '约 ' : ''}}{{recipe.minutes}} 分钟 · {{showNutrition ? recipe.servings + ' 人份' : recipe.difficulty}}</text>
+        <text>{{recipe.timeText}} · {{showNutrition ? recipe.servings + ' 人份' : recipe.difficulty}}</text>
       </view>
       <view wx:if="{{showNutrition && recipe.nutrition}}" class="discovery-nutrition">
         <text>{{recipe.calories}} 千卡</text><text>蛋白质 {{recipe.nutrition.protein}} 克</text>
