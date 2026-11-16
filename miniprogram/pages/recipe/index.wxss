@@ -150,3 +150,48 @@
 .detail-saved image { filter: brightness(.72) sepia(.8) saturate(3); }
 .detail-prev { color: var(--theme-accent-text, #994017); line-height: 86rpx; }
 .detail-prev[disabled] { background: transparent; color: #8a7b70; }
+
+.recipe-screen.timer-visible { padding-bottom: calc(300rpx + env(safe-area-inset-bottom)); }
+.step-timer-button {
+  display: inline-flex;
+  align-items: center;
+  min-height: 48rpx;
+  margin-top: 12rpx;
+  padding: 0 18rpx;
+  border: 1rpx solid var(--theme-accent, #FF8A3D);
+  border-radius: 24rpx;
+  background: #fff;
+  color: var(--theme-accent-text, #994017);
+  font-size: 23rpx;
+  line-height: 46rpx;
+}
+.step-timer-bar {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: calc(112rpx + env(safe-area-inset-bottom));
+  z-index: 11;
+  display: flex;
+  align-items: center;
+  gap: 12rpx;
+  padding: 14rpx 24rpx;
+  border-top: 1rpx solid var(--theme-border, #f0e4d8);
+  border-radius: 24rpx 24rpx 0 0;
+  background: #fff8f0;
+  box-shadow: 0 -8rpx 24rpx rgba(150, 80, 30, 0.1);
+}
+.step-timer-copy { flex: 1; min-width: 0; }
+.step-timer-label { display: block; overflow: hidden; color: var(--theme-muted, #75665e); font-size: 21rpx; text-overflow: ellipsis; white-space: nowrap; }
+.step-timer-clock { display: block; margin-top: 2rpx; color: var(--theme-text, #4e342c); font-size: 38rpx; font-weight: 700; font-variant-numeric: tabular-nums; line-height: 1.15; }
+.step-timer-finished { color: var(--theme-accent-text, #994017); }
+.step-timer-control {
+  flex: 0 0 104rpx;
+  min-height: 64rpx;
+  padding: 0;
+  border-radius: 18rpx;
+  background: var(--theme-accent, #FF8A3D);
+  color: #fff;
+  font-size: 25rpx;
+  line-height: 64rpx;
+}
+.step-timer-stop { background: #f1e7de; color: var(--theme-muted, #75665e); }

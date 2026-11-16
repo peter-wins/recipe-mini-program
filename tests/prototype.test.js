@@ -7,6 +7,7 @@ const { getMealPlans, rotateLightInspiration } = require('../miniprogram/meal-pl
 const tomatoEggs = legacyRecipeIds['tomato-eggs']
 const { getCoverUrl } = require('../miniprogram/recipe-image')
 const { localRecipeDay, dailyRecipe, previewRecipes, festivalRecipe } = require('../miniprogram/daily-recipe')
+const { stepTimer, formatClock } = require('../miniprogram/step-timer')
 
 test('今日推荐按本地日期轮换，食材有限时偶尔推荐只差一样的菜', () => {
   const day = localRecipeDay(new Date(2026, 10, 15, 1))
@@ -973,6 +974,84 @@ test('忌口解析为食材 id 后从菜谱库和随机吃里过滤', () => {
     assert.ok(!page.data.recipe.required.includes('egg'))
     assert.ok(!page.data.recipe.name.includes('鸡蛋'))
   } finally {
+    global.wx = originalWx
+    global.Page = originalPage
+  }
+})
+
+test('步骤计时从做法文字里取等待时间，支持秒、分钟、小时和组合', () => {
+  assert.deepEqual(stepTimer({ body: '盖盖慢焖15分钟' }), { seconds: 900, timerText: '15分钟' })
+  assert.equal(stepTimer({ body: '煎 20 秒，翻面再煎 10 秒' }).seconds, 20)
+  assert.equal(stepTimer({ body: '上锅蒸 10-12 分钟' }).seconds, 720)
+  assert.equal(stepTimer({ body: '蒸 3.5 分钟' }).seconds, 210)
+  assert.equal(stepTimer({ body: '小火焖 1 小时 30 分钟' }).seconds, 5400)
+  assert.equal(stepTimer({ body: '腌制半小时' }).seconds, 1800)
+  assert.equal(stepTimer({ body: '加入盐调味' }), null)
+  assert.equal(formatClock(65), '01:05')
+  assert.equal(formatClock(3600), '1:00:00')
+  const timed = matchRecipes([]).find(recipe => getRecipe(recipe.id).steps.some(step => step.seconds))
+  assert.ok(timed)
+  assert.ok(getRecipe(timed.id).steps.some(step => step.timerText))
+})
+
+test('详情页计时条可暂停、继续并在到点时提醒', () => {
+  const originalWx = global.wx
+  const originalPage = global.Page
+  const originalSetInterval = global.setInterval
+  const originalClearInterval = global.clearInterval
+  const originalNow = Date.now
+  const storage = new Map()
+  const toasts = []
+  let tick = null
+  const base = originalNow()
+  global.wx = {
+    getStorageSync: key => (storage.has(key) ? structuredClone(storage.get(key)) : ''),
+    setStorageSync: (key, value) => storage.set(key, structuredClone(value)),
+    showToast: options => toasts.push(options.title),
+    vibrateShort: () => {},
+    pageScrollTo: () => {}
+  }
+  global.setInterval = callback => { tick = callback; return 1 }
+  global.clearInterval = () => { tick = null }
+  let now = base
+  Date.now = () => now
+  let registered
+  global.Page = page => { registered = page }
+  delete require.cache[require.resolve('../miniprogram/pages/recipe/index')]
+  require('../miniprogram/pages/recipe/index')
+  try {
+    const page = { ...registered, data: JSON.parse(JSON.stringify(registered.data)) }
+    page.setData = function (update) { Object.assign(this.data, update) }
+    const recipe = matchRecipes([]).map(item => getRecipe(item.id)).find(item => item.steps.some(step => step.seconds))
+    page.onLoad({ id: recipe.id })
+    const step = page.data.recipe.steps.find(item => item.seconds)
+    page.startStepTimer({ currentTarget: { dataset: { step: step.number, seconds: step.seconds, label: step.timerText } } })
+    assert.equal(page.data.timerStep, step.number)
+    assert.equal(page.data.timerRunning, true)
+    assert.equal(page.data.remainingText, formatClock(step.seconds))
+
+    now = base + (step.seconds - 1) * 1000
+    tick()
+    assert.equal(page.data.remainingText, '00:01')
+    page.toggleTimer()
+    assert.equal(page.data.timerRunning, false)
+    assert.equal(tick, null)
+
+    now += 5000
+    page.toggleTimer()
+    assert.equal(page.data.timerRunning, true)
+    now += (step.seconds - 1) * 1000
+    tick()
+    assert.equal(page.data.timerDone, true)
+    assert.equal(page.data.timerRunning, false)
+    assert.ok(toasts.some(title => title.includes('时间到')))
+    page.stopTimer()
+    assert.equal(page.data.timerStep, 0)
+    page.onUnload()
+  } finally {
+    Date.now = originalNow
+    global.setInterval = originalSetInterval
+    global.clearInterval = originalClearInterval
     global.wx = originalWx
     global.Page = originalPage
   }

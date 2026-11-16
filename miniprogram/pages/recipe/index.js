@@ -4,6 +4,7 @@ const { readFavorites, toggleFavorite } = require('../../favorites')
 const { readKitchen } = require('../../inventory')
 const { getPurchaseItems, hasRecipeShopping, saveRecipeShopping } = require('../../shopping')
 const { recordRecipe } = require('../../activity')
+const { formatClock } = require('../../step-timer')
 
 Page({
   data: {
@@ -15,10 +16,16 @@ Page({
     purchaseItems: [],
     purchaseNeeded: {},
     hasSavedPurchase: false,
-    savingPurchase: false
+    savingPurchase: false,
+    timerStep: 0,
+    timerLabel: '',
+    remainingText: '',
+    timerRunning: false,
+    timerDone: false
   },
 
   onLoad(options) {
+    this.clearTimer()
     const recipe = getRecipe(options.id)
     this.selection = null
     this.purchaseOverrides = {}
@@ -29,7 +36,12 @@ Page({
       inventoryReady: false,
       purchaseItems: [],
       purchaseNeeded: {},
-      hasSavedPurchase: false
+      hasSavedPurchase: false,
+      timerStep: 0,
+      timerLabel: '',
+      remainingText: '',
+      timerRunning: false,
+      timerDone: false
     })
     if (!recipe) return
 
@@ -54,6 +66,69 @@ Page({
     applyTheme(this)
     this.refreshKitchenData()
     this.refreshRecipeRecords()
+  },
+
+  onUnload() {
+    this.clearTimer()
+  },
+
+  clearTimer() {
+    if (this.timerTick) clearInterval(this.timerTick)
+    this.timerTick = null
+    this.timerEndAt = null
+    this.pausedRemaining = null
+  },
+
+  startStepTimer(event) {
+    const { step, seconds, label } = event.currentTarget.dataset
+    const total = Number(seconds)
+    if (!Number.isFinite(total) || total < 1) return
+    this.clearTimer()
+    this.timerEndAt = Date.now() + total * 1000
+    this.setData({
+      timerStep: Number(step),
+      timerLabel: label || '',
+      remainingText: formatClock(total),
+      timerRunning: true,
+      timerDone: false
+    })
+    this.timerTick = setInterval(() => this.refreshTimer(), 1000)
+  },
+
+  refreshTimer() {
+    if (!this.timerEndAt) return
+    const remaining = Math.max(0, Math.ceil((this.timerEndAt - Date.now()) / 1000))
+    if (!remaining) {
+      this.clearTimer()
+      this.setData({ timerRunning: false, timerDone: true, remainingText: '00:00' })
+      wx.showToast({ title: `第 ${this.data.timerStep} 步时间到`, icon: 'none', duration: 3000 })
+      if (typeof wx.vibrateShort === 'function') wx.vibrateShort({ type: 'heavy', fail: () => {} })
+      return
+    }
+    const text = formatClock(remaining)
+    if (text !== this.data.remainingText) this.setData({ remainingText: text })
+  },
+
+  toggleTimer() {
+    if (this.data.timerDone) return
+    if (this.data.timerRunning ? !this.timerEndAt : !this.pausedRemaining) return
+    if (this.data.timerRunning) {
+      const remaining = Math.max(0, Math.ceil((this.timerEndAt - Date.now()) / 1000))
+      this.clearTimer()
+      this.pausedRemaining = remaining
+      this.setData({ timerRunning: false, remainingText: formatClock(remaining) })
+      return
+    }
+    const remaining = this.pausedRemaining || 0
+    if (!remaining) return
+    this.timerEndAt = Date.now() + remaining * 1000
+    this.setData({ timerRunning: true })
+    this.timerTick = setInterval(() => this.refreshTimer(), 1000)
+  },
+
+  stopTimer() {
+    this.clearTimer()
+    this.setData({ timerStep: 0, timerLabel: '', remainingText: '', timerRunning: false, timerDone: false })
   },
 
   refreshKitchenData() {

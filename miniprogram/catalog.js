@@ -1,5 +1,6 @@
 const { ingredients, recipes: sourceRecipes, legacyRecipeIds } = require('./data')
 const { recipeImage } = require('./recipe-image')
+const { stepTimer } = require('./step-timer')
 const equivalentNames = new Map([
   ['青葱', 'scallion'], ['葱段', 'scallion'],
   ['大葱葱白', 'vibe-e5a4a7e891b1'],
@@ -180,7 +181,8 @@ function getRecipe(id, selection) {
     steps: recipe.steps.map(([title, body], index) => {
       const number = index + 1
       const image = recipe.stepImages === false ? '' : recipeImage('steps/' + recipe.id + '/step_' + number + '.jpg')
-      return { number, title, body, image }
+      const timer = stepTimer({ title, body })
+      return { number, title, body, image, ...(timer || {}) }
     })
   }
 }

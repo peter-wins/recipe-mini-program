@@ -1,5 +1,5 @@
 <view class="theme-page theme-{{themeId}}">
-<view class="screen recipe-screen {{recipe ? 'has-nav' : ''}}">
+<view class="screen recipe-screen {{recipe ? 'has-nav' : ''}} {{timerStep > 0 ? 'timer-visible' : ''}}">
   <block wx:if="{{recipe}}">
     <view class="recipe-cover {{recipe.image ? 'recipe-cover-photo' : ''}}">
       <recipe-cover wx:if="{{recipe.image}}" class="detail-image" src="{{recipe.image}}" label="{{recipe.name}}成品"/>
@@ -101,6 +101,15 @@
   <view wx:else class="empty">找不到这道菜谱。</view>
 </view>
 
+<view wx:if="{{timerStep > 0}}" class="step-timer-bar">
+  <view class="step-timer-copy">
+    <text class="step-timer-label">第 {{timerStep}} 步 · {{timerLabel}}</text>
+    <text class="step-timer-clock {{timerDone ? 'step-timer-finished' : ''}}">{{timerDone ? '时间到' : remainingText}}</text>
+  </view>
+  <button wx:if="{{!timerDone}}" class="step-timer-control" bindtap="toggleTimer">{{timerRunning ? '暂停' : '继续'}}</button>
+  <button class="step-timer-control step-timer-stop" bindtap="stopTimer">结束</button>
+</view>
+
 <view wx:if="{{recipe}}" class="bottom-nav recipe-bar detail-bar">
   <block wx:if="{{cookingIndex < 0}}">
     <button class="detail-save {{saved ? 'detail-saved' : ''}}" bindtap="toggleSaved">
@@ -128,6 +137,7 @@
     <view class="step-content">
       <view wx:if="{{step.title}}" class="step-title">{{step.title}}</view>
       <view>{{step.body}}</view>
+      <button wx:if="{{step.seconds}}" class="step-timer-button" bindtap="startStepTimer" data-step="{{step.number}}" data-seconds="{{step.seconds}}" data-label="{{step.timerText}}" aria-label="为第 {{step.number}} 步计时 {{step.timerText}}">⏱ 计时 {{step.timerText}}</button>
     </view>
   </view>
 </template>
