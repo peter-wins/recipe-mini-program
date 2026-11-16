@@ -130,6 +130,7 @@
     <template is="stepText" data="{{step}}"/>
   </recipe-cover>
   <template wx:else is="stepText" data="{{step}}"/>
+  <button wx:if="{{step.seconds}}" class="step-timer-button" bindtap="startStepTimer" data-step="{{step.number}}" data-seconds="{{step.seconds}}" data-label="{{step.timerText}}" aria-label="为第 {{step.number}} 步计时 {{step.timerText}}">⏱ 计时 {{step.timerText}}</button>
 </template>
 <template name="stepText">
   <view class="step">
@@ -137,7 +138,6 @@
     <view class="step-content">
       <view wx:if="{{step.title}}" class="step-title">{{step.title}}</view>
       <view>{{step.body}}</view>
-      <button wx:if="{{step.seconds}}" class="step-timer-button" bindtap="startStepTimer" data-step="{{step.number}}" data-seconds="{{step.seconds}}" data-label="{{step.timerText}}" aria-label="为第 {{step.number}} 步计时 {{step.timerText}}">⏱ 计时 {{step.timerText}}</button>
     </view>
   </view>
 </template>

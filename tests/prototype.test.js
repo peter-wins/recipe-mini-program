@@ -1116,3 +1116,15 @@ test('口味偏好是独立设置页，问问 AI 的调整不会改成常用偏�
     global.Page = originalPage
   }
 })
+
+test('看图步骤的图片加载完成后计时按钮依然显示', () => {
+  const fs = require('node:fs')
+  const wxml = fs.readFileSync(require.resolve('../miniprogram/pages/recipe/index.wxml'), 'utf8')
+  const start = wxml.indexOf('<template name="recipeStep">')
+  const end = wxml.indexOf('<template name="stepText">')
+  assert.ok(start >= 0 && end > start)
+  const block = wxml.slice(start, end)
+  assert.ok(block.includes('</recipe-cover>'))
+  assert.ok(block.indexOf('step-timer-button') > block.indexOf('</recipe-cover>'))
+  assert.equal((wxml.match(/step-timer-button/g) || []).length, 1)
+})
