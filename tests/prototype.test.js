@@ -1,7 +1,7 @@
 const assert = require('node:assert/strict')
 const test = require('node:test')
 const { ingredients, recipes, legacyRecipeIds } = require('../miniprogram/data')
-const { getIngredientOptions, getIngredientGroups, searchIngredientOptions, getRecipe, matchRecipes, groupFridgeMatches, avoidIdsFromNotes } = require('../miniprogram/catalog')
+const { getIngredientOptions, getIngredientGroups, searchIngredientOptions, getRecipe, matchRecipes, groupFridgeMatches, avoidIdsFromNotes, getDietTags, tagsFor } = require('../miniprogram/catalog')
 const { recommendRecipes } = require('../miniprogram/recipe-recommendations')
 const { getMealPlans, rotateLightInspiration } = require('../miniprogram/meal-plans')
 const tomatoEggs = legacyRecipeIds['tomato-eggs']
@@ -1167,4 +1167,34 @@ test('收藏后爱心切换为实心图标', () => {
   assert.ok(wxml.includes("saved ? '/assets/icon-favorites-filled.svg' : '/assets/icon-favorites.svg'"))
   assert.ok(fs.existsSync(require.resolve('../miniprogram/assets/icon-favorites-filled.svg')))
   assert.ok(!wxss.includes('detail-saved image'))
+})
+
+test('减脂餐是通用人群标签，26 道轻食精确命中', () => {
+  const { recipes } = require('../miniprogram/data')
+  assert.deepEqual(getDietTags(), ['减脂餐'])
+  assert.equal(recipes.filter(recipe => tagsFor(recipe).includes('减脂餐')).length, 26)
+  assert.equal(recipes.filter(recipe => !tagsFor(recipe).includes('减脂餐') && recipe.nutrition).length, 0)
+
+  const fatLoss = matchRecipes([], { tag: '减脂餐' })
+  assert.equal(fatLoss.length, 26)
+  assert.ok(fatLoss.every(recipe => recipe.tags.includes('减脂餐')))
+  assert.ok(fatLoss.every(recipe => recipe.nutrition && recipe.calories))
+  assert.equal(matchRecipes([], { tag: '减脂餐' }).length, matchRecipes([], { lightOnly: true }).length)
+  assert.ok(!matchRecipes([], { tag: '不存在的标签' }).every(recipe => false))
+
+  const first = getRecipe(fatLoss[0].id)
+  assert.deepEqual(first.tags, ['减脂餐'])
+  assert.deepEqual(getRecipe('tomato-eggs').tags, [])
+})
+
+test('菜谱库有减脂餐筛选胶囊并接入匹配', () => {
+  const fs = require('node:fs')
+  const wxml = fs.readFileSync(require.resolve('../miniprogram/pages/home/index.wxml'), 'utf8')
+  const js = fs.readFileSync(require.resolve('../miniprogram/pages/home/index.js'), 'utf8')
+  assert.ok(wxml.includes('diet-tag-row'))
+  assert.ok(wxml.includes('bindtap="changeDietTag"'))
+  assert.ok(wxml.includes('{{item}}'))
+  assert.ok(js.includes("const dietTags = ['全部', ...getDietTags()]"))
+  assert.ok(js.includes('tag: inLibrary && dietTagIndex ? dietTags[dietTagIndex] : null'))
+  assert.ok(js.includes('dietTagIndex: 0'))
 })

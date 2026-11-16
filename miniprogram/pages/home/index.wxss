@@ -32,6 +32,24 @@ button.home-search {
 .library-eyebrow { color: var(--theme-muted, #75665e); font-size: 25rpx; }
 .library-title { margin-top: 8rpx; color: var(--theme-text, #4e342c); font-size: 50rpx; font-weight: 750; line-height: 1.2; }
 .recipe-search.library-search { border-radius: 26rpx; }
+.diet-tag-row { display: flex; flex-wrap: wrap; gap: 16rpx; margin-top: 20rpx; }
+.diet-tag {
+  min-height: 52rpx;
+  margin: 0;
+  padding: 0 26rpx;
+  border: 1rpx solid var(--theme-line, #e8ddd4);
+  border-radius: 26rpx;
+  background: transparent;
+  color: var(--theme-muted, #75665e);
+  font-size: 25rpx;
+  line-height: 50rpx;
+}
+.diet-tag-active {
+  border-color: var(--theme-accent, #FF8A3D);
+  background: var(--theme-accent, #FF8A3D);
+  color: #fff;
+  font-weight: 650;
+}
 .library-toolbar { margin-top: 24rpx; gap: 12rpx; }
 .library-category-picker { flex-shrink: 0; }
 .library-category-label {

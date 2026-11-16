@@ -64,7 +64,7 @@
 
     <view class="home-fridge">
       <view class="row home-fridge-heading">
-        <text class="section">冰箱里能做什么</text>
+        <text class="section">冰箱里的食材能做什么</text>
         <button wx:if="{{selected.length}}" class="more-recipes-link home-fridge-link" bindtap="openFridgeMatches">浏览更多 <text class="more-recipes-arrow" aria-hidden="true">›</text></button>
       </view>
       <view wx:if="{{selected.length}}" class="home-fridge-description">根据你登记的食材，找到今天的好选择</view>
@@ -111,8 +111,11 @@
       <input class="recipe-search-input" value="{{librarySearch}}" focus="{{librarySearchFocused}}" bindinput="searchLibrary" bindblur="blurLibrarySearch" confirm-type="search" placeholder="搜菜名或食材"/>
       <button wx:if="{{librarySearch}}" class="link" bindtap="clearLibrarySearch">清除</button>
     </view>
+    <view class="diet-tag-row">
+      <button wx:for="{{dietTags}}" wx:key="*this" class="diet-tag {{dietTagIndex === index ? 'diet-tag-active' : ''}}" data-index="{{index}}" bindtap="changeDietTag">{{item}}</button>
+    </view>
     <view class="row library-toolbar">
-      <text class="section">{{librarySearch || categoryIndex ? '找到 ' : '共 '}}{{results.length}} 道菜</text>
+      <text class="section">{{librarySearch || categoryIndex || dietTagIndex ? '找到 ' : '共 '}}{{results.length}} 道菜</text>
       <picker class="library-category-picker" mode="selector" range="{{categories}}" value="{{categoryIndex}}" bindchange="changeCategory" aria-label="菜谱分类，当前{{categories[categoryIndex]}}">
         <view class="library-category-label {{categoryIndex ? 'library-category-active' : ''}}">
           <text>{{categories[categoryIndex]}}</text>
