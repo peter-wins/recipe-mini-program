@@ -147,7 +147,6 @@
 .detail-save { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3rpx; min-height: 86rpx; line-height: 1.3; font-size: 24rpx; }
 .detail-save image { width: 35rpx; height: 35rpx; }
 .detail-saved { color: var(--theme-accent-text, #994017); font-weight: 700; }
-.detail-saved image { filter: brightness(.72) sepia(.8) saturate(3); }
 .detail-prev { color: var(--theme-accent-text, #994017); line-height: 86rpx; }
 .detail-prev[disabled] { background: transparent; color: #8a7b70; }
 .detail-bar .detail-prev { flex: 0 0 118rpx; }

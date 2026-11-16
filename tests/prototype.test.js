@@ -1164,3 +1164,12 @@ test('烹饪模式计时按钮在下一步旁边，步骤内的按钮只在看�
   assert.ok(wxml.slice(start, end).includes('step.seconds && !cooking'))
   assert.ok(wxml.includes('step: recipe.steps[cookingIndex], showStepText, cooking: true'))
 })
+
+test('收藏后爱心切换为实心图标', () => {
+  const fs = require('node:fs')
+  const wxml = fs.readFileSync(require.resolve('../miniprogram/pages/recipe/index.wxml'), 'utf8')
+  const wxss = fs.readFileSync(require.resolve('../miniprogram/pages/recipe/index.wxss'), 'utf8')
+  assert.ok(wxml.includes("saved ? '/assets/icon-favorites-filled.svg' : '/assets/icon-favorites.svg'"))
+  assert.ok(fs.existsSync(require.resolve('../miniprogram/assets/icon-favorites-filled.svg')))
+  assert.ok(!wxss.includes('detail-saved image'))
+})

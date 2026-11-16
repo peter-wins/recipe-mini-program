@@ -114,7 +114,7 @@
 <view wx:if="{{recipe}}" class="bottom-nav recipe-bar detail-bar">
   <block wx:if="{{cookingIndex < 0}}">
     <button class="detail-save {{saved ? 'detail-saved' : ''}}" bindtap="toggleSaved">
-      <image src="/assets/icon-favorites.svg" aria-hidden="true"/>
+      <image src="{{saved ? '/assets/icon-favorites-filled.svg' : '/assets/icon-favorites.svg'}}" aria-hidden="true"/>
       <text>{{saved ? '已收藏' : '收藏'}}</text>
     </button>
     <button class="primary" bindtap="startCooking">开始烹饪</button>
