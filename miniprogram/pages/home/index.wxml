@@ -56,7 +56,7 @@
         <view class="shortcut-icon shortcut-camera"><image src="/assets/icon-camera.svg" aria-hidden="true"/></view>
         <text>拍照识菜</text>
       </button>
-      <button class="home-shortcut" bindtap="showShortcutUnavailable">
+      <button class="home-shortcut" bindtap="openSurprise">
         <view class="shortcut-icon shortcut-random"><image src="/assets/icon-shuffle.svg" aria-hidden="true"/></view>
         <text>随机吃</text>
       </button>
@@ -137,14 +137,14 @@
     <view class="row profile-header">
       <view>
         <view class="profile-eyebrow">每一顿饭，都值得被记住</view>
-        <view class="profile-title">我的厨房</view>
+        <view class="profile-title">我的饭搭子</view>
       </view>
       <button class="profile-settings" bindtap="openProfileThemes" aria-label="主题设置"><text aria-hidden="true">⚙︎</text></button>
     </view>
     <view class="profile-head">
       <view class="profile-avatar" aria-hidden="true">👩🏻‍🍳</view>
       <view class="profile-copy">
-        <view class="profile-name">厨房里的美好日常</view>
+        <view class="profile-name">吃饭得有谱</view>
         <view class="profile-note">{{selected.length ? '手边有 ' + fridgeSummary.count + ' 种食材' : '冰箱还没登记食材'}}<text wx:if="{{fridgeSummary.staples}}"> · {{fridgeSummary.staples}} 样常备</text></view>
       </view>
     </view>
@@ -156,6 +156,7 @@
     <view class="profile-links">
       <button class="profile-row" bindtap="openFridge"><image src="/assets/icon-fridge.svg" aria-hidden="true"/>冰箱食材<text class="profile-arrow">›</text></button>
       <navigator class="profile-row" url="/pages/shopping/index" hover-class="pressed"><image src="/assets/icon-cart.svg" aria-hidden="true"/>采购清单<text class="profile-arrow">›</text></navigator>
+      <navigator class="profile-row" url="/pages/recommend/index" hover-class="pressed"><image src="/assets/icon-sparkles.svg" aria-hidden="true"/>口味偏好<text class="profile-hint">{{preferenceSummary}}</text><text class="profile-arrow">›</text></navigator>
     </view>
     <view id="profile-themes" class="profile-themes">
       <view class="profile-themes-title">主题</view>

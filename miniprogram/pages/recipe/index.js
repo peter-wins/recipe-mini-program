@@ -1,5 +1,5 @@
 const { applyTheme } = require('../../theme')
-const { getRecipe } = require('../../catalog')
+const { getRecipe, availableIngredients } = require('../../catalog')
 const { readFavorites, toggleFavorite } = require('../../favorites')
 const { readKitchen } = require('../../inventory')
 const { getPurchaseItems, hasRecipeShopping, saveRecipeShopping } = require('../../shopping')
@@ -14,7 +14,8 @@ Page({
     inventoryReady: false,
     purchaseItems: [],
     purchaseNeeded: {},
-    hasSavedPurchase: false
+    hasSavedPurchase: false,
+    savingPurchase: false
   },
 
   onLoad(options) {
@@ -37,7 +38,11 @@ Page({
     } catch {
       wx.showToast({ title: '未能记录浏览历史', icon: 'none' })
     }
+  },
 
+  refreshRecipeRecords() {
+    const { recipe } = this.data
+    if (!recipe) return
     try {
       this.setData({ saved: readFavorites().includes(recipe.id) })
     } catch {
@@ -47,12 +52,19 @@ Page({
 
   onShow() {
     applyTheme(this)
+    this.refreshKitchenData()
+    this.refreshRecipeRecords()
+  },
+
+  refreshKitchenData() {
     if (!this.data.recipe) return
     try {
       const { inventory: selection, shopping } = readKitchen()
       if (this.selection) {
+        const previous = availableIngredients(this.selection)
+        const current = availableIngredients(selection)
         for (const id of Object.keys(this.purchaseOverrides)) {
-          if (this.selection.includes(id) !== selection.includes(id)) delete this.purchaseOverrides[id]
+          if (previous.has(id) !== current.has(id)) delete this.purchaseOverrides[id]
         }
       }
       this.selection = selection
@@ -81,7 +93,7 @@ Page({
     if (!required.items.some(item => item.id === id)) return
 
     const needed = !this.data.purchaseNeeded[id]
-    if (needed === !this.selection.includes(id)) delete this.purchaseOverrides[id]
+    if (needed === !availableIngredients(this.selection).has(id)) delete this.purchaseOverrides[id]
     else this.purchaseOverrides[id] = needed
     this.refreshPurchaseItems()
   },
@@ -133,17 +145,20 @@ Page({
 
   savePurchaseItems() {
     const { recipe, inventoryReady, purchaseItems, hasSavedPurchase } = this.data
-    if (!recipe || !inventoryReady || (!purchaseItems.length && !hasSavedPurchase)) return
+    if (this.data.savingPurchase || !recipe || !inventoryReady || (!purchaseItems.length && !hasSavedPurchase)) return
 
+    this.setData({ savingPurchase: true })
     try {
       const saved = saveRecipeShopping(recipe, this.purchaseOverrides)
-      this.onShow()
+      this.refreshKitchenData()
       wx.showToast({
         title: saved ? (hasSavedPurchase ? '已更新采购清单' : '已加入采购清单') : '这次无需补货',
         icon: saved ? 'success' : 'none'
       })
     } catch {
       wx.showToast({ title: '保存失败，请重试', icon: 'none' })
+    } finally {
+      this.setData({ savingPurchase: false })
     }
   },
 

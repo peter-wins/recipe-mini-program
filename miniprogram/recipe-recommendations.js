@@ -74,4 +74,18 @@ function recommendRecipes(selected, { mode, maxMinutes, people, taste, notes }, 
   return { recipes: picks, ignored }
 }
 
-module.exports = { recommendRecipes }
+function matchesTaste(recipe, taste) {
+  if (!taste || taste === 'any') return true
+  const profile = recipeProfiles.get(recipe.id)
+  if (!profile) return true
+  return taste === 'mild' ? !profile.spicy : profile.spicy
+}
+
+// 偏好 spicy/mild 时优先只留这类菜；若一类都没有就维持原池，避免推荐为空。
+function preferTaste(recipes, taste) {
+  if (!taste || taste === 'any') return recipes
+  const preferred = recipes.filter(recipe => matchesTaste(recipe, taste))
+  return preferred.length ? preferred : recipes
+}
+
+module.exports = { recommendRecipes, matchesTaste, preferTaste }

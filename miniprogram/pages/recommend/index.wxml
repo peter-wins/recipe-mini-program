@@ -68,5 +68,6 @@
       </block>
       <view wx:else class="subtle recommend-result-note">试试放宽烹饪时间或口味，也可以调整想吃的食材。</view>
     </view>
+    <view class="subtle recommend-bottom-note">「问问 AI」正在优化中，目前可试用本地菜谱推荐。</view>
   </view>
 </view>

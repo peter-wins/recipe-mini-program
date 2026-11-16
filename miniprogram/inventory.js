@@ -1,4 +1,5 @@
 const { getIngredientOptions, ingredientIds, stapleIds } = require('./catalog')
+const { readSyncedKitchen, saveSyncedKitchen, syncKitchen } = require('./kitchen-sync')
 
 const legacyKey = 'fridge-ingredient-ids-v1'
 const key = 'recipe-kitchen-v1'
@@ -28,7 +29,7 @@ function restoreShopping(stored) {
   return shopping
 }
 
-function readKitchen() {
+function readLegacyKitchen() {
   const stored = wx.getStorageSync(key)
   const ids = stored ? stored.inventory : wx.getStorageSync(legacyKey)
   return {
@@ -37,8 +38,21 @@ function readKitchen() {
   }
 }
 
+function readKitchen() {
+  const synced = readSyncedKitchen()
+  if (!synced) return readLegacyKitchen()
+  return {
+    inventory: [...new Set(synced.inventory.flatMap(ingredientIds).filter(id => ingredientNames.has(id)))],
+    shopping: synced.shopping
+  }
+}
+
 function saveKitchen(kitchen) {
-  wx.setStorageSync(key, kitchen)
+  saveSyncedKitchen(readKitchen(), kitchen)
+}
+
+function syncInventory() {
+  return syncKitchen(readLegacyKitchen)
 }
 
 function readInventory() {
@@ -62,4 +76,4 @@ function previewInventory(ids) {
   return { inventoryPreview, extraIngredients: ordered.length - inventoryPreview.length }
 }
 
-module.exports = { readKitchen, saveKitchen, readInventory, saveInventory, summarizeInventory, previewInventory }
+module.exports = { readKitchen, saveKitchen, syncInventory, readInventory, saveInventory, summarizeInventory, previewInventory }

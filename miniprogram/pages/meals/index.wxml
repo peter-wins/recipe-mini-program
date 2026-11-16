@@ -16,9 +16,6 @@
           <text class="meal-plan-title">{{plan.title}}</text>
           <text class="subtle meal-time">约 {{plan.minutes}} 分钟</text>
         </view>
-        <view wx:if="{{inventoryReady && inventory.length}}" class="meal-status {{plan.missingCount ? 'meal-status-missing' : ''}}">
-          {{plan.missingCount === 0 ? '食材齐全' : '缺：' + plan.missingText}}
-        </view>
         <view class="meal-dishes">
           <navigator wx:for="{{plan.dishes}}" wx:key="id" class="meal-dish" url="/pages/recipe/index?id={{item.id}}" hover-class="pressed">
             <recipe-cover class="meal-dish-cover" src="{{item.image}}" lazy="{{true}}"/>
@@ -26,11 +23,14 @@
             <text class="chevron meal-dish-arrow" aria-hidden="true">›</text>
           </navigator>
         </view>
-        <view wx:if="{{plan.rice}}" class="subtle meal-rice">配熟米饭</view>
+        <view wx:if="{{plan.serveWithRice || inventoryReady}}" class="row meal-card-meta">
+          <text wx:if="{{plan.serveWithRice}}" class="subtle meal-rice">可配米饭</text>
+          <template wx:if="{{inventoryReady}}" is="recipeStockStatus" data="{{missingCount: plan.missingCount, missingText: plan.missingText}}"/>
+        </view>
       </view>
     </block>
     <view class="row meal-section-footer">
-      <text class="subtle meal-plan-note">搭配耗时按依次制作估算</text>
+      <text class="subtle meal-plan-note">耗时按依次做菜估算，煮饭另计</text>
       <button wx:if="{{plans.length > planPreviewLimit}}" class="link meal-toggle-plans" bindtap="togglePlans" aria-expanded="{{showAllPlans}}">
         {{showAllPlans ? '收起搭配' : '全部 ' + plans.length + ' 套搭配'}}
       </button>

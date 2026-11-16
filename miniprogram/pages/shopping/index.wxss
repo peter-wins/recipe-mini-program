@@ -1,1 +1,22 @@
-/* pages/shopping/index.wxss */
+.shopping-item-name { min-width: 0; overflow-wrap: anywhere; }
+.shopping-quantity {
+  display: flex;
+  align-items: center;
+  gap: 8rpx;
+  max-width: 62%;
+  padding: 10rpx 0 10rpx 12rpx;
+  font-size: 26rpx;
+  line-height: 1.4;
+  white-space: normal;
+  text-align: right;
+}
+.shopping-quantity text:first-child { min-width: 0; overflow-wrap: anywhere; }
+.shopping-chevron { flex-shrink: 0; }
+.shopping-details {
+  margin-top: 10rpx;
+  padding: 8rpx 16rpx;
+  border-radius: 16rpx;
+  background: var(--theme-soft, #fff3e8);
+}
+.shopping-detail { align-items: flex-start; gap: 16rpx; padding: 8rpx 0; }
+.shopping-detail .quantity { max-width: 52%; overflow-wrap: anywhere; }

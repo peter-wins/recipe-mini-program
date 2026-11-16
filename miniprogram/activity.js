@@ -1,19 +1,27 @@
-const key = 'recipe-activity-v1'
+const { readKitchen } = require('./inventory')
+const { activityStorageKey, normalizeRecipeIds, readRecipeRecords, saveRecipeRecord } = require('./kitchen-sync')
 
 function readActivity() {
-  const stored = wx.getStorageSync(key) || {}
-  return {
-    history: Array.isArray(stored.history) ? [...new Set(stored.history.map(resolveRecipeId))] : [],
-    cooked: Array.isArray(stored.cooked) ? [...new Set(stored.cooked.map(resolveRecipeId))] : []
-  }
+  const stored = wx.getStorageSync(activityStorageKey) || {}
+  return { history: normalizeRecipeIds(stored.history), cooked: readRecipeRecords().cooked }
 }
 
 function recordRecipe(list, id) {
-  const activity = readActivity()
-  activity[list] = [id, ...activity[list].filter(item => item !== id)]
-  wx.setStorageSync(key, activity)
+  const recipeId = resolveRecipeId(id)
+  if (list === 'cooked') {
+    saveRecipeRecord('cooked', recipeId, true, readKitchen)
+    return
+  }
+  const stored = wx.getStorageSync(activityStorageKey) || {}
+  const history = [recipeId, ...normalizeRecipeIds(stored.history).filter(item => item !== recipeId)]
+  wx.setStorageSync(activityStorageKey, { ...stored, history })
 }
 
-module.exports = { readActivity, recordRecipe }
+function clearBrowsingHistory() {
+  const stored = wx.getStorageSync(activityStorageKey) || {}
+  wx.setStorageSync(activityStorageKey, { ...stored, history: [] })
+}
+
+module.exports = { readActivity, recordRecipe, clearBrowsingHistory }
 const { resolveRecipeId } = require('./catalog')
 

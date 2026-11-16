@@ -37,6 +37,10 @@ Page({
 
   onShow() {
     applyTheme(this)
+    this.refreshKitchenData()
+  },
+
+  refreshKitchenData() {
     try {
       const selected = readInventory()
       if (selected.join(',') !== this.data.selected.join(',')) this.updateSelection(selected)

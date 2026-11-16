@@ -1,4 +1,7 @@
 {
+  "usingComponents": {
+    "recipe-cover": "/components/recipe-cover/index"
+  },
   "component": true,
   "styleIsolation": "apply-shared"
 }

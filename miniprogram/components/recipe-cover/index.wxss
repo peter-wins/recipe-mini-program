@@ -1,5 +1,24 @@
 :host { display: block; }
+.cover-frame { position: relative; width: 100%; height: 100%; }
+.cover-frame-fluid { height: auto; }
+.cover-frame-square {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-rows: auto;
+  align-items: start;
+}
+.cover-frame-square::before {
+  grid-area: 1 / 1;
+  display: block;
+  padding-top: 100%;
+  content: '';
+}
+.cover-frame-square .cover-text { grid-area: 1 / 1; min-width: 0; }
 .cover, .placeholder { display: block; width: 100%; height: 100%; }
 .cover-fluid { height: auto; }
-.placeholder { display: flex; align-items: center; justify-content: center; background: var(--theme-placeholder, #f4e5d7); }
+.cover-loading { position: absolute; top: 0; left: 0; opacity: 0; pointer-events: none; }
+.cover-loaded { position: relative; animation: cover-appear 160ms ease-out both; }
+.placeholder { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; background: var(--theme-placeholder, #f4e5d7); }
 .placeholder image { width: 42rpx; height: 42rpx; }
+@keyframes cover-appear { from { opacity: 0; } to { opacity: 1; } }
+@media (prefers-reduced-motion: reduce) { .cover-loaded { animation: none; } }

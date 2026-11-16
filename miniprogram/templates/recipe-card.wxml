@@ -16,10 +16,14 @@
       <view wx:if="{{showNutrition && recipe.nutrition}}" class="discovery-nutrition">
         <text>{{recipe.calories}} 千卡</text><text>蛋白质 {{recipe.nutrition.protein}} 克</text>
       </view>
-      <view wx:if="{{showStock}}" class="discovery-stock {{recipe.missingCount ? 'discovery-stock-missing' : ''}}">
-        <view wx:if="{{!recipe.missingCount}}" class="discovery-stock-check" aria-hidden="true"></view>
-        <text>{{recipe.missingCount > 2 ? '缺：' + recipe.missingCount + ' 样食材' : recipe.missingCount ? '缺：' + recipe.missingText : '食材齐全'}}</text>
-      </view>
+      <template wx:if="{{showStock}}" is="recipeStockStatus" data="{{missingCount: recipe.missingCount, missingText: recipe.missingText, summarize: true}}"/>
     </view>
   </navigator>
+</template>
+
+<template name="recipeStockStatus">
+  <view class="recipe-stock {{missingCount ? 'recipe-stock-missing' : 'recipe-stock-ready'}}">
+    <view wx:if="{{!missingCount}}" class="recipe-stock-check" aria-hidden="true"></view>
+    <text>{{summarize && missingCount > 2 ? '缺：' + missingCount + ' 样食材' : missingCount ? '缺：' + missingText : '食材齐全'}}</text>
+  </view>
 </template>

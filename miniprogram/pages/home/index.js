@@ -1,5 +1,7 @@
 const { themes, saveTheme, applyTheme } = require('../../theme')
-const { getRecipeCategories, getRecipe, matchRecipes, groupFridgeMatches } = require('../../catalog')
+const { getRecipeCategories, getRecipe, matchRecipes, groupFridgeMatches, avoidIdsFromNotes } = require('../../catalog')
+const { preferTaste } = require('../../recipe-recommendations')
+const { readPreferences, preferenceSummary } = require('../../preferences')
 const { readFavorites } = require('../../favorites')
 const { readInventory, summarizeInventory } = require('../../inventory')
 const { readActivity } = require('../../activity')
@@ -17,15 +19,19 @@ const categories = [
 ]
 const initialRecipes = matchRecipes([])
 const libraryPageSize = 24
+const defaultLibraryFilters = { librarySearch: '', librarySearchFocused: false, categoryIndex: 0 }
 const homeMatchLimit = 2
-const quickRecipe = getRecipe('tomato-eggs')
+const defaultRecipe = getRecipe('tomato-eggs')
 const lightRotationKey = 'recipe-light-inspiration-v1'
 const mealCategories = new Set(['素菜', '荤菜', '水产', '汤', '主食'])
 const quickDishIds = new Set(initialRecipes.filter(recipe =>
   recipe.required.length && recipe.minutes <= 20 && mealCategories.has(recipe.category)
 ).map(recipe => recipe.id))
+const quickMealRecipes = initialRecipes.filter(recipe =>
+  quickDishIds.has(recipe.id) || (recipe.category === '早餐' && recipe.minutes <= 20)
+)
 const viewTitles = {
-  match: '美味厨房', library: '菜谱库',
+  match: '吃饭搭子', library: '菜谱库',
   meals: '轻食', profile: '我的'
 }
 
@@ -37,34 +43,37 @@ Page({
     greeting: greetingInfo(new Date(), 0),
     inventoryReady: false,
     fridgeSummary: summarizeInventory([]),
-    librarySearch: '',
-    librarySearchFocused: false,
+    ...defaultLibraryFilters,
     results: initialRecipes,
     libraryCards: initialRecipes.slice(0, libraryPageSize),
-    quickRecipe,
+    quickRecipe: defaultRecipe,
     lightInspiration: null,
     suggestedRecipes: [],
     featured: null,
     homeMatches: [],
+    preferenceSummary: '',
     categories,
-    categoryIndex: 0,
     favorites: [],
     history: [],
     cooked: []
   },
 
+  onShareAppMessage() {
+    const { featured, quickRecipe } = this.data
+    const recipe = featured || quickRecipe
+    return {
+      title: recipe ? `今天吃什么？试试${recipe.name}` : '今天吃什么？打开冰箱看看，吃什么就有了谱',
+      path: '/pages/home/index'
+    }
+  },
+
   onShow() {
     applyTheme(this)
-    try {
-      const selected = readInventory()
-      this.setData({ inventoryReady: true, greeting: greetingInfo(new Date(), selected.length) })
-      if (selected.join(',') !== this.data.selected.join(',') || this.recipeDay !== localRecipeDay()) {
-        this.updateSelection(selected)
-      }
-    } catch {
-      this.setData({ inventoryReady: false })
-      wx.showToast({ title: '暂时无法读取冰箱', icon: 'none' })
-    }
+    this.refreshKitchenData()
+    this.refreshRecipeRecords()
+  },
+
+  refreshRecipeRecords() {
     try {
       this.setData({ favorites: readFavorites().map(id => getRecipe(id)).filter(Boolean) })
     } catch {
@@ -80,6 +89,27 @@ Page({
       wx.showToast({ title: '暂时无法读取使用记录', icon: 'none' })
     }
     this.refreshHomeSuggestions()
+  },
+
+  refreshKitchenData() {
+    const preferences = readPreferences()
+    const preferenceKey = JSON.stringify(preferences)
+    if (preferenceKey !== this.preferenceKey) {
+      this.preferenceKey = preferenceKey
+      this.preferences = preferences
+      this.avoidIds = avoidIdsFromNotes(preferences.notes)
+      this.allRecipes = matchRecipes([], { avoidIds: this.avoidIds })
+      this.recipeDay = null
+      this.setData({ preferenceSummary: preferenceSummary(preferences) })
+    }
+    try {
+      const selected = readInventory()
+      this.setData({ inventoryReady: true })
+      this.updateHomeMeal(selected)
+    } catch {
+      this.setData({ inventoryReady: false })
+      wx.showToast({ title: '暂时无法读取冰箱', icon: 'none' })
+    }
     if (this.data.view === 'match') this.refreshLightInspiration()
   },
 
@@ -106,10 +136,10 @@ Page({
   },
 
   refreshHomeSuggestions() {
-    const { featured, homeMatches, favorites, cooked } = this.data
+    const { featured, quickRecipe, homeMatches, favorites, cooked } = this.data
     const shown = new Set([(featured || quickRecipe).id, ...homeMatches.map(recipe => recipe.id)])
     const preferred = new Set([...favorites, ...cooked].map(recipe => recipe.category))
-    const candidates = this.inventoryMatches || initialRecipes
+    const candidates = this.inventoryMatches || this.allRecipes || initialRecipes
     const suggestedRecipes = candidates.filter(recipe => quickDishIds.has(recipe.id) && !shown.has(recipe.id)).sort((left, right) =>
       Number(preferred.has(right.category)) - Number(preferred.has(left.category))
     ).slice(0, 2)
@@ -137,8 +167,8 @@ Page({
 
   showView(view, update = {}) {
     if (!viewTitles[view] || (view === this.data.view && !Object.keys(update).length)) return
-    if (view === 'match' && this.recipeDay !== localRecipeDay()) this.updateSelection(this.data.selected)
-    this.updateResults({ view, librarySearchFocused: false, ...update }, () => {
+    if (view === 'match') this.updateHomeMeal(this.data.selected)
+    this.updateResults({ view, ...defaultLibraryFilters, ...update }, () => {
       if (view === 'match') this.refreshLightInspiration()
       wx.setNavigationBarTitle({ title: viewTitles[view] })
       wx.pageScrollTo({ scrollTop: 0, duration: 0 })
@@ -170,16 +200,23 @@ Page({
     })
   },
 
+  openSurprise() {
+    wx.navigateTo({
+      url: '/pages/surprise/index',
+      fail: () => wx.showToast({ title: '暂时无法打开，请重试', icon: 'none' })
+    })
+  },
+
   showShortcutUnavailable() {
     wx.showToast({ title: '功能在开发中', icon: 'none' })
   },
 
   openRecipeSearch() {
-    this.showView('library', { categoryIndex: 0, librarySearch: '', librarySearchFocused: true })
+    this.showView('library', { librarySearchFocused: true })
   },
 
   openAllRecipes() {
-    this.showView('library', { categoryIndex: 0, librarySearch: '' })
+    this.showView('library', defaultLibraryFilters)
   },
 
   blurLibrarySearch() {
@@ -203,21 +240,46 @@ Page({
     this.setData({ libraryCards: results.slice(0, libraryCards.length + libraryPageSize) })
   },
 
-  updateSelection(selected) {
-    const day = localRecipeDay()
-    this.inventoryMatches = selected.length ? matchRecipes(selected) : null
+  updateHomeMeal(selected, date = new Date()) {
+    const greeting = greetingInfo(date, selected.length)
+    if (selected.join(',') !== this.data.selected.join(',') ||
+        this.recipeDay !== localRecipeDay(date) || this.data.greeting.period !== greeting.period) {
+      this.updateSelection(selected, date, greeting)
+    }
+  },
+
+  updateSelection(selected, date = new Date(), greeting = greetingInfo(date, selected.length)) {
+    const day = localRecipeDay(date)
+    const avoidIds = this.avoidIds || []
+    const taste = (this.preferences || readPreferences()).taste
+    const allRecipes = this.allRecipes || initialRecipes
+    this.inventoryMatches = selected.length ? matchRecipes(selected, { avoidIds }) : null
     const { ready, almost } = groupFridgeMatches(this.inventoryMatches || [])
-    const festival = festivalOf()
-    const festivalPick = festival && festivalRecipe(festival, ready, almost, matchRecipes([]))
-    const featured = festivalPick || dailyRecipe(ready, almost, day)
+    const readyPool = preferTaste(ready, taste)
+    const almostPool = preferTaste(almost, taste)
+    const festival = festivalOf(date)
+    const festivalPick = festival && festivalRecipe(festival, readyPool, almostPool, allRecipes)
+    const featured = festivalPick || dailyRecipe(readyPool, almostPool, day, greeting.period)
+    const quickIds = new Set(allRecipes.filter(recipe =>
+      recipe.required.length && recipe.minutes <= 20 && mealCategories.has(recipe.category)
+    ).map(recipe => recipe.id))
+    const quickCandidates = preferTaste(allRecipes.filter(recipe =>
+      quickIds.has(recipe.id) || (recipe.category === '早餐' && recipe.minutes <= 20)
+    ), taste)
+    const currentQuick = this.data.quickRecipe
+    const safeQuick = currentQuick && allRecipes.some(recipe => recipe.id === currentQuick.id) ? currentQuick : null
+    const quickRecipe = featured ? (safeQuick || quickCandidates[0] || allRecipes[0] || defaultRecipe) :
+      dailyRecipe(quickCandidates, [], day, greeting.period) || allRecipes[0] || defaultRecipe
     const hero = featured || quickRecipe
-    const readyPreview = previewRecipes(ready, homeMatchLimit, hero, true)
-    const homeMatches = readyPreview.concat(previewRecipes(almost, homeMatchLimit - readyPreview.length, hero, false))
+    const readyPreview = previewRecipes(readyPool, homeMatchLimit, hero, true)
+    const homeMatches = readyPreview.concat(previewRecipes(almostPool, homeMatchLimit - readyPreview.length, hero, false))
     const visibleLibraryCards = Math.max(libraryPageSize, this.data.libraryCards.length)
     this.recipeDay = day
     this.updateResults({
       selected,
+      greeting,
       featured,
+      quickRecipe,
       homeMatches,
       fridgeSummary: summarizeInventory(selected)
     }, () => this.refreshHomeSuggestions(), visibleLibraryCards)
@@ -229,7 +291,8 @@ Page({
     const results = matchRecipes(selected, {
       category: inLibrary && categoryIndex ? categories[categoryIndex] : null,
       search: inLibrary ? librarySearch : '',
-      rankByStock: !inLibrary
+      rankByStock: !inLibrary,
+      avoidIds: this.avoidIds || []
     })
     this.setData({
       ...update,

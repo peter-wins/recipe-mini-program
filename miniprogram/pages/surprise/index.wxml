@@ -1,0 +1,32 @@
+<view class="theme-page theme-{{themeId}}">
+<view class="screen surprise-screen">
+  <view class="surprise-head">
+    <view class="surprise-title">今晚就吃这个</view>
+    <view class="surprise-sub">{{poolLabel}}<block wx:if="{{inventoryCount}}"> · 从冰箱 {{inventoryCount}} 种食材里挑的</block></view>
+  </view>
+
+  <block wx:if="{{recipe}}">
+    <view class="surprise-card">
+      <recipe-cover wx:if="{{recipe.image}}" class="surprise-image" src="{{recipe.image}}" label="{{recipe.name}}成品" mode="aspectFill"/>
+      <view wx:else class="surprise-image surprise-image-fallback">{{recipe.name}}</view>
+      <view class="surprise-body">
+        <view class="surprise-name">{{recipe.name}}</view>
+        <view class="surprise-reason">{{reason}}</view>
+        <view class="surprise-meta">{{recipe.minutes}} 分钟 · {{recipe.difficulty}} · {{recipe.servings}} 人份</view>
+      </view>
+    </view>
+
+    <view class="surprise-actions">
+      <button class="surprise-btn surprise-btn-again" bindtap="pick" aria-label="换一道菜">换一道</button>
+      <navigator class="surprise-btn surprise-btn-main" url="/pages/recipe/index?id={{recipe.id}}" hover-class="surprise-btn-hover">看做法 ›</navigator>
+    </view>
+    <view class="surprise-tip">不满意就换一道，决定好了点「看做法」</view>
+  </block>
+
+  <view wx:else class="surprise-empty">
+    <view class="surprise-empty-title">还没想好今晚吃什么？</view>
+    <view class="surprise-empty-text">先去冰箱登记几样手边的食材，抽中的菜会更贴合你家现有材料。</view>
+    <button class="surprise-btn surprise-btn-main" bindtap="openFridge">去登记食材</button>
+  </view>
+</view>
+</view>

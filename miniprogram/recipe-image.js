@@ -1,5 +1,7 @@
 const developmentImageBase = 'http://192.168.1.81:8088'
-const productionImageBase = ''
+const cloudImageEnv = 'recipe-dev-d9gsv38lz1ade2114'
+const cloudImageBase = 'cloud://' + cloudImageEnv + '.7265-recipe-dev-d9gsv38lz1ade2114-1404757921/recipe-covers/'
+const useLocalImagesInDevelopment = false
 
 function isDevelopmentCoverUrl(url) {
   return url.indexOf(developmentImageBase + '/') === 0
@@ -8,8 +10,10 @@ function isDevelopmentCoverUrl(url) {
 function getCoverUrl(coverPath, envVersion) {
   const validPath = /^(?:ai-generated\/[^/\\]+|steps\/(?!\.{1,2}\/)[^/\\]+\/step_[1-9]\d*)\.jpg$/
   if (!validPath.test(coverPath)) return ''
-  const base = envVersion === 'develop' ? developmentImageBase : productionImageBase
-  return base ? base.replace(/\/$/, '') + '/' + coverPath.split('/').map(encodeURIComponent).join('/') : ''
+  if (envVersion === 'develop' && useLocalImagesInDevelopment) {
+    return developmentImageBase + '/' + coverPath.split('/').map(encodeURIComponent).join('/')
+  }
+  return ['develop', 'trial', 'release'].includes(envVersion) ? cloudImageBase + coverPath : ''
 }
 
 function recipeImage(coverPath) {
@@ -18,4 +22,4 @@ function recipeImage(coverPath) {
   return getCoverUrl(coverPath, miniProgram && miniProgram.envVersion)
 }
 
-module.exports = { getCoverUrl, recipeImage, isDevelopmentCoverUrl }
+module.exports = { cloudImageEnv, getCoverUrl, recipeImage, isDevelopmentCoverUrl }

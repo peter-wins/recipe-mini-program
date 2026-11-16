@@ -1,8 +1,9 @@
 {
-  "pages": ["pages/home/index", "pages/fridge/index", "pages/fridge-matches/index", "pages/recommend/index", "pages/recipe/index", "pages/shopping/index", "pages/records/index"],
-  "usingComponents": { "recipe-cover": "/components/recipe-cover/index" },
+  "entryPagePath": "pages/home/index",
+  "pages": ["pages/home/index", "pages/fridge/index", "pages/fridge-matches/index", "pages/recommend/index", "pages/surprise/index", "pages/recipe/index", "pages/shopping/index", "pages/records/index", "pages/index/index"],
+  "lazyCodeLoading": "requiredComponents",
   "window": {
-    "navigationBarTitleText": "美味厨房",
+    "navigationBarTitleText": "吃饭搭子",
     "navigationBarBackgroundColor": "#FFF8F0",
     "navigationBarTextStyle": "black",
     "backgroundColor": "#FFF8F0"

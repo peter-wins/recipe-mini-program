@@ -142,3 +142,4 @@
 .recommend-results { margin-top: 28rpx; }
 .recommend-result-note { margin-top: 6rpx; overflow-wrap: anywhere; }
 .recommend-results .discovery-grid { margin-top: 16rpx; }
+.recommend-bottom-note { margin-top: 20rpx; text-align: center; }

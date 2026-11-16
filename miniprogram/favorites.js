@@ -1,17 +1,16 @@
-const key = 'favorite-recipe-ids'
+const { resolveRecipeId } = require('./catalog')
+const { readKitchen } = require('./inventory')
+const { readRecipeRecords, saveRecipeRecord } = require('./kitchen-sync')
 
 function readFavorites() {
-  const stored = wx.getStorageSync(key)
-  return Array.isArray(stored) ? [...new Set(stored.filter(id => typeof id === 'string').map(resolveRecipeId))] : []
+  return readRecipeRecords().favorites
 }
 
 function toggleFavorite(id) {
-  const saved = readFavorites()
-  const alreadySaved = saved.includes(id)
-  wx.setStorageSync(key, alreadySaved ? saved.filter(item => item !== id) : [id, ...saved])
-  return !alreadySaved
+  const recipeId = resolveRecipeId(id)
+  const present = !readFavorites().includes(recipeId)
+  saveRecipeRecord('favorites', recipeId, present, readKitchen)
+  return present
 }
 
 module.exports = { readFavorites, toggleFavorite }
-const { resolveRecipeId } = require('./catalog')
-

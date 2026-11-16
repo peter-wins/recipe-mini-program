@@ -1,4 +1,7 @@
 {
+  "usingComponents": {
+    "recipe-cover": "/components/recipe-cover/index"
+  },
   "navigationStyle": "custom",
   "navigationBarTitleText": "AI 智能推荐"
 }

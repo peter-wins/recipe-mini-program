@@ -327,7 +327,8 @@ button.home-search {
 }
 .profile-row + .profile-row { border-top: 1rpx solid var(--theme-border, #f0e4d8); }
 .profile-row image { width: 34rpx; height: 34rpx; flex-shrink: 0; }
-.profile-arrow { margin-left: auto; color: var(--theme-muted, #75665e); font-size: 33rpx; }
+.profile-hint { max-width: 340rpx; margin-left: auto; overflow: hidden; color: var(--theme-muted, #75665e); font-size: 22rpx; text-overflow: ellipsis; white-space: nowrap; }
+.profile-arrow { flex-shrink: 0; margin-left: 8rpx; color: var(--theme-muted, #75665e); font-size: 33rpx; }
 
 .profile-themes {
   margin-top: 26rpx;

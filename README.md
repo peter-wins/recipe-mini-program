@@ -16,7 +16,11 @@
 
 运行 `node --test tests/prototype.test.js` 验证数据、匹配、采购与页面逻辑。
 
-## 本机图片服务
+## 菜谱图源
+
+开发版、体验版和正式版默认从微信云开发的云存储读取图片。把本地图片上传到云存储的 `recipe-covers/ai-generated/` 和 `recipe-covers/steps/`，沿用现有文件名和目录结构。小程序通过 `wx.cloud.downloadFile` 读取对应文件 ID。
+
+### 本地 Docker 图源
 
 菜谱封面存放在项目根目录的 `recipe-covers/ai-generated/`，步骤图存放在 `recipe-covers/steps/`。两个目录均位于 `miniprogram/` 外。打开 Docker Desktop 后，在项目根目录运行以下命令。
 
@@ -25,11 +29,9 @@ docker compose -p recipe-local-images -f compose.images.yaml up -d
 curl -I http://192.168.1.81:8088/ai-generated/aquatic_ga-li-chao-xie.jpg
 ```
 
-开发版从 `http://192.168.1.81:8088` 读取封面。若模拟器显示域名校验错误，在微信开发者工具的「详情 → 本地设置」中启用「不校验合法域名、web-view（业务域名）、TLS 版本以及 HTTPS 证书」，再重新编译。手机和电脑连接到同一 Wi-Fi 后，在微信开发者工具点「真机调试」并扫描新生成的二维码。也可以先用手机浏览器打开上面的示例图片地址，确认能连接到图源。
+如需切回本地图源，在 `miniprogram/recipe-image.js` 中把 `useLocalImagesInDevelopment` 设为 `true`。此时开发版从 `http://192.168.1.81:8088` 获取图片。若模拟器显示域名校验错误，在微信开发者工具的「详情 → 本地设置」中启用「不校验合法域名、web-view（业务域名）、TLS 版本以及 HTTPS 证书」，再重新编译。手机和电脑连接到同一 Wi-Fi 后，在微信开发者工具点「真机调试」并扫描新生成的二维码。也可以先用手机浏览器打开上面的示例图片地址，确认能连接到图源。
 
 若电脑的 Wi-Fi 地址变了，请同步修改 `compose.images.yaml` 和 `miniprogram/recipe-image.js` 中的 IP，重新启动容器并重新编译。
-
-上线时将图片按同样的 `ai-generated/` 和 `steps/` 路径部署到 HTTPS 图源，并在 `miniprogram/recipe-image.js` 填写 `productionImageBase`。配置前体验版和正式版使用封面占位图，做法步骤显示文字。
 
 停止容器可运行 `docker compose -p recipe-local-images -f compose.images.yaml down`。
 

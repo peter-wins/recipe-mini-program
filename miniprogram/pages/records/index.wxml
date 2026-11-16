@@ -1,5 +1,8 @@
 <view class="theme-page theme-{{themeId}}">
 <view class="screen">
+  <view wx:if="{{hasHistory}}" class="records-actions">
+    <button class="link" bindtap="clearHistory">清空历史</button>
+  </view>
   <view wx:if="{{!recipes.length}}" class="empty">{{type === 'favorites' ? '收藏的菜谱会出现在这里。' : type === 'history' ? '打开过的菜谱会出现在这里。' : '完成分步烹饪后，菜谱会出现在这里。'}}</view>
   <navigator wx:for="{{recipes}}" wx:key="id" class="recipe-card" url="/pages/recipe/index?id={{item.id}}" hover-class="card-pressed">
     <recipe-cover wx:if="{{item.image}}" class="dish-thumb" src="{{item.image}}" lazy="{{true}}"/>

@@ -13,6 +13,20 @@ function dinnerChoices(recipes) {
   return rest.length ? rest : recipes
 }
 
+function mealChoices(recipes, period) {
+  let preferred = []
+  if (period === 'breakfast') {
+    preferred = recipes.filter(recipe => mealCategory(recipe) === '早餐')
+    if (!preferred.length) preferred = recipes.filter(recipe => recipe.minutes <= 20 && mealCategory(recipe) === '主食')
+  } else if (period === 'lunch') {
+    preferred = recipes.filter(recipe => recipe.minutes <= 25 && ['素菜', '荤菜', '水产', '主食'].includes(mealCategory(recipe)))
+  } else if (period === 'night') {
+    preferred = recipes.filter(recipe => recipe.minutes <= 20 && ['汤', '主食', '早餐'].includes(mealCategory(recipe)))
+    if (!preferred.length) preferred = recipes.filter(recipe => recipe.minutes <= 20)
+  }
+  return preferred.length ? preferred : dinnerChoices(recipes)
+}
+
 function localRecipeDay(date = new Date()) {
   return Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()) / 86400000
 }
@@ -35,15 +49,15 @@ function rotateCategories(recipes, index) {
   }
 }
 
-function dailyRecipe(ready, almost, day) {
-  if (!ready.length) return rotateCategories(dinnerChoices(almost), day)
-  const readyChoices = dinnerChoices(ready)
+function dailyRecipe(ready, almost, day, period = 'dinner') {
+  if (!ready.length) return rotateCategories(mealChoices(almost, period), day)
+  const readyChoices = mealChoices(ready, period)
   const includeAlmost = almost.length && readyChoices.filter(recipe => recipe.required.length > 1).length < 2
   if (!includeAlmost) return rotateCategories(readyChoices, day)
 
   // Keep two days for ready recipes and use the third to add variety.
   const cycle = Math.floor(day / 3)
-  if (day - cycle * 3 === 2) return rotateCategories(dinnerChoices(almost), cycle)
+  if (day - cycle * 3 === 2) return rotateCategories(mealChoices(almost, period), cycle)
   return rotateCategories(readyChoices, day - cycle)
 }
 

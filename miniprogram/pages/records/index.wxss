@@ -1,1 +1,10 @@
-/* pages/records/index.wxss */
+.records-actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 12rpx;
+}
+
+.records-actions .link {
+  margin: 0;
+  line-height: 64rpx;
+}

@@ -13,8 +13,9 @@
       <view class="recipe-facts {{recipe.calories > 0 && !recipe.nutrition ? 'recipe-facts-with-energy' : ''}}">
         <view class="recipe-fact">
           <image class="fact-icon" src="/assets/icon-recipe-clock.svg" aria-hidden="true"/>
-          <text class="fact-label">烹饪时长</text>
+          <text class="fact-label">{{recipe.waitMinutes ? '动手时间' : '烹饪时长'}}</text>
           <text class="fact-value">{{recipe.minutes}} 分钟</text>
+          <text wx:if="{{recipe.waitText}}" class="fact-note">另需等待 {{recipe.waitText}}</text>
         </view>
         <view class="recipe-fact">
           <image class="fact-icon" src="/assets/icon-recipe-difficulty.svg" aria-hidden="true"/>
@@ -48,7 +49,7 @@
 
       <view class="list-heading recipe-section">
         <text class="section">食材清单</text>
-        <button wx:if="{{inventoryReady && (purchaseItems.length || hasSavedPurchase)}}" class="link" bindtap="savePurchaseItems">{{hasSavedPurchase ? '更新采购项' : '加入采购清单'}}</button>
+        <button wx:if="{{inventoryReady && (purchaseItems.length || hasSavedPurchase)}}" class="link" bindtap="savePurchaseItems" disabled="{{savingPurchase}}" loading="{{savingPurchase}}">{{hasSavedPurchase ? '更新采购项' : '加入采购清单'}}</button>
         <navigator wx:else class="link" url="/pages/shopping/index">看采购清单 ›</navigator>
       </view>
       <view wx:if="{{inventoryReady}}" class="purchase-summary">
@@ -116,7 +117,7 @@
 </view>
 
 <template name="recipeStep">
-  <recipe-cover wx:if="{{step.image && !showStepText}}" class="step-photo" src="{{step.image}}" mode="widthFix" label="{{'第' + step.number + '步：' + step.title}}" lazy="{{lazy}}" text-fallback="{{true}}">
+  <recipe-cover wx:if="{{step.image && !showStepText}}" class="step-photo" src="{{step.image}}" mode="widthFix" label="{{'第' + step.number + '步：' + step.title}}" lazy="{{lazy}}" text-fallback="{{true}}" reserve-square="{{true}}">
     <template is="stepText" data="{{step}}"/>
   </recipe-cover>
   <template wx:else is="stepText" data="{{step}}"/>
