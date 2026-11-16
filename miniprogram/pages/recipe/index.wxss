@@ -165,19 +165,6 @@
 }
 
 .recipe-screen.timer-visible { padding-bottom: calc(300rpx + env(safe-area-inset-bottom)); }
-.step-timer-button {
-  display: inline-flex;
-  align-items: center;
-  min-height: 48rpx;
-  margin-top: 12rpx;
-  padding: 0 18rpx;
-  border: 1rpx solid var(--theme-accent, #FF8A3D);
-  border-radius: 24rpx;
-  background: #fff;
-  color: var(--theme-accent-text, #994017);
-  font-size: 23rpx;
-  line-height: 46rpx;
-}
 .step-timer-bar {
   position: fixed;
   left: 0;

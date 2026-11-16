@@ -1117,7 +1117,7 @@ test('口味偏好是独立设置页，问问 AI 的调整不会改成常用偏�
   }
 })
 
-test('看图步骤的图片加载完成后计时按钮依然显示', () => {
+test('计时按钮不在步骤内容里，只在烹饪底栏', () => {
   const fs = require('node:fs')
   const wxml = fs.readFileSync(require.resolve('../miniprogram/pages/recipe/index.wxml'), 'utf8')
   const start = wxml.indexOf('<template name="recipeStep">')
@@ -1125,8 +1125,7 @@ test('看图步骤的图片加载完成后计时按钮依然显示', () => {
   assert.ok(start >= 0 && end > start)
   const block = wxml.slice(start, end)
   assert.ok(block.includes('</recipe-cover>'))
-  assert.ok(block.indexOf('step-timer-button') > block.indexOf('</recipe-cover>'))
-  assert.equal((wxml.match(/step-timer-button/g) || []).length, 1)
+  assert.ok(!wxml.includes('step-timer-button'))
 })
 
 test('虚高时长改成动手时间，未拆的长菜标明含等待', () => {
@@ -1150,7 +1149,7 @@ test('虚高时长改成动手时间，未拆的长菜标明含等待', () => {
   assert.equal(getRecipe(rabbit.id).durationNote, '含等待')
 })
 
-test('烹饪模式计时按钮在下一步旁边，步骤内的按钮只在看全部时出现', () => {
+test('烹饪模式计时按钮在下一步旁边', () => {
   const fs = require('node:fs')
   const wxml = fs.readFileSync(require.resolve('../miniprogram/pages/recipe/index.wxml'), 'utf8')
   const nav = wxml.slice(wxml.indexOf('<block wx:else>', wxml.indexOf('class="bottom-nav')), wxml.indexOf('</view>\n</view>\n\n<template name="recipeStep"'))
@@ -1158,11 +1157,7 @@ test('烹饪模式计时按钮在下一步旁边，步骤内的按钮只在看�
   assert.ok(nav.includes('bindtap="startStepTimer"'))
   assert.ok(nav.includes('recipe.steps[cookingIndex].seconds'))
   assert.ok(nav.indexOf('class="detail-timer"') < nav.indexOf("'下一步'"))
-
-  const start = wxml.indexOf('<template name="recipeStep">')
-  const end = wxml.indexOf('<template name="stepText">')
-  assert.ok(wxml.slice(start, end).includes('step.seconds && !cooking'))
-  assert.ok(wxml.includes('step: recipe.steps[cookingIndex], showStepText, cooking: true'))
+  assert.ok(!wxml.includes('cooking:'))
 })
 
 test('收藏后爱心切换为实心图标', () => {
