@@ -1,6 +1,6 @@
 {
   "entryPagePath": "pages/home/index",
-  "pages": ["pages/home/index", "pages/fridge/index", "pages/fridge-matches/index", "pages/recommend/index", "pages/surprise/index", "pages/recipe/index", "pages/shopping/index", "pages/records/index", "pages/index/index"],
+  "pages": ["pages/home/index", "pages/fridge/index", "pages/fridge-matches/index", "pages/recommend/index", "pages/preferences/index", "pages/surprise/index", "pages/recipe/index", "pages/shopping/index", "pages/records/index", "pages/index/index"],
   "lazyCodeLoading": "requiredComponents",
   "window": {
     "navigationBarTitleText": "吃饭搭子",

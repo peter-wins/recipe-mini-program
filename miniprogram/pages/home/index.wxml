@@ -156,7 +156,7 @@
     <view class="profile-links">
       <button class="profile-row" bindtap="openFridge"><image src="/assets/icon-fridge.svg" aria-hidden="true"/>冰箱食材<text class="profile-arrow">›</text></button>
       <navigator class="profile-row" url="/pages/shopping/index" hover-class="pressed"><image src="/assets/icon-cart.svg" aria-hidden="true"/>采购清单<text class="profile-arrow">›</text></navigator>
-      <navigator class="profile-row" url="/pages/recommend/index" hover-class="pressed"><image src="/assets/icon-sparkles.svg" aria-hidden="true"/>口味偏好<text class="profile-hint">{{preferenceSummary}}</text><text class="profile-arrow">›</text></navigator>
+      <navigator class="profile-row" url="/pages/preferences/index" hover-class="pressed"><image src="/assets/icon-sparkles.svg" aria-hidden="true"/>口味偏好<text class="profile-hint">{{preferenceSummary}}</text><text class="profile-arrow">›</text></navigator>
     </view>
     <view id="profile-themes" class="profile-themes">
       <view class="profile-themes-title">主题</view>

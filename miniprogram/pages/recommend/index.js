@@ -1,6 +1,6 @@
 const { readInventory, previewInventory } = require('../../inventory')
 const { recommendRecipes } = require('../../recipe-recommendations')
-const { readPreferences, savePreferences, resetPreferences } = require('../../preferences')
+const { readPreferences } = require('../../preferences')
 const { applyTheme } = require('../../theme')
 
 const modes = [
@@ -92,26 +92,29 @@ Page({
     if (!option || this.data[key] === value) return
     const update = key === 'mode' ? { modeHint: option.hint } : {}
     this.setData({ ...clearResults, ...update, [key]: value })
-    savePreferences({ [key]: value })
   },
 
   changePeople(event) {
     const change = Number(event.currentTarget.dataset.change)
     const people = Math.min(12, Math.max(1, this.data.people + change))
-    if (people !== this.data.people) {
-      this.setData({ ...clearResults, people })
-      savePreferences({ people })
-    }
+    if (people !== this.data.people) this.setData({ ...clearResults, people })
   },
 
   updateNotes(event) {
     this.setData({ ...clearResults, notes: event.detail.value })
-    savePreferences({ notes: event.detail.value })
   },
 
-  resetPreferences() {
-    const saved = resetPreferences()
-    this.setData({ ...defaults, ...clearResults, ...saved, modeHint: modes[0].hint })
+  restorePreferences() {
+    const saved = readPreferences()
+    this.setData({
+      ...clearResults,
+      mode: saved.mode,
+      maxMinutes: saved.maxMinutes,
+      people: saved.people,
+      taste: saved.taste,
+      notes: saved.notes,
+      modeHint: modes.find(item => item.value === saved.mode).hint
+    })
   },
 
   runRecommendations() {

@@ -1,0 +1,34 @@
+<view class="theme-page theme-{{themeId}}">
+  <view class="screen preference-screen">
+    <view class="headline">口味偏好</view>
+    <view class="subtle preference-intro">设置一次，首页推荐、冰箱匹配和随机吃都会照着来。在「问问 AI」里的临时调整不会改这里。</view>
+
+    <view class="preference-panel">
+      <view class="section">口味</view>
+      <view class="preference-options">
+        <button wx:for="{{tastes}}" wx:key="value" class="preference-option {{taste === item.value ? 'preference-option-selected' : ''}}" data-key="taste" data-value="{{item.value}}" bindtap="setPreference" aria-pressed="{{taste === item.value}}">{{item.label}}</button>
+      </view>
+
+      <view class="section">常用烹饪时间</view>
+      <view class="preference-options">
+        <button wx:for="{{times}}" wx:key="value" class="preference-option {{maxMinutes === item.value ? 'preference-option-selected' : ''}}" data-key="maxMinutes" data-value="{{item.value}}" bindtap="setPreference" aria-pressed="{{maxMinutes === item.value}}">{{item.label}}</button>
+      </view>
+
+      <view class="section">用餐人数</view>
+      <view class="preference-people">
+        <button class="preference-step" data-change="{{-1}}" bindtap="changePeople" disabled="{{people <= 1}}" aria-label="减少一人">−</button>
+        <text>{{people}} 人</text>
+        <button class="preference-step" data-change="{{1}}" bindtap="changePeople" disabled="{{people >= 12}}" aria-label="增加一人">+</button>
+      </view>
+    </view>
+
+    <view class="preference-panel">
+      <view class="section">忌口与想吃的</view>
+      <textarea class="preference-input" value="{{notes}}" bindinput="updateNotes" maxlength="120" placeholder="例如：不要香菜，想吃豆腐" aria-label="填写忌口或想吃的食材" show-confirm-bar="{{false}}"/>
+      <view class="subtle preference-hint">写「不要香菜」这类忌口，推荐和随机吃会自动避开相关菜。</view>
+    </view>
+
+    <button class="primary preference-save" bindtap="save">保存偏好</button>
+    <button class="link preference-reset" bindtap="restoreDefaults">恢复默认</button>
+  </view>
+</view>

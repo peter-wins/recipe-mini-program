@@ -457,7 +457,7 @@ test('菜谱页分页，采购保留原用量，旧收藏映射到新菜谱', ()
   assert.deepEqual(recommend.data.inventoryPreview.map(item => item.id), ['egg', 'broccoli'])
   assert.equal(recommend.data.people, 3)
   assert.equal(recommend.data.hasRun, false)
-  recommend.resetPreferences()
+  recommend.restorePreferences()
   assert.equal(recommend.data.people, 2)
   assert.equal(recommend.data.maxMinutes, 30)
   storage.set('fridge-ingredient-ids-v1', ['potato', 'potato', 'unknown'])
@@ -1052,6 +1052,66 @@ test('详情页计时条可暂停、继续并在到点时提醒', () => {
     Date.now = originalNow
     global.setInterval = originalSetInterval
     global.clearInterval = originalClearInterval
+    global.wx = originalWx
+    global.Page = originalPage
+  }
+})
+
+test('口味偏好是独立设置页，问问 AI 的调整不会改成常用偏好', () => {
+  const originalWx = global.wx
+  const originalPage = global.Page
+  const originalSetTimeout = global.setTimeout
+  const storage = new Map([
+    ['recipe-taste-preferences-v1', { mode: 'stock', maxMinutes: 15, people: 2, taste: 'mild', notes: '' }]
+  ])
+  global.wx = {
+    getStorageSync: key => (storage.has(key) ? structuredClone(storage.get(key)) : ''),
+    setStorageSync: (key, value) => storage.set(key, structuredClone(value)),
+    setNavigationBarColor: () => {},
+    setBackgroundColor: () => {},
+    showToast: () => {},
+    navigateBack: () => {},
+    pageScrollTo: () => {},
+    getWindowInfo: () => ({ windowWidth: 375, statusBarHeight: 20 }),
+    getMenuButtonBoundingClientRect: () => ({ height: 32, top: 24, left: 280 })
+  }
+  global.setTimeout = callback => { callback(); return 1 }
+  let registered
+  global.Page = page => { registered = page }
+  const prefPath = require.resolve('../miniprogram/pages/preferences/index')
+  const recommendPath = require.resolve('../miniprogram/pages/recommend/index')
+  delete require.cache[prefPath]
+  delete require.cache[recommendPath]
+  try {
+    require('../miniprogram/pages/preferences/index')
+    const page = { ...registered, data: JSON.parse(JSON.stringify(registered.data)) }
+    page.setData = function (update) { Object.assign(this.data, update) }
+    page.onShow()
+    assert.equal(page.data.taste, 'mild')
+    page.setPreference({ currentTarget: { dataset: { key: 'taste', value: 'spicy' } } })
+    page.updateNotes({ detail: { value: '不要香菜' } })
+    assert.equal(storage.get('recipe-taste-preferences-v1').taste, 'mild')
+    page.save()
+    assert.equal(storage.get('recipe-taste-preferences-v1').taste, 'spicy')
+    assert.equal(storage.get('recipe-taste-preferences-v1').notes, '不要香菜')
+
+    require('../miniprogram/pages/recommend/index')
+    const recommend = { ...registered, data: JSON.parse(JSON.stringify(registered.data)) }
+    recommend.setData = function (update) { Object.assign(this.data, update) }
+    recommend.onLoad()
+    assert.equal(recommend.data.taste, 'spicy')
+    recommend.setPreference({ currentTarget: { dataset: { key: 'taste', value: 'mild' } } })
+    assert.equal(storage.get('recipe-taste-preferences-v1').taste, 'spicy')
+    recommend.restorePreferences()
+    assert.equal(recommend.data.taste, 'spicy')
+
+    page.restoreDefaults()
+    assert.equal(storage.get('recipe-taste-preferences-v1').taste, 'any')
+    assert.equal(storage.get('recipe-taste-preferences-v1').notes, '')
+  } finally {
+    delete require.cache[prefPath]
+    delete require.cache[recommendPath]
+    global.setTimeout = originalSetTimeout
     global.wx = originalWx
     global.Page = originalPage
   }
