@@ -1,6 +1,5 @@
 const { readInventory, previewInventory } = require('../../inventory')
 const { recommendRecipes } = require('../../recipe-recommendations')
-const { readPreferences } = require('../../preferences')
 const { applyTheme } = require('../../theme')
 
 const modes = [
@@ -28,15 +27,6 @@ Page({
 
   onLoad() {
     this.updateNavLayout()
-    const saved = readPreferences()
-    this.setData({
-      mode: saved.mode,
-      maxMinutes: saved.maxMinutes,
-      people: saved.people,
-      taste: saved.taste,
-      notes: saved.notes,
-      modeHint: modes.find(item => item.value === saved.mode).hint
-    })
   },
 
   onResize() {
@@ -105,16 +95,7 @@ Page({
   },
 
   restorePreferences() {
-    const saved = readPreferences()
-    this.setData({
-      ...clearResults,
-      mode: saved.mode,
-      maxMinutes: saved.maxMinutes,
-      people: saved.people,
-      taste: saved.taste,
-      notes: saved.notes,
-      modeHint: modes.find(item => item.value === saved.mode).hint
-    })
+    this.setData({ ...clearResults, ...defaults, modeHint: modes[0].hint })
   },
 
   runRecommendations() {

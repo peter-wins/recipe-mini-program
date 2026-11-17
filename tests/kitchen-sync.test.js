@@ -216,3 +216,93 @@ test('已有冰箱云记录可迁移收藏和做过的菜，离线取消收藏�
   assert.deepEqual(readActivity().cooked, [favorite, cooked])
   assert.deepEqual(readKitchen().inventory, ['tomato', 'garlic'])
 })
+
+test('搭配和日历可迁移、离线同步和换设备恢复，晚到的旧设备不覆盖已有安排', async t => {
+  const { readCalendar, saveCalendarMeal, prepareCalendarSnapshots } = require('../miniprogram/meal-calendar')
+  const { saveCustomMeal, getCustomMeal, archiveCustomMeal } = require('../miniprogram/meal-plans')
+  const { syncPlanning } = require('../miniprogram/planning-sync')
+  const cloud = cloudFixture()
+  const egg = 'breakfast_zheng-shui-dan'
+  const other = 'vegetable_dish_suan-rong-xi-lan-hua'
+  const day = '2026-11-17'
+  const later = '2026-11-18'
+  const original = { id: 'custom-legacy-2', title: '旧搭配', hasCustomTitle: true, recipes: [egg] }
+  const legacyCalendar = () => ({ [day]: { dinner: { type: 'plan', id: original.id } } })
+  const legacyDevice = () => new Map([
+    ['recipe-custom-meals-v1', [structuredClone(original)]],
+    ['recipe-meal-calendar-v1', legacyCalendar()]
+  ])
+  const deviceA = legacyDevice()
+  const deviceB = new Map()
+  const deviceC = legacyDevice()
+  let storage = deviceA
+  let online = false
+  let useOldFunction = false
+  const notices = []
+  t.mock.method(console, 'warn', () => {})
+  global.wx = {
+    getStorageSync: key => structuredClone(storage.get(key)),
+    setStorageSync: (key, value) => storage.set(key, structuredClone(value)),
+    showToast: options => notices.push(options.title),
+    cloud: {
+      async callFunction({ name, data }) {
+        assert.equal(name, 'syncKitchen')
+        if (!online) throw Error('offline')
+        if (useOldFunction) return { result: { ok: false, error: 'invalid_input' } }
+        return { result: await cloud.call('planning-user', data) }
+      }
+    }
+  }
+  t.after(() => { delete global.wx })
+
+  prepareCalendarSnapshots()
+  const frozen = readCalendar()[day].dinner
+  assert.equal(frozen.title, '旧搭配')
+  assert.deepEqual(frozen.dishes.map(dish => dish.id), [egg])
+  saveCustomMeal('离线改名', [other], original.id)
+  await syncPlanning()
+  assert.equal(cloud.records.size, 0)
+  online = true
+  useOldFunction = true
+  await syncPlanning()
+  assert.ok(storage.get('recipe-planning-sync-v1').pending.length)
+  useOldFunction = false
+  await syncPlanning()
+  assert.equal(storage.get('recipe-planning-sync-v1').pending.length, 0)
+
+  storage = deviceB
+  await syncPlanning()
+  assert.equal(getCustomMeal(original.id).title, '离线改名')
+  assert.deepEqual(readCalendar()[day].dinner, frozen)
+  const backgroundMeal = { type: 'recipes', ids: [egg, other] }
+  assert.equal(saveCalendarMeal(day, 'dinner', null, frozen), true)
+  assert.equal(saveCalendarMeal(later, 'lunch', backgroundMeal, null), true)
+  assert.equal(archiveCustomMeal(original.id), true)
+  await syncPlanning()
+
+  storage = deviceA
+  online = false
+  assert.equal(saveCalendarMeal(day, 'dinner', { type: 'recipe', id: other }, frozen), true)
+  assert.equal(saveCalendarMeal(later, 'breakfast', { type: 'recipe', id: egg }, null), true)
+  await syncPlanning()
+  online = true
+  await syncPlanning()
+  assert.ok(notices.some(notice => notice.includes('其他设备')))
+  assert.equal(readCalendar()[day], undefined)
+  assert.deepEqual(readCalendar()[later], { breakfast: { type: 'recipe', id: egg }, lunch: backgroundMeal })
+  assert.equal(getCustomMeal(original.id), null)
+
+  storage = deviceC
+  prepareCalendarSnapshots()
+  await syncPlanning()
+  assert.equal(readCalendar()[day], undefined)
+  assert.equal(getCustomMeal(original.id), null)
+  assert.deepEqual(readCalendar()[later], { breakfast: { type: 'recipe', id: egg }, lunch: backgroundMeal })
+
+  const request = { planningVersion: 1, planningRequest: { clientId: 'device-test', operations: [] } }
+  assert.deepEqual((await cloud.call('different-user', request)).planning, { meals: {}, calendar: {} })
+  assert.equal((await cloud.call('planning-user', request, 'different-app')).error, 'unauthorized')
+  const old = await cloud.call('planning-user', { clientId: 'device-old', seed: null, operations: [operation(1, ['egg'])] })
+  assert.deepEqual(old.kitchen.inventory, ['egg'])
+  assert.equal(cloud.records.size, 2)
+})

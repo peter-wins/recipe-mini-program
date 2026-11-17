@@ -20,7 +20,7 @@ Page({
   refreshItems() {
     const expansion = new Map(this.data.items.map(item => [item.key, item.expanded]))
     const items = listShopping().map(item => ({
-      ...item, expanded: expansion.has(item.key) ? expansion.get(item.key) : item.separateQuantities
+      ...item, expanded: expansion.get(item.key) || false
     }))
     this.setData({ items })
   },

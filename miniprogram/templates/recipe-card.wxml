@@ -4,7 +4,7 @@
       <recipe-cover wx:if="{{recipe.image}}" class="discovery-photo" src="{{recipe.image}}" lazy="{{true}}"/>
       <view wx:else class="discovery-photo discovery-no-photo">
         <image src="/assets/icon-cookbook.svg" aria-hidden="true"/>
-        <text>{{recipe.category}}</text>
+        <text>{{recipe.libraryCategory || recipe.category}}</text>
       </view>
     </view>
     <view class="discovery-body">

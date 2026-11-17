@@ -1,0 +1,7 @@
+{
+  "navigationBarTitleText": "自己搭配",
+  "usingComponents": {
+    "recipe-cover": "/components/recipe-cover/index",
+    "recipe-picker": "/components/recipe-picker/index"
+  }
+}

@@ -1,6 +1,4 @@
-const { matchRecipes, groupFridgeMatches, avoidIdsFromNotes } = require('../../catalog')
-const { preferTaste } = require('../../recipe-recommendations')
-const { readPreferences } = require('../../preferences')
+const { matchRecipes, groupFridgeMatches } = require('../../catalog')
 const { readInventory, previewInventory } = require('../../inventory')
 const { applyTheme } = require('../../theme')
 
@@ -22,19 +20,15 @@ Page({
     try {
       const selected = readInventory()
       const key = selected.slice().sort().join(',')
-      const preferences = readPreferences()
-      const preferenceKey = JSON.stringify(preferences)
-      if (key === this.inventoryKey && preferenceKey === this.preferenceKey) return
-      const avoidIds = avoidIdsFromNotes(preferences.notes)
-      const matches = groupFridgeMatches(selected.length ? matchRecipes(selected, { avoidIds }) : [])
+      if (key === this.inventoryKey) return
+      const matches = groupFridgeMatches(selected.length ? matchRecipes(selected) : [])
       this.groups = {
-        ready: preferTaste(matches.ready, preferences.taste),
-        almost: preferTaste(matches.almost, preferences.taste)
+        ready: matches.ready,
+        almost: matches.almost
       }
       const groupId = this.data.groupId || (this.groups.ready.length || !this.groups.almost.length ? 'ready' : 'almost')
       this.inventoryKey = key
-      this.preferenceKey = preferenceKey
-      this.showGroup(groupId, Math.max(pageSize, this.data.recipes.length), previewInventory(selected))
+      this.showGroup(groupId, Math.max(pageSize, this.data.recipes.length), previewInventory(selected, 5))
     } catch {
       wx.showToast({ title: '暂时无法读取冰箱', icon: 'none' })
     }

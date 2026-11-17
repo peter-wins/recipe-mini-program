@@ -1,0 +1,7 @@
+{
+  "navigationBarTitleText": "添加菜谱",
+  "usingComponents": {
+    "recipe-cover": "/components/recipe-cover/index",
+    "recipe-picker": "/components/recipe-picker/index"
+  }
+}

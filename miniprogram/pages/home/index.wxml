@@ -1,16 +1,5 @@
 <import src="../../templates/recipe-card.wxml"/>
 
-<template name="lightBanner">
-  <button class="collection-banner collection-banner-light" data-view="meals" bindtap="switchView">
-    <view class="collection-icon" aria-hidden="true">🥗</view>
-    <view class="collection-copy">
-      <view class="collection-title">{{title}}</view>
-      <view class="collection-description">{{description}}</view>
-    </view>
-    <text class="collection-arrow" aria-hidden="true">›</text>
-  </button>
-</template>
-
 <template name="homeFeature">
   <navigator wx:if="{{recipe}}" class="feature-banner {{recipe.image ? 'feature-with-photo' : ''}}" url="/pages/recipe/index?id={{recipe.id}}" hover-class="feature-tap" aria-label="{{recipe.name + '，看做法'}}">
     <recipe-cover wx:if="{{recipe.image}}" class="feature-image" src="{{recipe.image}}"/>
@@ -44,27 +33,27 @@
     </view>
     <template is="homeFeature" data="{{recipe: featured || quickRecipe, isRecommended: !!featured}}"/>
     <view class="home-shortcuts">
-      <button class="home-shortcut" bindtap="openRecommendations">
-        <view class="shortcut-icon shortcut-ai"><image src="/assets/icon-sparkles.svg" aria-hidden="true"/></view>
-        <text>问问 AI</text>
-      </button>
       <button class="home-shortcut" bindtap="openFridge">
         <view class="shortcut-icon shortcut-fridge"><image src="/assets/icon-fridge.svg" aria-hidden="true"/></view>
         <text>我的冰箱</text>
-      </button>
-      <button class="home-shortcut" bindtap="showShortcutUnavailable">
-        <view class="shortcut-icon shortcut-camera"><image src="/assets/icon-camera.svg" aria-hidden="true"/></view>
-        <text>拍照识菜</text>
       </button>
       <button class="home-shortcut" bindtap="openSurprise">
         <view class="shortcut-icon shortcut-random"><image src="/assets/icon-shuffle.svg" aria-hidden="true"/></view>
         <text>随机吃</text>
       </button>
+      <navigator class="home-shortcut" url="/pages/meal-calendar/index" hover-class="pressed">
+        <view class="shortcut-icon shortcut-calendar"><view class="meal-calendar-icon" aria-hidden="true"></view></view>
+        <text>做饭日历</text>
+      </navigator>
+      <button class="home-shortcut" bindtap="openRecommendations">
+        <view class="shortcut-icon shortcut-ai"><image src="/assets/icon-sparkles.svg" aria-hidden="true"/></view>
+        <text>问问 AI</text>
+      </button>
     </view>
 
     <view class="home-fridge">
       <view class="row home-fridge-heading">
-        <text class="section">冰箱里能做什么</text>
+        <text class="section">冰箱里的食材能做什么</text>
         <button wx:if="{{selected.length}}" class="more-recipes-link home-fridge-link" bindtap="openFridgeMatches">浏览更多 <text class="more-recipes-arrow" aria-hidden="true">›</text></button>
       </view>
       <view wx:if="{{selected.length}}" class="home-fridge-description">根据你登记的食材，找到今天的好选择</view>
@@ -87,8 +76,8 @@
     </view>
     <view class="home-inspiration">
       <view class="row home-fridge-heading">
-        <text class="section">轻食灵感</text>
-        <button class="more-recipes-link home-fridge-link" data-view="meals" bindtap="switchView">更多 <text class="more-recipes-arrow" aria-hidden="true">›</text></button>
+        <text class="section">减脂轻食</text>
+        <button class="more-recipes-link home-fridge-link" bindtap="openFatLossRecipes">浏览更多 <text class="more-recipes-arrow" aria-hidden="true">›</text></button>
       </view>
       <navigator wx:if="{{lightInspiration}}" class="collection-banner collection-banner-light" url="/pages/recipe/index?id={{lightInspiration.id}}" hover-class="pressed">
         <recipe-cover class="collection-photo" src="{{lightInspiration.image}}" lazy="{{true}}"/>
@@ -111,41 +100,41 @@
       <input class="recipe-search-input" value="{{librarySearch}}" focus="{{librarySearchFocused}}" bindinput="searchLibrary" bindblur="blurLibrarySearch" confirm-type="search" placeholder="搜菜名或食材"/>
       <button wx:if="{{librarySearch}}" class="link" bindtap="clearLibrarySearch">清除</button>
     </view>
+    <view class="library-scenes">
+      <button wx:for="{{sceneTags}}" wx:key="*this" class="library-scene {{tagIndex === index ? 'library-scene-active' : ''}}" data-index="{{index}}" bindtap="selectSceneTag" aria-pressed="{{tagIndex === index}}">{{item}}</button>
+    </view>
     <view class="row library-toolbar">
-      <text class="section">{{librarySearch || categoryIndex ? '找到 ' : '共 '}}{{results.length}} 道菜</text>
-      <picker class="library-category-picker" mode="selector" range="{{categories}}" value="{{categoryIndex}}" bindchange="changeCategory" aria-label="菜谱分类，当前{{categories[categoryIndex]}}">
-        <view class="library-category-label {{categoryIndex ? 'library-category-active' : ''}}">
-          <text>{{categories[categoryIndex]}}</text>
-          <view class="library-category-arrow" aria-hidden="true"></view>
-        </view>
-      </picker>
+      <text class="section">{{librarySearch || categoryIndex || tagIndex || methodIndex ? '找到 ' : '共 '}}{{results.length}} 道菜</text>
+      <view class="library-filters">
+        <picker class="library-category-picker" mode="selector" range="{{categories}}" value="{{categoryIndex}}" bindchange="changeCategory" aria-label="菜谱分类，当前{{categories[categoryIndex]}}">
+          <view class="library-category-label {{categoryIndex ? 'library-category-active' : ''}}">
+            <text>{{categories[categoryIndex]}}</text>
+            <view class="library-category-arrow" aria-hidden="true"></view>
+          </view>
+        </picker>
+        <picker class="library-category-picker" mode="selector" range="{{methodTags}}" value="{{methodIndex}}" bindchange="changeCookMethod" aria-label="烹饪方式，当前{{methodTags[methodIndex]}}">
+          <view class="library-category-label {{methodIndex ? 'library-category-active' : ''}}">
+            <text>{{methodTags[methodIndex]}}</text>
+            <view class="library-category-arrow" aria-hidden="true"></view>
+          </view>
+        </picker>
+      </view>
     </view>
     <view wx:if="{{!results.length}}" class="empty">没有找到符合条件的菜谱。</view>
     <view wx:else class="discovery-grid library-grid">
-      <template wx:for="{{libraryCards}}" wx:key="id" is="discoveryTile" data="{{recipe: item}}"/>
+      <template wx:for="{{libraryCards}}" wx:key="id" is="discoveryTile" data="{{recipe: item, showNutrition: (tagIndex || methodIndex) && !!item.nutrition}}"/>
     </view>
     <button wx:if="{{libraryCards.length < results.length}}" class="link library-load-more" bindtap="loadMoreRecipes">加载更多</button>
-    <view class="home-inspiration">
-      <view class="row home-fridge-heading"><text class="section">轻食搭配</text></view>
-      <template is="lightBanner" data="{{title: '一人食 · 清爽轻食', description: '看看主食和配菜怎么搭'}}"/>
-    </view>
   </block>
 
-  <light-meals wx:elif="{{view === 'meals'}}" inventory="{{selected}}" inventory-ready="{{inventoryReady}}"/>
+  <meal-pairings wx:elif="{{view === 'meals'}}" id="meal-pairings" inventory="{{selected}}" inventory-ready="{{inventoryReady}}" calendar-date="{{calendarDate}}" calendar-slot="{{calendarSlot}}"/>
 
   <block wx:elif="{{view === 'profile'}}">
-    <view class="row profile-header">
-      <view>
-        <view class="profile-eyebrow">每一顿饭，都值得被记住</view>
-        <view class="profile-title">我的饭搭子</view>
-      </view>
-      <button class="profile-settings" bindtap="openProfileThemes" aria-label="主题设置"><text aria-hidden="true">⚙︎</text></button>
-    </view>
     <view class="profile-head">
       <view class="profile-avatar" aria-hidden="true">👩🏻‍🍳</view>
       <view class="profile-copy">
         <view class="profile-name">吃饭得有谱</view>
-        <view class="profile-note">{{selected.length ? '手边有 ' + fridgeSummary.count + ' 种食材' : '冰箱还没登记食材'}}<text wx:if="{{fridgeSummary.staples}}"> · {{fridgeSummary.staples}} 样常备</text></view>
+        <view class="profile-note">会做饭的人「最帅」</view>
       </view>
     </view>
     <view class="profile-stats">
@@ -156,7 +145,6 @@
     <view class="profile-links">
       <button class="profile-row" bindtap="openFridge"><image src="/assets/icon-fridge.svg" aria-hidden="true"/>冰箱食材<text class="profile-arrow">›</text></button>
       <navigator class="profile-row" url="/pages/shopping/index" hover-class="pressed"><image src="/assets/icon-cart.svg" aria-hidden="true"/>采购清单<text class="profile-arrow">›</text></navigator>
-      <navigator class="profile-row" url="/pages/preferences/index" hover-class="pressed"><image src="/assets/icon-sparkles.svg" aria-hidden="true"/>口味偏好<text class="profile-hint">{{preferenceSummary}}</text><text class="profile-arrow">›</text></navigator>
     </view>
     <view id="profile-themes" class="profile-themes">
       <view class="profile-themes-title">主题</view>
@@ -178,7 +166,7 @@
   <view class="nav-inner">
     <button class="nav-item {{view === 'match' ? 'nav-current' : ''}}" data-view="match" bindtap="switchView"><image src="/assets/icon-home.svg" aria-hidden="true"/>首页</button>
     <button class="nav-item {{view === 'library' ? 'nav-current' : ''}}" data-view="library" bindtap="switchView"><image src="/assets/icon-cookbook.svg" aria-hidden="true"/>菜谱</button>
-    <button class="nav-item {{view === 'meals' ? 'nav-current' : ''}}" data-view="meals" bindtap="switchView"><image src="/assets/icon-light-meal.svg" aria-hidden="true"/>轻食</button>
+    <button class="nav-item {{view === 'meals' ? 'nav-current' : ''}}" data-view="meals" bindtap="switchView"><image src="/assets/icon-light-meal.svg" aria-hidden="true"/>搭配</button>
     <button class="nav-item {{view === 'profile' ? 'nav-current' : ''}}" data-view="profile" bindtap="switchView"><image src="/assets/icon-profile.svg" aria-hidden="true"/>我的</button>
   </view>
 </view>

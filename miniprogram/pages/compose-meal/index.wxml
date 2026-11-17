@@ -1,0 +1,6 @@
+<view class="theme-page theme-{{themeId}}">
+  <view class="screen compose-screen">
+    <input class="compose-input" value="{{title}}" bindinput="updateTitle" maxlength="24" placeholder="搭配名称（选填）" aria-label="搭配名称"/>
+    <recipe-picker initial="{{selected}}" confirm-text="保存搭配" busy="{{saving}}" bind:confirm="onPickerConfirm"/>
+  </view>
+</view>

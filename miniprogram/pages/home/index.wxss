@@ -32,7 +32,31 @@ button.home-search {
 .library-eyebrow { color: var(--theme-muted, #75665e); font-size: 25rpx; }
 .library-title { margin-top: 8rpx; color: var(--theme-text, #4e342c); font-size: 50rpx; font-weight: 750; line-height: 1.2; }
 .recipe-search.library-search { border-radius: 26rpx; }
-.library-toolbar { margin-top: 24rpx; gap: 12rpx; }
+.library-scenes {
+  display: flex;
+  gap: 14rpx;
+  margin-top: 20rpx;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.library-scene {
+  flex-shrink: 0;
+  min-height: 60rpx;
+  padding: 0 28rpx;
+  border: 2rpx solid var(--theme-border, #eadfd4);
+  border-radius: 30rpx;
+  background: transparent;
+  color: var(--theme-muted, #75665e);
+  font-size: 27rpx;
+  line-height: 56rpx;
+}
+.library-scene-active {
+  border-color: var(--theme-accent, #c87137);
+  background: var(--theme-accent, #c87137);
+  color: #fff;
+}
+.library-toolbar { flex-wrap: wrap; margin-top: 20rpx; gap: 4rpx 12rpx; }
+.library-filters { display: flex; flex-wrap: wrap; gap: 0 14rpx; margin-left: auto; }
 .library-category-picker { flex-shrink: 0; }
 .library-category-label {
   display: flex;
@@ -193,7 +217,8 @@ button.home-search {
 .shortcut-icon image { width: 36rpx; height: 36rpx; }
 .shortcut-ai { background: #f2e6d2; }
 .shortcut-fridge { background: #e4ecdf; }
-.shortcut-camera { background: #f2e6dd; }
+.shortcut-calendar { background: #f2e6dd; color: var(--theme-accent-text, #994017); }
+.shortcut-calendar .meal-calendar-icon { flex-basis: 36rpx; height: 33rpx; }
 .shortcut-random { background: #eee6ec; }
 .home-fridge { padding-top: 36rpx; border-top: 1rpx solid var(--theme-border, #e8d8cb); }
 .home-fridge-heading { min-height: 58rpx; }
@@ -226,17 +251,6 @@ button.home-search {
   border-radius: 18rpx;
 }
 .collection-banner-light.pressed { background: var(--theme-soft, #fff3e8); }
-.collection-icon {
-  display: flex;
-  flex: 0 0 78rpx;
-  align-items: center;
-  justify-content: center;
-  height: 78rpx;
-  border-radius: 21rpx;
-  background: var(--theme-soft, #fff8ef);
-  font-size: 38rpx;
-}
-.collection-icon image { width: 37rpx; height: 37rpx; }
 .collection-copy { flex: 1; min-width: 0; }
 .collection-title { font-size: 30rpx; font-weight: 700; }
 .collection-description { margin-top: 6rpx; color: var(--theme-muted, #75665e); font-size: 24rpx; }
@@ -268,27 +282,11 @@ button.home-search {
 .main-nav .nav-item image { width: 34rpx; height: 34rpx; }
 .main-nav .nav-current { background: transparent; color: var(--theme-accent-text, #994017); }
 .main-nav .nav-current image { filter: var(--theme-nav-icon, brightness(.68) sepia(.8) saturate(4)); }
-.profile-header { margin: 12rpx 0 30rpx; }
-.profile-eyebrow { color: var(--theme-muted, #75665e); font-size: 25rpx; }
-.profile-title { margin-top: 8rpx; color: var(--theme-text, #4e342c); font-size: 50rpx; font-weight: 750; line-height: 1.2; }
-.profile-settings {
-  display: flex;
-  flex: 0 0 72rpx;
-  align-items: center;
-  justify-content: center;
-  height: 72rpx;
-  padding: 0;
-  border: 1rpx solid var(--theme-border, #f0e4d8);
-  border-radius: 23rpx;
-  background: #fff;
-  color: var(--theme-accent-text, #96512f);
-  font-size: 38rpx;
-  line-height: 1;
-}
 .profile-head {
   display: flex;
   align-items: center;
   gap: 22rpx;
+  margin-top: 12rpx;
   padding: 30rpx;
   border-radius: 32rpx;
   background: var(--theme-neutral, #f1e6d9);
@@ -309,6 +307,7 @@ button.home-search {
 .profile-note { margin-top: 9rpx; color: var(--theme-muted, #75665e); font-size: 24rpx; }
 .profile-stats { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); margin: 20rpx 0 26rpx; }
 .profile-stat { padding: 10rpx 4rpx; border-radius: 16rpx; color: var(--theme-muted, #75665e); font-size: 23rpx; line-height: 1.4; text-align: center; }
+.profile-stat + .profile-stat { border-left: 1rpx solid var(--theme-border, #f0e4d8); }
 .stat-count { display: block; margin-bottom: 4rpx; color: var(--theme-text, #4e342c); font-size: 44rpx; font-weight: 750; line-height: 1.2; }
 .profile-links { overflow: hidden; padding: 4rpx 24rpx; border-radius: 30rpx; background: #fff; }
 .profile-row {

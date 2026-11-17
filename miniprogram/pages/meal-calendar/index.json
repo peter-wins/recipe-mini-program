@@ -1,0 +1,6 @@
+{
+  "navigationBarTitleText": "做饭日历",
+  "usingComponents": {
+    "recipe-cover": "/components/recipe-cover/index"
+  }
+}

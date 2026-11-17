@@ -8,7 +8,7 @@
     <recipe-cover wx:if="{{item.image}}" class="dish-thumb" src="{{item.image}}" lazy="{{true}}"/>
     <view class="recipe-text">
       <view class="recipe-name">{{item.name}}</view>
-      <view class="recipe-note">{{item.category}}</view>
+      <view class="recipe-note">{{item.libraryCategory}}</view>
     </view>
     <view class="recipe-aside">
       <text>{{item.timeText}}</text><text class="arrow" aria-hidden="true">›</text>

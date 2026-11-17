@@ -1,8 +1,6 @@
-const { getIngredientOptions, getIngredientGroups, searchIngredientOptions, matchRecipes, groupFridgeMatches } = require('../../catalog')
+const { getIngredientOptions, getIngredientGroups, searchIngredientOptions } = require('../../catalog')
 const { readInventory, saveInventory, summarizeInventory } = require('../../inventory')
 const { applyTheme } = require('../../theme')
-const { previewRecipes } = require('../../daily-recipe')
-const { listShopping } = require('../../shopping')
 
 const options = getIngredientOptions()
 const fridgeGroups = getIngredientGroups()
@@ -28,10 +26,6 @@ Page({
     ingredientLimit: ingredientPageSize,
     showAllSelected: false,
     fridgeSummary: summarizeInventory([]),
-    hasMatches: false,
-    recipePreview: [],
-    shoppingCount: 0,
-    ingredientPickerOpen: false,
     ...ingredientView([], '', 0, ingredientPageSize)
   },
 
@@ -44,21 +38,9 @@ Page({
     try {
       const selected = readInventory()
       if (selected.join(',') !== this.data.selected.join(',')) this.updateSelection(selected)
-      const shoppingCount = listShopping().length
-      if (this.data.shoppingCount !== shoppingCount) this.setData({ shoppingCount })
     } catch {
       wx.showToast({ title: '暂时无法读取冰箱', icon: 'none' })
     }
-  },
-
-  openIngredientPicker() {
-    this.setData({ ingredientPickerOpen: true }, () => {
-      wx.pageScrollTo({ selector: '#ingredient-picker', duration: 200 })
-    })
-  },
-
-  closeIngredientPicker() {
-    this.setData({ ingredientPickerOpen: false })
   },
 
   searchIngredients(event) {
@@ -112,16 +94,11 @@ Page({
   },
 
   updateSelection(selected) {
-    const { ready, almost } = groupFridgeMatches(selected.length ? matchRecipes(selected) : [])
-    const available = previewRecipes(ready, 2, null, true)
-    const recipePreview = available.concat(previewRecipes(almost, 2 - available.length, null, false))
     this.applyIngredientView({
       selected,
       selectedItems: options.filter(item => selected.includes(item.id)).map(({ id, name }) => ({ id, name })),
       showAllSelected: selected.length > 8 && this.data.showAllSelected,
-      fridgeSummary: summarizeInventory(selected),
-      recipePreview,
-      hasMatches: recipePreview.length > 0
+      fridgeSummary: summarizeInventory(selected)
     })
   }
 })

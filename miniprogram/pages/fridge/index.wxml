@@ -1,21 +1,12 @@
-<import src="../../templates/recipe-card.wxml"/>
-
 <view class="theme-page theme-{{themeId}}">
   <view class="screen">
-    <view class="row fridge-header">
-      <view class="headline">我的冰箱</view>
-      <navigator class="fridge-cart" url="/pages/shopping/index" aria-label="采购清单" hover-class="card-pressed">
-        <image src="/assets/icon-cart.svg" aria-hidden="true"/>
-      </navigator>
-    </view>
-
     <view class="fridge-card">
       <view class="row">
         <view>
           <view class="section">手边有 {{fridgeSummary.count}} 种食材</view>
           <view class="subtle">{{fridgeSummary.staples ? '另有 ' + fridgeSummary.staples + ' 样常备调料' : '点选食材即可登记'}}</view>
         </view>
-        <view class="fridge-icon" aria-hidden="true"><image src="/assets/icon-fridge.svg" aria-hidden="true"/></view>
+        <navigator class="fridge-icon" url="/pages/shopping/index" aria-label="采购清单" hover-class="card-pressed"><image src="/assets/icon-cart.svg" aria-hidden="true"/></navigator>
       </view>
       <view wx:if="{{selected.length}}" class="fridge-picked">
         <block wx:for="{{selectedItems}}" wx:key="id">
@@ -24,62 +15,33 @@
         <button wx:if="{{selected.length > 8}}" class="fridge-expand" bindtap="toggleSelectedIngredients" aria-expanded="{{showAllSelected}}">{{showAllSelected ? '收起' : '还有 ' + (selected.length - 8) + ' 样'}}</button>
         <button wx:if="{{selected.length <= 8 || showAllSelected}}" class="fridge-clear" bindtap="clearInventory">清空</button>
       </view>
-      <view wx:if="{{selected.length}}" class="subtle fridge-reminder">
-        <image class="fridge-reminder-icon" src="/assets/icon-sparkles.svg" aria-hidden="true"/>
-        <text>做饭前，记得确认手边的食材够不够用。</text>
-      </view>
-      <button class="primary fridge-add" bindtap="openIngredientPicker" aria-expanded="{{ingredientPickerOpen}}">＋ 添加食材</button>
     </view>
 
-    <view wx:if="{{ingredientPickerOpen}}" id="ingredient-picker" class="fridge-edit">
+    <view id="ingredient-picker" class="fridge-edit">
       <view class="recipe-search fridge-search">
         <view class="search-mark" aria-hidden="true"></view>
         <input class="recipe-search-input" value="{{search}}" bindinput="searchIngredients" confirm-type="search" placeholder="搜索食材，如 茄子、牛腩"/>
         <button wx:if="{{search}}" class="link" bindtap="clearIngredientSearch">清除</button>
       </view>
 
-      <view class="fridge-picker">
-        <view class="row fridge-picker-head">
-          <text class="section">{{searching ? '搜索结果' : '常用食材'}}</text>
-          <button class="link fridge-close" bindtap="closeIngredientPicker">收起</button>
-        </view>
-        <scroll-view wx:if="{{!searching}}" class="fridge-tabs" scroll-x enhanced show-scrollbar="{{false}}">
-          <view class="fridge-tabs-track">
-            <button wx:for="{{fridgeGroupNames}}" wx:key="*this" class="fridge-tab {{fridgeGroupIndex === index ? 'fridge-tab-active' : ''}}" data-index="{{index}}" bindtap="selectIngredientGroup" aria-pressed="{{fridgeGroupIndex === index}}">{{item}}</button>
-          </view>
+      <view class="row fridge-picker-head">
+        <text class="section">{{searching ? '搜索结果' : '常用食材'}}</text>
+      </view>
+      <view class="fridge-picker-body">
+        <scroll-view wx:if="{{!searching}}" class="fridge-groups" scroll-y enhanced show-scrollbar="{{false}}">
+          <button wx:for="{{fridgeGroupNames}}" wx:key="*this" class="fridge-group {{fridgeGroupIndex === index ? 'fridge-group-active' : ''}}" data-index="{{index}}" bindtap="selectIngredientGroup" aria-pressed="{{fridgeGroupIndex === index}}">{{item}}</button>
         </scroll-view>
-        <view wx:if="{{!visibleIngredients.length}}" class="empty fridge-empty">没找到这个食材，试试其他叫法。</view>
-        <view wx:else class="fridge-options">
-          <button wx:for="{{visibleIngredients}}" wx:key="id" class="fridge-option {{item.checked ? 'fridge-option-checked' : ''}}" data-id="{{item.id}}" bindtap="toggleIngredient" aria-pressed="{{item.checked}}">
-            <text class="fridge-option-name">{{item.name}}</text>
-            <text class="fridge-option-mark" aria-hidden="true">{{item.checked ? '✓' : '+'}}</text>
-          </button>
-        </view>
-        <button wx:if="{{hasMoreIngredients}}" class="link fridge-more" bindtap="loadMoreIngredients">显示更多结果</button>
+        <scroll-view class="fridge-options-scroll" scroll-y enhanced show-scrollbar="{{false}}">
+          <view wx:if="{{!visibleIngredients.length}}" class="empty fridge-empty">没找到这个食材，试试其他叫法。</view>
+          <view wx:else class="fridge-options">
+            <button wx:for="{{visibleIngredients}}" wx:key="id" class="fridge-option {{item.checked ? 'fridge-option-checked' : ''}}" data-id="{{item.id}}" bindtap="toggleIngredient" aria-pressed="{{item.checked}}">
+              <text class="fridge-option-name">{{item.name}}</text>
+              <text class="fridge-option-mark" aria-hidden="true">{{item.checked ? '✓' : '+'}}</text>
+            </button>
+          </view>
+          <button wx:if="{{hasMoreIngredients}}" class="link fridge-more" bindtap="loadMoreIngredients">显示更多结果</button>
+        </scroll-view>
       </view>
     </view>
-
-    <block wx:if="{{selected.length}}">
-      <view class="list-heading fridge-section-heading">
-        <text class="section">用这些食材做什么？</text>
-        <navigator wx:if="{{hasMatches}}" class="link fridge-section-link" url="/pages/fridge-matches/index">看更多 ›</navigator>
-      </view>
-      <view wx:if="{{hasMatches}}" class="discovery-grid">
-        <template wx:for="{{recipePreview}}" wx:key="id" is="discoveryTile" data="{{recipe: item, showStock: true}}"/>
-      </view>
-      <view wx:else class="subtle">暂时没找到合适的菜，再登记几样主料试试。</view>
-    </block>
-
-    <view class="list-heading fridge-section-heading">
-      <text class="section">采购清单</text>
-    </view>
-    <navigator class="fridge-shopping" url="/pages/shopping/index" hover-class="card-pressed">
-      <view class="fridge-icon" aria-hidden="true"><image src="/assets/icon-cart.svg" aria-hidden="true"/></view>
-      <view class="fridge-shopping-copy">
-        <view class="fridge-shopping-title">{{shoppingCount ? shoppingCount + ' 项待买' : '暂无待买食材'}}</view>
-        <view class="subtle">买完可以直接补进冰箱</view>
-      </view>
-      <text class="chevron" aria-hidden="true">›</text>
-    </navigator>
   </view>
 </view>

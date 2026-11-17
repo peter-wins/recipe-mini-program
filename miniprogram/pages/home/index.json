@@ -1,6 +1,6 @@
 {
   "usingComponents": {
-    "light-meals": "/pages/meals/index",
+    "meal-pairings": "/pages/meals/index",
     "recipe-cover": "/components/recipe-cover/index"
   }
 }

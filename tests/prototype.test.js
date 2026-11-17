@@ -1,7 +1,7 @@
 const assert = require('node:assert/strict')
 const test = require('node:test')
 const { ingredients, recipes, legacyRecipeIds } = require('../miniprogram/data')
-const { getIngredientOptions, getIngredientGroups, searchIngredientOptions, getRecipe, matchRecipes, groupFridgeMatches, avoidIdsFromNotes } = require('../miniprogram/catalog')
+const { getIngredientOptions, getIngredientGroups, searchIngredientOptions, getRecipeCategories, getRecipeTags, getRecipe, matchRecipes, groupFridgeMatches, avoidIdsFromNotes } = require('../miniprogram/catalog')
 const { recommendRecipes } = require('../miniprogram/recipe-recommendations')
 const { getMealPlans, rotateLightInspiration } = require('../miniprogram/meal-plans')
 const tomatoEggs = legacyRecipeIds['tomato-eggs']
@@ -183,8 +183,27 @@ test('共用图组件复用云图、合并下载并忽略已经切走的请求',
   }
 })
 
+test('菜谱库按菜品分组，早餐、半成品和厨具通过标签叠加筛选', () => {
+  const categories = getRecipeCategories()
+  assert.deepEqual(new Set(categories), new Set(['荤菜', '素菜', '海鲜', '蛋类', '主食', '汤羹', '甜品', '饮品', '酱料']))
+  const grouped = categories.flatMap(category => matchRecipes([], { category }))
+  assert.equal(grouped.length, recipes.length)
+  assert.equal(new Set(grouped.map(recipe => recipe.id)).size, recipes.length)
+  assert.deepEqual(getRecipeTags(), ['减脂', '早餐', '快手', '半成品', '空气炸锅', '微波炉', '电饭煲', '烤箱'])
+
+  const ids = options => matchRecipes([], options).map(recipe => recipe.id)
+  assert.ok(ids({ category: '蛋类', tag: '早餐' }).includes('breakfast_zheng-shui-dan'))
+  assert.ok(ids({ category: '主食', tag: '早餐' }).includes('soup_xiao-mi-zhou'))
+  assert.ok(ids({ category: '酱料', tag: '半成品' }).includes('semi-finished_niu-you-huo-guo-di-liao'))
+  assert.ok(ids({ category: '饮品', tag: '半成品' }).includes('drink_suan-mei-tang-（-ban-cheng-pin-jia-gong-）'))
+  assert.ok(ids({ category: '主食', tag: '空气炸锅' }).includes('other_kong-qi-zha-guo-zhao-shao-ji-fan'))
+  assert.ok(ids({ category: '甜品', tag: '微波炉' }).includes('breakfast_wei-bo-lu-dan-gao'))
+  assert.ok(!ids({ tag: '快手' }).includes('soup_pi-dan-shou-rou-zhou'))
+  assert.equal(getRecipe('breakfast_zheng-shui-dan').category, '早餐')
+})
+
 test('菜谱 ID 唯一，原有菜谱和新轻食的食材及做法完整', () => {
-  assert.equal(recipes.filter(recipe => !recipe.light).length, 364)
+  assert.equal(recipes.filter(recipe => !recipe.light).length, 363)
   assert.equal(recipes.filter(recipe => recipe.light).length, 26)
   assert.equal(new Set(recipes.map(recipe => recipe.id)).size, recipes.length)
   for (const recipe of recipes) {
@@ -211,6 +230,13 @@ test('菜谱 ID 唯一，原有菜谱和新轻食的食材及做法完整', () =
 
 test('冰箱常用分类精简，搜索保留长尾食材并能识别同义词和旧库存', () => {
   assert.equal(getIngredientGroups().some(group => group.name === '其他食材'), false)
+  const groupedIds = new Set(getIngredientGroups().flatMap(group => group.items.map(item => item.id)))
+  for (const unused of ['sweetPotato', 'driedTofuStick', 'chickenWings', 'hairtail', 'squid', 'dumplingWrapper']) {
+    assert.equal(groupedIds.has(unused), false, unused + ' 不该在常用分类')
+  }
+  for (const frequent of ['vibe-e5b08fe7b1b3e8bea3', 'vibe-e5b08fe7b1b3e6a492', 'vibe-e99d92e8bea3e6a492', 'vibe-e69fa0e6aaac', 'vibe-e799bde88a9de9babb', 'vibe-e88a9de9babb']) {
+    assert.equal(groupedIds.has(frequent), true, frequent + ' 应在常用分类')
+  }
   assert.deepEqual(searchIngredientOptions(''), [])
   assert.equal(searchIngredientOptions('青蟹')[0].name, '青蟹')
   assert.equal(searchIngredientOptions('老姜')[0].id, 'ginger')
@@ -318,26 +344,29 @@ test('轻食列表按耗时和真实库存筛选，缺料可沿用采购流程',
       setData(update) { Object.assign(this.data, update) }
     }
     component.lifetimes.attached.call(page)
-    assert.equal(page.data.recipes.length, 26)
+    const selectGoal = goal => page.selectGoal({ currentTarget: { dataset: { goal } } })
+    assert.equal(page.data.goal, 'family')
     assert.equal(page.data.planPreviewLimit, 2)
-    assert.equal(page.data.plans.length, 6)
+    assert.equal(page.data.plans.length, 3)
+    assert.ok(page.data.plans.every(plan => plan.dishes.length === 4))
     assert.equal(page.data.showAllPlans, false)
     page.togglePlans()
     assert.equal(page.data.showAllPlans, true)
-    page.togglePlans()
+
+    selectGoal('light')
     assert.equal(page.data.showAllPlans, false)
-    page.toggleQuickOnly()
-    assert.ok(page.data.recipes.length < 26)
-    assert.ok(page.data.recipes.every(item => item.minutes <= 30))
-    assert.ok(page.data.plans.every(plan => plan.minutes <= 30))
-    page.toggleReadyOnly()
-    assert.ok(page.data.recipes.some(item => item.id === id))
-    assert.ok(page.data.recipes.every(item => item.missingCount === 0))
-    assert.ok(page.data.plans.every(plan => plan.missingCount === 0))
+    assert.equal(page.data.plans.length, 5)
+    assert.equal(page.data.plans.filter(plan => plan.dishes.length === 2).length, 2)
+    assert.ok(page.data.plans.every(plan => plan.nutrition))
+    assert.equal(page.data.plans.find(plan => plan.id === id).missingCount, 0)
     page.data.inventory = []
-    component.observers['inventory, inventoryReady'].call(page, [], true)
-    assert.equal(page.data.readyOnly, false)
-    assert.ok(page.data.recipes.length)
+    component.observers.inventory.call(page)
+    assert.ok(page.data.plans.find(plan => plan.id === id).missingCount > 0)
+    assert.equal(page.data.plans.find(plan => plan.id === id).nutrition.protein, recipe.nutrition.protein)
+
+    selectGoal('solo')
+    assert.equal(page.data.plans.length, 3)
+    assert.ok(page.data.plans.every(plan => plan.servings === 1 && plan.dishes.length === 1))
   } finally {
     global.Component = originalComponent
     global.wx = originalWx
@@ -363,16 +392,27 @@ test('首页轻食 5 到 60 分钟有效，过期后换菜并优先用上冰箱�
   assert.equal(rotateLightInspiration([], null, now, () => 0.9999).rotation.expiresAt, now + 60 * minute)
 })
 
-test('轻食搭配按各道菜检查缺料，配米饭只作为搭配建议', () => {
-  assert.equal(getMealPlans([]).length, 6)
-  const stock = ['egg', 'broccoli', 'garlic']
-  const [ready] = getMealPlans(stock, { readyOnly: true, maxMinutes: 30 })
-  assert.equal(ready.id, 'egg-broccoli')
-  assert.equal(ready.serveWithRice, true)
+test('家庭餐有三菜一汤，减脂组合按每份计算营养并检查各道菜的缺料', () => {
+  const family = getMealPlans([])
+  assert.equal(family.length, 3)
+  for (const plan of family) {
+    assert.equal(plan.dishes.length, 4)
+    assert.equal(plan.dishes.filter(dish => getRecipe(dish.id).category === '汤').length, 1)
+  }
+  const [fast] = getMealPlans([], { maxMinutes: 30 })
+  assert.equal(fast.minutes, 30)
+  const stock = fast.dishes.flatMap(dish => getRecipe(dish.id).required.map(([ingredient]) => ingredient))
+  const ready = getMealPlans(stock, { readyOnly: true, maxMinutes: 30 }).find(plan => plan.id === fast.id)
+  assert.ok(ready.serveWithRice)
   assert.equal(ready.missingText, '')
-  assert.equal(getMealPlans(stock, { readyOnly: true, maxMinutes: 20 }).length, 0)
-  const almost = getMealPlans(['egg', 'broccoli']).find(plan => plan.id === ready.id)
-  assert.equal(almost.missingText, '大蒜')
+
+  const combo = getMealPlans([], { goal: 'light' }).find(plan => plan.id === 'light-rice-and-greens')
+  const main = getRecipe(combo.dishes[0].id)
+  const side = getRecipe(combo.dishes[1].id)
+  assert.equal(combo.nutrition.calories, main.calories + side.calories)
+  assert.equal(combo.nutrition.protein, main.nutrition.protein + side.nutrition.protein)
+  const mainOnly = main.required.map(([ingredient]) => ingredient)
+  assert.ok(!getMealPlans(mainOnly, { goal: 'light', readyOnly: true }).some(plan => plan.id === combo.id))
 
   const lunch = matchRecipes(['chicken', 'pepper', 'onion'], { lightOnly: true })
     .find(recipe => recipe.id === 'light_chicken-brown-rice')
@@ -525,8 +565,8 @@ test('菜谱页分页，采购保留原用量，旧收藏映射到新菜谱', ()
   saveInventory(fullStock)
   fridgeMatches.onShow()
   assert.equal(fridgeMatches.data.groupId, 'ready')
-  assert.equal(fridgeMatches.data.inventoryPreview.length, 3)
-  assert.equal(fridgeMatches.data.extraIngredients, fullStock.length - 3)
+  assert.equal(fridgeMatches.data.inventoryPreview.length, 5)
+  assert.equal(fridgeMatches.data.extraIngredients, fullStock.length - 5)
   assert.equal(fridgeMatches.data.total, groups.ready.length)
   assert.ok(fridgeMatches.data.recipes.every(recipe => recipe.missingCount === 0))
   changeGroup(fridgeMatches, 'almost')
@@ -549,12 +589,6 @@ test('菜谱页分页，采购保留原用量，旧收藏映射到新菜谱', ()
   assert.equal(home.data.view, 'match')
   fridge.onShow()
   assert.equal(fridge.data.visibleIngredients[0].name, '番茄')
-  assert.deepEqual(fridge.data.recipePreview.map(item => item.name), ['拔丝土豆'])
-  assert.equal(fridge.data.ingredientPickerOpen, false)
-  fridge.openIngredientPicker()
-  assert.equal(fridge.data.ingredientPickerOpen, true)
-  fridge.closeIngredientPicker()
-  assert.equal(fridge.data.ingredientPickerOpen, false)
   fridge.selectIngredientGroup({ currentTarget: { dataset: { index: 1 } } })
   assert.equal(fridge.data.visibleIngredients.find(item => item.id === 'potato').checked, true)
   fridge.searchIngredients({ detail: { value: '青蟹' } })
@@ -577,7 +611,6 @@ test('菜谱页分页，采购保留原用量，旧收藏映射到新菜谱', ()
   fridge.clearInventory()
   pendingModal.success({ confirm: true })
   assert.deepEqual(readInventory(), [])
-  assert.equal(fridge.data.hasMatches, false)
   saveInventory(['potato'])
   home.onShow()
   home.switchView({ currentTarget: { dataset: { view: 'library' } } })
@@ -608,7 +641,7 @@ test('菜谱页分页，采购保留原用量，旧收藏映射到新菜谱', ()
   assert.equal(home.data.results.length, recipes.length)
   assert.equal(home.data.librarySearchFocused, false)
   home.changeCategory({ detail: { value: '1' } })
-  assert.ok(home.data.results.length && home.data.results.every(recipe => recipe.category === '荤菜'))
+  assert.ok(home.data.results.length && home.data.results.every(recipe => recipe.libraryCategory === '荤菜'))
   home.loadMoreRecipes()
   const libraryCards = home.data.libraryCards
   home.openFridgeMatches()
@@ -644,6 +677,27 @@ test('菜谱页分页，采购保留原用量，旧收藏映射到新菜谱', ()
   home.blurLibrarySearch()
   assert.equal(home.data.librarySearchFocused, false)
 
+  home.showView('match')
+  home.openFatLossRecipes()
+  assert.equal(home.data.sceneTags[home.data.tagIndex], '减脂')
+  assert.equal(home.data.results.length, 26)
+  home.changeCategory({ detail: { value: String(home.data.categories.indexOf('主食')) } })
+  assert.ok(home.data.results.length < 26)
+  assert.ok(home.data.results.every(recipe => recipe.libraryCategory === '主食'))
+  home.searchLibrary({ detail: { value: '糙米饭' } })
+  assert.deepEqual(home.data.results.map(recipe => recipe.id), ['light_chicken-brown-rice'])
+  home.selectSceneTag({ currentTarget: { dataset: { index: 0 } } })
+  assert.equal(home.data.tagIndex, 0)
+  home.clearLibrarySearch()
+  home.changeCategory({ detail: { value: '0' } })
+  home.changeCookMethod({ detail: { value: String(home.data.methodTags.indexOf('微波炉')) } })
+  assert.equal(home.data.methodTags[home.data.methodIndex], '微波炉')
+  assert.equal(home.data.results.length, 12)
+  home.selectSceneTag({ currentTarget: { dataset: { index: 1 } } })
+  assert.equal(home.data.methodIndex, 0)
+  assert.equal(home.data.sceneTags[home.data.tagIndex], '减脂')
+  assert.equal(home.data.results.length, 26)
+
   detail.onLoad({ id: 'tomato-eggs' })
   detail.onShow()
   assert.equal(detail.data.saved, true)
@@ -663,8 +717,6 @@ test('菜谱页分页，采购保留原用量，旧收藏映射到新菜谱', ()
   assert.equal(shopping.data.items[0].expanded, true)
   shopping.onShow()
   assert.equal(shopping.data.items[0].expanded, true)
-  fridge.onShow()
-  assert.equal(fridge.data.shoppingCount, 1)
   const { readKitchen, saveKitchen } = require('../miniprogram/inventory')
   const kitchen = readKitchen()
   const unrelated = { recipeId: 'another-dish', id: 'potato', quantity: '2个' }
@@ -787,7 +839,10 @@ test('采购按同一食材合并，兼容计量求和，原用量和菜名可�
       { recipeId: 'tomato-eggs', id: 'garlic', quantity: '适量' },
       { recipeId: 'egg-fried-rice', id: 'vibe-e8929ce78987', quantity: '2瓣' },
       { recipeId: 'egg-fried-rice', id: 'porkBelly', quantity: '0.5 kg' },
-      { recipeId: 'tomato-eggs', id: 'porkBelly', quantity: '200 克' }
+      { recipeId: 'tomato-eggs', id: 'porkBelly', quantity: '200 克' },
+      { recipeId: 'tomato-eggs', id: 'vibe-e795aae88c84e985b1', quantity: '10g' },
+      { recipeId: 'egg-fried-rice', id: 'vibe-e795aae88c84e985b1', quantity: '15ml' },
+      { recipeId: 'egg-fried-rice', id: 'oysterSauce', quantity: '2 瓶' }
     ]
   }
   try {
@@ -797,7 +852,7 @@ test('采购按同一食材合并，兼容计量求和，原用量和菜名可�
     }
     const { listShopping, removeShoppingItem } = require('../miniprogram/shopping')
     const items = listShopping()
-    assert.equal(items.length, 3)
+    assert.equal(items.length, 5)
     const eggs = items.find(item => item.key === 'egg')
     assert.equal(eggs.quantity, '3 个')
     assert.deepEqual(eggs.details.map(({ title, quantity }) => [title, quantity]), [
@@ -805,13 +860,17 @@ test('采购按同一食材合并，兼容计量求和，原用量和菜名可�
       [getRecipe('egg-fried-rice').name, '1 个']
     ])
     const garlic = items.find(item => item.key === 'garlic')
-    assert.equal(garlic.separateQuantities, true)
+    assert.equal(garlic.quantity, '若干')
     assert.deepEqual(garlic.details.map(item => item.quantity), ['适量', '2瓣'])
     assert.equal(items.find(item => item.key === 'porkBelly').quantity, '700 克')
+    const ketchup = items.find(item => item.name === '番茄酱')
+    assert.equal(ketchup.quantity, '1 份')
+    assert.deepEqual(ketchup.details.map(item => item.quantity), ['10g', '15ml'])
+    assert.equal(items.find(item => item.key === 'oysterSauce').quantity, '2 瓶')
     assert.equal(removeShoppingItem(garlic.key, true), true)
     const { readKitchen } = require('../miniprogram/inventory')
     assert.deepEqual(readKitchen().inventory, ['garlic'])
-    assert.equal(readKitchen().shopping.length, 4)
+    assert.equal(readKitchen().shopping.length, 7)
     assert.equal(removeShoppingItem(garlic.key, true), false)
   } finally {
     global.wx = originalWx
@@ -913,70 +972,13 @@ test('随机吃优先从冰箱能做的菜里抽，换一道避开当前菜', ()
   }
 })
 
-test('口味偏好写入本地存储，重新加载后仍生效', () => {
-  const originalWx = global.wx
-  const storage = new Map()
-  global.wx = {
-    getStorageSync: key => (storage.has(key) ? structuredClone(storage.get(key)) : ''),
-    setStorageSync: (key, value) => storage.set(key, structuredClone(value))
-  }
-  const path = require.resolve('../miniprogram/preferences')
-  delete require.cache[path]
-  try {
-    const preferences = require('../miniprogram/preferences')
-    preferences.savePreferences({ taste: 'spicy', mode: 'light', people: 3, notes: '不要香菜', maxMinutes: 15 })
-    delete require.cache[path]
-    const reloaded = require('../miniprogram/preferences')
-    assert.deepEqual(reloaded.readPreferences(), {
-      mode: 'light', maxMinutes: 15, people: 3, taste: 'spicy', notes: '不要香菜'
-    })
-    assert.match(reloaded.preferenceSummary(), /偏香辣/)
-    assert.match(reloaded.preferenceSummary(), /不要香菜/)
-    reloaded.resetPreferences()
-    assert.equal(reloaded.readPreferences().taste, 'any')
-    assert.equal(reloaded.readPreferences().notes, '')
-  } finally {
-    delete require.cache[path]
-    global.wx = originalWx
-  }
-})
-
-test('忌口解析为食材 id 后从菜谱库和随机吃里过滤', () => {
-  const originalWx = global.wx
-  const originalPage = global.Page
+test('忌口解析为食材 id 后从菜谱库里过滤', () => {
   const avoid = avoidIdsFromNotes('不要香菜、不吃葱')
   assert.ok(avoid.includes('cilantro'))
   assert.ok(avoid.includes('scallion'))
   const eggDish = matchRecipes([]).find(recipe => recipe.required.includes('egg'))
   assert.ok(eggDish)
   assert.ok(!matchRecipes([], { avoidIds: ['egg'] }).some(recipe => recipe.id === eggDish.id))
-
-  const storage = new Map([
-    ['recipe-kitchen-v1', { inventory: ['tomato', 'egg'], shopping: [] }],
-    ['recipe-taste-preferences-v1', { mode: 'stock', maxMinutes: 30, people: 2, taste: 'any', notes: '不要鸡蛋' }]
-  ])
-  global.wx = {
-    getStorageSync: key => (storage.has(key) ? structuredClone(storage.get(key)) : ''),
-    setStorageSync: (key, value) => storage.set(key, structuredClone(value)),
-    setNavigationBarColor: () => {},
-    setBackgroundColor: () => {},
-    showToast: () => {}
-  }
-  let registered
-  global.Page = page => { registered = page }
-  delete require.cache[require.resolve('../miniprogram/pages/surprise/index')]
-  require('../miniprogram/pages/surprise/index')
-  try {
-    const page = { ...registered, data: JSON.parse(JSON.stringify(registered.data)) }
-    page.setData = function (update) { Object.assign(this.data, update) }
-    page.onLoad()
-    assert.ok(page.data.recipe)
-    assert.ok(!page.data.recipe.required.includes('egg'))
-    assert.ok(!page.data.recipe.name.includes('鸡蛋'))
-  } finally {
-    global.wx = originalWx
-    global.Page = originalPage
-  }
 })
 
 test('步骤计时从做法文字里取等待时间，支持秒、分钟、小时和组合', () => {
@@ -1057,66 +1059,6 @@ test('详情页计时条可暂停、继续并在到点时提醒', () => {
   }
 })
 
-test('口味偏好是独立设置页，问问 AI 的调整不会改成常用偏好', () => {
-  const originalWx = global.wx
-  const originalPage = global.Page
-  const originalSetTimeout = global.setTimeout
-  const storage = new Map([
-    ['recipe-taste-preferences-v1', { mode: 'stock', maxMinutes: 15, people: 2, taste: 'mild', notes: '' }]
-  ])
-  global.wx = {
-    getStorageSync: key => (storage.has(key) ? structuredClone(storage.get(key)) : ''),
-    setStorageSync: (key, value) => storage.set(key, structuredClone(value)),
-    setNavigationBarColor: () => {},
-    setBackgroundColor: () => {},
-    showToast: () => {},
-    navigateBack: () => {},
-    pageScrollTo: () => {},
-    getWindowInfo: () => ({ windowWidth: 375, statusBarHeight: 20 }),
-    getMenuButtonBoundingClientRect: () => ({ height: 32, top: 24, left: 280 })
-  }
-  global.setTimeout = callback => { callback(); return 1 }
-  let registered
-  global.Page = page => { registered = page }
-  const prefPath = require.resolve('../miniprogram/pages/preferences/index')
-  const recommendPath = require.resolve('../miniprogram/pages/recommend/index')
-  delete require.cache[prefPath]
-  delete require.cache[recommendPath]
-  try {
-    require('../miniprogram/pages/preferences/index')
-    const page = { ...registered, data: JSON.parse(JSON.stringify(registered.data)) }
-    page.setData = function (update) { Object.assign(this.data, update) }
-    page.onShow()
-    assert.equal(page.data.taste, 'mild')
-    page.setPreference({ currentTarget: { dataset: { key: 'taste', value: 'spicy' } } })
-    page.updateNotes({ detail: { value: '不要香菜' } })
-    assert.equal(storage.get('recipe-taste-preferences-v1').taste, 'mild')
-    page.save()
-    assert.equal(storage.get('recipe-taste-preferences-v1').taste, 'spicy')
-    assert.equal(storage.get('recipe-taste-preferences-v1').notes, '不要香菜')
-
-    require('../miniprogram/pages/recommend/index')
-    const recommend = { ...registered, data: JSON.parse(JSON.stringify(registered.data)) }
-    recommend.setData = function (update) { Object.assign(this.data, update) }
-    recommend.onLoad()
-    assert.equal(recommend.data.taste, 'spicy')
-    recommend.setPreference({ currentTarget: { dataset: { key: 'taste', value: 'mild' } } })
-    assert.equal(storage.get('recipe-taste-preferences-v1').taste, 'spicy')
-    recommend.restorePreferences()
-    assert.equal(recommend.data.taste, 'spicy')
-
-    page.restoreDefaults()
-    assert.equal(storage.get('recipe-taste-preferences-v1').taste, 'any')
-    assert.equal(storage.get('recipe-taste-preferences-v1').notes, '')
-  } finally {
-    delete require.cache[prefPath]
-    delete require.cache[recommendPath]
-    global.setTimeout = originalSetTimeout
-    global.wx = originalWx
-    global.Page = originalPage
-  }
-})
-
 test('计时按钮不在步骤内容里，只在烹饪底栏', () => {
   const fs = require('node:fs')
   const wxml = fs.readFileSync(require.resolve('../miniprogram/pages/recipe/index.wxml'), 'utf8')
@@ -1167,4 +1109,17 @@ test('收藏后爱心切换为实心图标', () => {
   assert.ok(wxml.includes("saved ? '/assets/icon-favorites-filled.svg' : '/assets/icon-favorites.svg'"))
   assert.ok(fs.existsSync(require.resolve('../miniprogram/assets/icon-favorites-filled.svg')))
   assert.ok(!wxss.includes('detail-saved image'))
+})
+
+test('陈皮排骨汤去重，电器标签同时匹配菜名与做法步骤', () => {
+  const { recipes } = require('../miniprogram/data')
+  const { recipeTaxonomy } = require('../miniprogram/recipe-taxonomy')
+  assert.equal(recipes.filter(recipe => recipe.name === '陈皮排骨汤').length, 1)
+  const tags = name => recipeTaxonomy(recipes.find(recipe => recipe.name === name)).tags
+  assert.ok(tags('烤蛋挞').includes('烤箱'))
+  assert.ok(tags('戚风蛋糕的做法').includes('烤箱'))
+  assert.ok(tags('太阳蛋').includes('微波炉'))
+  assert.ok(tags('皮蛋瘦肉粥').includes('电饭煲'))
+  assert.ok(tags('甜辣烤全翅').includes('空气炸锅'))
+  assert.ok(tags('炸薯条').includes('空气炸锅'))
 })

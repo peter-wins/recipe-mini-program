@@ -1,0 +1,94 @@
+<view class="theme-page theme-{{themeId}}">
+  <view class="screen calendar-screen">
+    <view class="calendar-panel">
+      <view class="row calendar-heading">
+        <text class="section">{{monthLabel}}</text>
+        <view class="calendar-navigation">
+          <button class="link calendar-arrow" data-step="-1" bindtap="stepCalendar" aria-label="上个月">‹</button>
+          <button class="link calendar-arrow" data-step="1" bindtap="stepCalendar" aria-label="下个月">›</button>
+        </view>
+      </view>
+      <view class="calendar-grid calendar-weekdays" aria-hidden="true">
+        <text wx:for="{{weekdays}}" wx:key="*this">{{item}}</text>
+      </view>
+      <view class="calendar-grid">
+        <block wx:for="{{visibleDays}}" wx:key="key" wx:for-item="day">
+          <button wx:if="{{day.day}}" class="calendar-day {{day.selected ? 'calendar-day-selected' : ''}} {{day.today ? 'calendar-day-today' : ''}}" data-date="{{day.key}}" bindtap="selectDay" aria-label="{{day.label}}" aria-pressed="{{day.selected}}">
+            <text class="calendar-day-number">{{day.today ? '今' : day.day}}</text>
+            <view class="calendar-dots" aria-hidden="true">
+              <view wx:for="{{day.dots}}" wx:key="id" class="calendar-dot"></view>
+            </view>
+          </button>
+          <view wx:else aria-hidden="true"></view>
+        </block>
+      </view>
+    </view>
+
+    <view class="calendar-meals">
+      <view class="section calendar-agenda">{{dayLabel}}</view>
+      <view wx:if="{{intent}}" class="row calendar-intent">
+        <view>
+          <view>安排 · {{intent.title}}</view>
+          <text class="subtle">{{intent.hint}}</text>
+        </view>
+        <button class="link" bindtap="cancelIntent">取消</button>
+      </view>
+      <view wx:for="{{meals}}" wx:key="id" wx:for-item="meal" class="calendar-meal">
+        <view class="row calendar-meal-heading">
+          <view class="calendar-meal-title">
+            <text class="calendar-meal-label">{{meal.label}}</text>
+            <text wx:if="{{meal.entry && (meal.entry.type === 'plan' || meal.dishes.length !== 1)}}" class="subtle calendar-plan-name">{{meal.title}}</text>
+          </view>
+          <button wx:if="{{intent || !meal.entry}}" class="link calendar-meal-action" bindtap="tapMeal" data-slot="{{meal.id}}">
+            {{intent ? '安排在这里' : '＋ 添加菜谱'}}
+          </button>
+          <button wx:else class="link calendar-meal-menu" bindtap="openMealMenu" data-slot="{{meal.id}}" aria-label="{{meal.label + '更多操作'}}">···</button>
+        </view>
+        <block wx:if="{{meal.entry}}">
+          <view wx:if="{{meal.dishes.length}}" class="calendar-dishes {{meal.dishes.length >= 2 ? 'calendar-dishes-grid' : ''}}">
+            <navigator wx:for="{{meal.dishes}}" wx:key="id" class="calendar-dish" url="/pages/recipe/index?id={{item.id}}" hover-class="pressed">
+              <recipe-cover class="calendar-dish-cover" src="{{item.image}}" lazy="{{true}}"/>
+              <view class="calendar-dish-copy">
+                <view class="calendar-dish-name">{{item.name}}</view>
+                <block wx:if="{{meal.dishes.length === 1}}">
+                  <view wx:if="{{item.timeText}}" class="subtle calendar-dish-time">{{item.timeText}}</view>
+                  <text class="calendar-dish-link">查看菜谱 ›</text>
+                </block>
+              </view>
+            </navigator>
+          </view>
+        </block>
+      </view>
+    </view>
+
+    <button class="calendar-shopping-card" bindtap="openPurchasePreview">
+      <view class="calendar-shopping-heading">
+        <image src="/assets/icon-cart.svg" aria-hidden="true"/>
+        <text>提前准备，做饭更轻松</text>
+      </view>
+      <view class="subtle calendar-shopping-note">查看今天起三天的用餐计划还缺哪些食材。</view>
+      <view class="calendar-shopping-link">查看待采购食材 ›</view>
+    </button>
+  </view>
+
+  <view wx:if="{{purchasePreview}}" class="calendar-overlay">
+    <view class="calendar-backdrop" bindtap="closePurchasePreview"></view>
+    <view class="calendar-chooser" aria-label="待采购食材">
+      <view class="row">
+        <text class="section">待采购食材</text>
+        <button class="link" bindtap="closePurchasePreview">关闭</button>
+      </view>
+      <view wx:if="{{!purchasePreview.items.length}}" class="empty">{{purchasePreview.recipeIds.length ? '这三天暂无需要新增的食材' : '这三天还没有用餐安排'}}</view>
+      <scroll-view wx:else class="calendar-purchase-list" scroll-y="{{true}}" style="height: {{purchasePreview.items.length * 72}}rpx">
+        <view wx:for="{{purchasePreview.items}}" wx:key="key" class="row calendar-purchase-item">
+          <text>{{item.name}}</text>
+          <text class="subtle">{{item.quantity}}</text>
+        </view>
+      </scroll-view>
+      <view class="row calendar-purchase-actions">
+        <navigator class="calendar-shopping-link" url="/pages/shopping/index" bindtap="closePurchasePreview">采购清单 ›</navigator>
+        <button wx:if="{{purchasePreview.items.length}}" class="primary" bindtap="confirmPurchasePreview">加入采购清单</button>
+      </view>
+    </view>
+  </view>
+</view>

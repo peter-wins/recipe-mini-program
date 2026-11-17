@@ -1,53 +1,84 @@
 <import src="../../templates/recipe-card.wxml"/>
 
-<view>
-  <view class="row meal-toolbar">
-    <text class="section">一餐吃什么</text>
-    <view class="meal-filters">
-      <button class="meal-filter {{quickOnly ? 'meal-filter-active' : ''}}" bindtap="toggleQuickOnly" aria-pressed="{{quickOnly}}">30 分钟内</button>
-      <button wx:if="{{inventoryReady && inventory.length}}" class="meal-filter {{readyOnly ? 'meal-filter-active' : ''}}" bindtap="toggleReadyOnly" aria-pressed="{{readyOnly}}">食材齐全</button>
+<view class="meal-page">
+  <view class="row meal-hero">
+    <view class="meal-hero-copy">
+      <view class="meal-page-title">一餐吃什么</view>
+      <view class="subtle meal-subtitle">看看手边食材能搭哪一餐</view>
     </view>
+    <navigator class="meal-calendar-link" url="/pages/meal-calendar/index" aria-label="做饭日历" hover-class="card-pressed">
+      <view class="meal-calendar-icon" aria-hidden="true"></view>
+    </navigator>
+  </view>
+
+  <view class="meal-goals">
+    <button class="{{goal === 'custom' ? 'meal-goal-active' : ''}}" data-goal="custom" bindtap="selectGoal" aria-pressed="{{goal === 'custom'}}">我的搭配</button>
+    <button class="{{goal === 'family' ? 'meal-goal-active' : ''}}" data-goal="family" bindtap="selectGoal" aria-pressed="{{goal === 'family'}}">三菜一汤</button>
+    <button class="{{goal === 'light' ? 'meal-goal-active' : ''}}" data-goal="light" bindtap="selectGoal" aria-pressed="{{goal === 'light'}}">减脂餐</button>
+    <button class="{{goal === 'solo' ? 'meal-goal-active' : ''}}" data-goal="solo" bindtap="selectGoal" aria-pressed="{{goal === 'solo'}}">一人餐</button>
   </view>
 
   <block wx:if="{{plans.length}}">
     <block wx:for="{{plans}}" wx:key="id" wx:for-item="plan">
-      <view wx:if="{{showAllPlans || index < planPreviewLimit}}" class="meal-card">
-        <view class="row">
-          <text class="meal-plan-title">{{plan.title}}</text>
-          <text class="subtle meal-time">约 {{plan.minutes}} 分钟</text>
+      <view wx:if="{{goal === 'custom' || showAllPlans || index < planPreviewLimit}}" class="meal-card">
+        <view class="row meal-card-heading">
+          <view class="meal-card-copy">
+            <view class="meal-plan-title">{{plan.title}}</view>
+            <view class="meal-plan-meta">
+              <text wx:if="{{plan.nutrition}}" class="subtle meal-plan-note">每份约 {{plan.nutrition.calories}} 千卡 · 蛋白质 {{plan.nutrition.protein}} 克</text>
+              <text wx:elif="{{plan.servings}}" class="subtle meal-plan-note">{{plan.servings}} 人份</text>
+              <text wx:elif="{{goal === 'family'}}" class="subtle meal-plan-note">三菜一汤 · 可配米饭</text>
+              <text wx:elif="{{goal === 'custom'}}" class="subtle meal-plan-note">{{plan.dishes.length}} 道菜</text>
+              <template wx:if="{{inventoryReady && goal === 'custom'}}" is="recipeStockStatus" data="{{missingCount: plan.missingCount, missingText: plan.missingCount + ' 样食材'}}"/>
+            </view>
+          </view>
+          <button wx:if="{{goal === 'custom'}}" class="link meal-card-menu" data-id="{{plan.id}}" bindtap="openMealMenu" aria-label="更多操作">···</button>
+          <view wx:elif="{{inventoryReady}}" class="meal-card-stock">
+            <template is="recipeStockStatus" data="{{missingCount: plan.missingCount, missingText: plan.missingCount + ' 样食材'}}"/>
+          </view>
         </view>
-        <view class="meal-dishes">
+        <view class="meal-dishes {{plan.dishes.length === 1 ? 'meal-dishes-single' : ''}}">
           <navigator wx:for="{{plan.dishes}}" wx:key="id" class="meal-dish" url="/pages/recipe/index?id={{item.id}}" hover-class="pressed">
-            <recipe-cover class="meal-dish-cover" src="{{item.image}}" lazy="{{true}}"/>
+            <recipe-cover wx:if="{{item.image}}" class="meal-dish-cover" src="{{item.image}}" lazy="{{true}}"/>
+            <view wx:else class="meal-dish-cover meal-photo-empty"><image src="/assets/icon-cookbook.svg" aria-hidden="true"/></view>
             <text class="meal-dish-name">{{item.name}}</text>
-            <text class="chevron meal-dish-arrow" aria-hidden="true">›</text>
           </navigator>
         </view>
-        <view wx:if="{{plan.serveWithRice || inventoryReady}}" class="row meal-card-meta">
-          <text wx:if="{{plan.serveWithRice}}" class="subtle meal-rice">可配米饭</text>
-          <template wx:if="{{inventoryReady}}" is="recipeStockStatus" data="{{missingCount: plan.missingCount, missingText: plan.missingText}}"/>
+        <view class="meal-card-actions">
+          <button wx:if="{{inventoryReady && plan.missingCount}}" class="meal-buy" data-id="{{plan.id}}" bindtap="openMealShopping">补齐食材</button>
+          <navigator class="meal-add" url="/pages/meal-calendar/index?planId={{plan.id}}{{calendarDate ? '&date=' + calendarDate + '&slot=' + calendarSlot : ''}}" hover-class="pressed">＋ 安排到日历</navigator>
         </view>
       </view>
     </block>
-    <view class="row meal-section-footer">
-      <text class="subtle meal-plan-note">耗时按依次做菜估算，煮饭另计</text>
-      <button wx:if="{{plans.length > planPreviewLimit}}" class="link meal-toggle-plans" bindtap="togglePlans" aria-expanded="{{showAllPlans}}">
-        {{showAllPlans ? '收起搭配' : '全部 ' + plans.length + ' 套搭配'}}
-      </button>
-    </view>
+    <button wx:if="{{goal !== 'custom' && plans.length > planPreviewLimit}}" class="meal-toggle-plans" bindtap="togglePlans" aria-expanded="{{showAllPlans}}">
+      <text>{{showAllPlans ? '收起搭配' : '展开全部 ' + plans.length + ' 套搭配'}}</text>
+      <view class="meal-expand-arrow {{showAllPlans ? 'meal-expand-arrow-up' : ''}}" aria-hidden="true"></view>
+    </button>
   </block>
-  <view wx:else class="subtle meal-plan-empty">暂时没有符合筛选条件的整餐搭配</view>
+  <view wx:elif="{{goal !== 'custom'}}" class="empty">暂无整餐搭配</view>
 
-  <view class="row meal-recipes-heading">
-    <text class="section">轻食菜谱</text>
-    <text wx:if="{{recipes.length}}" class="subtle">{{recipes.length}} 道</text>
-  </view>
+  <button wx:if="{{goal === 'custom'}}" class="meal-create-card" bindtap="openMealComposer" aria-label="新建搭配">
+    <text class="meal-create-icon" aria-hidden="true">＋</text>
+    <text>点击新增你喜欢的搭配</text>
+  </button>
 
-  <view wx:if="{{recipes.length}}" class="discovery-grid">
-    <template wx:for="{{recipes}}" wx:key="id" is="discoveryTile" data="{{recipe: item, showStock: inventoryReady && !!inventory.length, showNutrition: true}}"/>
-  </view>
-  <view wx:else class="empty">
-    没有符合条件的轻食菜谱。
-    <button wx:if="{{quickOnly || readyOnly}}" class="link" bindtap="resetFilters">清除筛选</button>
+  <view wx:if="{{purchasePicker}}" class="meal-sheet-overlay">
+    <view class="meal-sheet-backdrop" bindtap="closeMealShopping"></view>
+    <view class="meal-sheet" aria-label="补齐食材">
+      <view class="section">补齐食材</view>
+      <view class="subtle meal-sheet-note">{{purchasePicker.title}} · 待添加 {{purchasePicker.items.length}} 样</view>
+      <scroll-view class="meal-purchase-list" scroll-y="{{true}}" style="height: {{purchasePicker.listHeight}}rpx">
+        <view wx:for="{{purchasePicker.items}}" wx:key="key" class="meal-purchase-item">
+          <view class="row meal-purchase-row">
+            <text>{{item.name}}</text>
+            <text class="subtle">{{item.quantity}}</text>
+          </view>
+        </view>
+      </scroll-view>
+      <view class="meal-sheet-actions">
+        <button class="link" bindtap="closeMealShopping">取消</button>
+        <button class="primary" bindtap="confirmMealShopping">加入采购清单</button>
+      </view>
+    </view>
   </view>
 </view>

@@ -1,0 +1,13 @@
+@import "../../styles/recipe-search.wxss";
+
+.compose-screen { padding-bottom: calc(155rpx + env(safe-area-inset-bottom)); }
+.compose-input {
+  box-sizing: border-box;
+  width: 100%;
+  height: 88rpx;
+  padding: 0 24rpx;
+  border: 1rpx solid var(--theme-border, #f0e4d8);
+  border-radius: 24rpx;
+  background: var(--theme-surface, #fff);
+  font-size: 28rpx;
+}

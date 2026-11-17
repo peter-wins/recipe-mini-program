@@ -93,10 +93,129 @@ async function findKitchen(id) {
   return data[0]
 }
 
+function validPlanningEntry(entry) {
+  if (entry === null) return true
+  if (!entry) return false
+  if (entry.type === 'recipe') return isKey(entry.id)
+  if (entry.type === 'recipes') return Array.isArray(entry.ids) && entry.ids.length > 0 && entry.ids.every(isKey)
+  if (entry.type !== 'plan' || !isKey(entry.id)) return false
+  if (entry.dishes === undefined) return entry.title === undefined
+  return typeof entry.title === 'string' && entry.title.length <= 300 &&
+    Array.isArray(entry.dishes) && entry.dishes.length > 0 &&
+    entry.dishes.every(dish => dish && isKey(dish.id) && isKey(dish.name))
+}
+
+function validPlanningMeal(meal) {
+  if (!meal) return false
+  const { id, title, recipes, archived, hasCustomTitle } = meal
+  return isKey(id) && /^custom-[a-z0-9-]+$/.test(id) && typeof title === 'string' && title.length <= 300 &&
+    Array.isArray(recipes) && recipes.length > 0 && recipes.every(isKey) &&
+    (archived === undefined || typeof archived === 'boolean') &&
+    (hasCustomTitle === undefined || typeof hasCustomTitle === 'boolean')
+}
+
+function validPlanningChange(change) {
+  if (!change || !Number.isSafeInteger(change.sequence) || change.sequence < 1 ||
+      (change.importOnly !== undefined && typeof change.importOnly !== 'boolean')) return false
+  if (change.meal) {
+    return validPlanningMeal(change.meal) &&
+      (change.importOnly || change.expected === null ||
+        validPlanningMeal(change.expected) && change.expected.id === change.meal.id)
+  }
+  return typeof change.date === 'string' && /^[1-9]\d{3}-\d{2}-\d{2}$/.test(change.date) &&
+    ['breakfast', 'lunch', 'dinner'].includes(change.slot) && validPlanningEntry(change.entry) &&
+    (change.importOnly || validPlanningEntry(change.expected))
+}
+
+function cleanPlanningEntry(entry) {
+  if (entry === null) return null
+  if (entry.type === 'recipes') return { type: entry.type, ids: entry.ids }
+  if (entry.type === 'plan' && entry.dishes) {
+    return { type: entry.type, id: entry.id, title: entry.title, dishes: entry.dishes.map(({ id, name }) => ({ id, name })) }
+  }
+  return { type: entry.type, id: entry.id }
+}
+
+function cleanPlanningMeal(meal) {
+  if (!meal) return null
+  const { id, title, recipes, archived, hasCustomTitle } = meal
+  return { id, title, recipes, ...(archived ? { archived: true } : {}), ...(hasCustomTitle ? { hasCustomTitle: true } : {}) }
+}
+
+function applyPlanningChanges(current, operations) {
+  const meals = { ...current.meals }
+  const calendar = { ...current.calendar }
+  let conflicts = 0
+  for (const change of operations) {
+    if (change.meal) {
+      const { id } = change.meal
+      if (change.importOnly && Object.hasOwn(meals, id)) continue
+      if (!change.importOnly && JSON.stringify(cleanPlanningMeal(meals[id])) !== JSON.stringify(cleanPlanningMeal(change.expected))) {
+        conflicts++
+        continue
+      }
+      meals[id] = cleanPlanningMeal(change.meal)
+      continue
+    }
+    const day = calendar[change.date] || {}
+    if (change.importOnly && Object.hasOwn(day, change.slot)) continue
+    if (!change.importOnly && JSON.stringify(cleanPlanningEntry(day[change.slot] || null)) !== JSON.stringify(cleanPlanningEntry(change.expected))) {
+      conflicts++
+      continue
+    }
+    // A null slot records a deletion so a late first-time import cannot restore it.
+    calendar[change.date] = { ...day, [change.slot]: cleanPlanningEntry(change.entry) }
+  }
+  return { planning: { meals, calendar }, conflicts }
+}
+
+async function syncPlanning(request, appId, openId) {
+  if (!request || typeof request.clientId !== 'string' || !/^[a-z0-9-]{8,64}$/.test(request.clientId) ||
+      !Array.isArray(request.operations) || request.operations.length > 32 ||
+      !request.operations.every((change, index) => validPlanningChange(change) &&
+        (index === 0 || change.sequence === request.operations[index - 1].sequence + 1))) {
+    return { ok: false, error: 'invalid_input' }
+  }
+
+  // Planning has an independent revision and operation sequence from the existing kitchen data.
+  const id = crypto.createHash('sha256').update(appId + ':' + openId + ':meal-planning').digest('hex').slice(0, 32)
+  const { clientId, operations } = request
+  for (let attempt = 0; attempt < 5; attempt++) {
+    const record = await findKitchen(id)
+    const applied = record && record.applied[clientId] || 0
+    const pending = operations.filter(change => change.sequence > applied)
+    const current = record ? record.planning : { meals: {}, calendar: {} }
+    if (!pending.length) return { ok: true, planningVersion: 1, planning: current, applied }
+    if (pending[0].sequence !== applied + 1) return { ok: false, error: 'invalid_sequence' }
+
+    const { planning, conflicts } = applyPlanningChanges(current, pending)
+    const sequence = pending[pending.length - 1].sequence
+    const acknowledgements = { ...(record && record.applied), [clientId]: sequence }
+    if (!record) {
+      try {
+        await kitchens.add({ data: { _id: id, _openid: openId, scope: 'meal-planning', version: 1, applied: acknowledgements, planning } })
+        return { ok: true, planningVersion: 1, planning, applied: sequence, conflicts }
+      } catch (error) {
+        if (!await findKitchen(id)) throw error
+        continue
+      }
+    }
+    const { stats } = await kitchens.where({ _id: id, version: record.version }).update({ data: {
+      version: db.command.inc(1),
+      applied: db.command.set(acknowledgements),
+      planning: db.command.set(planning)
+    } })
+    if (stats.updated === 1) return { ok: true, planningVersion: 1, planning, applied: sequence, conflicts }
+  }
+  return { ok: false, error: 'sync_conflict' }
+}
+
 exports.main = async event => {
   const { APPID, OPENID } = cloud.getWXContext()
   if (!OPENID || APPID !== miniProgramAppId) return { ok: false, error: 'unauthorized' }
-  if (!event || JSON.stringify(event).length > 500000 || !validInput(event)) return { ok: false, error: 'invalid_input' }
+  if (!event || JSON.stringify(event).length > 500000) return { ok: false, error: 'invalid_input' }
+  if (event.planningVersion === 1) return syncPlanning(event.planningRequest, APPID, OPENID)
+  if (!validInput(event)) return { ok: false, error: 'invalid_input' }
 
   // Derive the document from the verified caller, never from request data.
   const id = crypto.createHash('sha256').update(APPID + ':' + OPENID).digest('hex').slice(0, 32)

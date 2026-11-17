@@ -5,7 +5,7 @@
       <recipe-cover wx:if="{{recipe.image}}" class="detail-image" src="{{recipe.image}}" label="{{recipe.name}}成品"/>
       <view class="recipe-cover-caption">
         <view class="headline">{{recipe.name}}</view>
-        <view class="recipe-cover-category">{{recipe.category}}</view>
+        <view class="recipe-cover-category">{{recipe.libraryCategory}}</view>
       </view>
     </view>
 

@@ -1,6 +1,4 @@
-const { getIngredientOptions, getRecipe, matchRecipes, groupFridgeMatches, avoidIdsFromNotes } = require('../../catalog')
-const { preferTaste } = require('../../recipe-recommendations')
-const { readPreferences } = require('../../preferences')
+const { getIngredientOptions, getRecipe, matchRecipes, groupFridgeMatches } = require('../../catalog')
 const { readInventory, summarizeInventory } = require('../../inventory')
 const { applyTheme } = require('../../theme')
 
@@ -33,9 +31,7 @@ Page({
   onShow() {
     applyTheme(this)
     const key = readInventory().slice().sort().join(',')
-    const preferences = readPreferences()
-    const preferenceKey = JSON.stringify(preferences)
-    if (key !== this.inventoryKey || preferenceKey !== this.preferenceKey) {
+    if (key !== this.inventoryKey) {
       this.buildPools()
       this.pick()
     }
@@ -43,15 +39,12 @@ Page({
 
   buildPools() {
     const selected = readInventory()
-    const preferences = readPreferences()
     this.inventoryKey = selected.slice().sort().join(',')
-    this.preferenceKey = JSON.stringify(preferences)
-    const avoidIds = avoidIdsFromNotes(preferences.notes)
-    const { ready, almost } = groupFridgeMatches(selected.length ? matchRecipes(selected, { avoidIds }) : [])
-    const readyPool = preferTaste(ready, preferences.taste)
-    const almostPool = preferTaste(almost, preferences.taste)
-    const all = preferTaste(matchRecipes([], { avoidIds }).filter(recipe =>
-      recipe.required.length && mainCategories.has(recipe.category)), preferences.taste)
+    const { ready, almost } = groupFridgeMatches(selected.length ? matchRecipes(selected) : [])
+    const readyPool = ready
+    const almostPool = almost
+    const all = matchRecipes([]).filter(recipe =>
+      recipe.required.length && mainCategories.has(recipe.category))
     this.pools = [
       { list: readyPool, label: '冰箱食材齐全' },
       { list: almostPool, label: '只差一样' },

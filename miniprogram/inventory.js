@@ -68,9 +68,9 @@ function summarizeInventory(ids) {
   return { count: ids.length - staples, staples }
 }
 
-function previewInventory(ids) {
+function previewInventory(ids, limit = ingredientPreviewLimit) {
   const ordered = ids.slice().sort((left, right) => Number(stapleIds.has(left)) - Number(stapleIds.has(right)))
-  const inventoryPreview = ordered.slice(0, ingredientPreviewLimit).map(id => ({
+  const inventoryPreview = ordered.slice(0, limit).map(id => ({
     id, name: ingredientNames.get(id), icon: ingredientIcons.get(id) || ''
   }))
   return { inventoryPreview, extraIngredients: ordered.length - inventoryPreview.length }

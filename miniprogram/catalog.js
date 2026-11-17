@@ -1,6 +1,7 @@
 const { ingredients, recipes: sourceRecipes, legacyRecipeIds } = require('./data')
 const { recipeImage } = require('./recipe-image')
 const { stepTimer } = require('./step-timer')
+const { recipeTaxonomy, orderRecipeTags, fatLossTag } = require('./recipe-taxonomy')
 const equivalentNames = new Map([
   ['青葱', 'scallion'], ['葱段', 'scallion'],
   ['大葱葱白', 'vibe-e5a4a7e891b1'],
@@ -67,9 +68,12 @@ const recipes = sourceRecipes.map(recipe => {
       groups[pantry ? 'pantry' : key].push([ingredientId, quantity, name])
     }
   }
-  return { ...recipe, ...groups }
+  return { ...recipe, ...groups, ...recipeTaxonomy(recipe) }
 })
 const recipeById = new Map(recipes.map(recipe => [recipe.id, recipe]))
+function getRecipeTags() {
+  return orderRecipeTags(recipes.flatMap(recipe => recipe.tags))
+}
 
 function resolveRecipeId(id) {
   return Object.prototype.hasOwnProperty.call(legacyRecipeIds, id) ? legacyRecipeIds[id] : id
@@ -88,24 +92,26 @@ const ingredientGroups = [
   ['蔬菜', [
     'tomato', 'cucumber', 'cabbage', 'bokchoy', 'broccoli', 'carrot', 'pepper', 'vibe-e99d92e6a492', 'onion',
     'spinach', 'corn', 'beanSprout', 'zucchini', 'pumpkin', 'peas', 'eggplant', 'greenBean',
-    'celery', 'lettuce', 'babyCabbage', 'loofah', 'celeryStalk'
+    'celery', 'lettuce', 'babyCabbage', 'loofah', 'celeryStalk',
+    'vibe-e5b08fe7b1b3e8bea3', 'vibe-e5b08fe7b1b3e6a492', 'vibe-e99d92e8bea3e6a492', 'vibe-e69fa0e6aaac'
   ]],
   ['菌菇和根茎', [
-    'potato', 'mushroom', 'enoki', 'lotusRoot', 'radish', 'winterMelon', 'yam', 'sweetPotato'
+    'potato', 'mushroom', 'enoki', 'lotusRoot', 'radish', 'winterMelon', 'yam'
   ]],
-  ['蛋奶和豆制品', ['egg', 'tofu', 'driedTofu', 'driedTofuStick', 'milk']],
+  ['蛋奶和豆制品', ['egg', 'tofu', 'driedTofu', 'milk']],
   ['肉和水产', [
     'chicken', 'thigh', 'pork', 'ribs', 'mince', 'beef', 'shrimp', 'cod',
-    'porkBelly', 'chickenWings', 'beefBrisket', 'seaBass', 'hairtail', 'squid'
+    'porkBelly', 'beefBrisket', 'seaBass'
   ]],
   ['米面和主食', [
     'rice', 'vibe-e5a4a7e7b1b3', 'noodles', 'vibe-e88d9ee9baa6e99da2', 'nori', 'vermicelli', 'riceNoodle', 'flour', 'steamedBun',
-    'dumplingWrapper', 'riceCake', 'brownRiceCooked', 'rolledOats', 'wholeWheatFlour', 'konjacNoodles'
+    'riceCake', 'brownRiceCooked', 'rolledOats', 'wholeWheatFlour', 'konjacNoodles'
   ]],
   ['厨房常备', [
     'scallion', 'vibe-e5a4a7e891b1', 'garlic', 'ginger', 'chili', 'cilantro',
     'oil', 'salt', 'soy', 'darkSoy', 'vinegar', 'sugar', 'rockSugar',
-    'starch', 'wine', 'oysterSauce', 'sesame', 'whitePepper', 'starAnise'
+    'starch', 'wine', 'oysterSauce', 'sesame', 'whitePepper', 'starAnise',
+    'vibe-e799bde88a9de9babb', 'vibe-e88a9de9babb'
   ]]
 ]
 // 水不进清单：没人会记录“我家有水”
@@ -118,7 +124,7 @@ function getIngredientOptions() {
 }
 
 function getRecipeCategories() {
-  return [...new Set(recipes.map(recipe => recipe.category))]
+  return [...new Set(recipes.map(recipe => recipe.libraryCategory))]
 }
 
 function getIngredientGroups() {
@@ -202,13 +208,14 @@ function getRecipe(id, selection) {
   }
 }
 
-function matchRecipes(selection, { category, maxMinutes, readyOnly, lightOnly, search = '', rankByStock = true, avoidIds = [] } = {}) {
+function matchRecipes(selection, { category, tag, maxMinutes, readyOnly, lightOnly, search = '', rankByStock = true, avoidIds = [] } = {}) {
   const query = search.trim().toLowerCase()
   const available = availableIngredients(selection)
   const avoided = new Set(avoidIds.flatMap(id => ingredientIds(id)))
   const matches = recipes.filter(recipe =>
     (!avoided.size || !recipe.required.some(([id]) => avoided.has(canonicalIngredientId(id)))) &&
-    (!lightOnly || recipe.light) && (!category || recipe.category === category) && (!maxMinutes || recipe.minutes <= maxMinutes) &&
+    (!lightOnly || recipe.light) && (!category || recipe.libraryCategory === category) &&
+    (!tag || recipe.tags.includes(tag)) && (!maxMinutes || recipe.minutes <= maxMinutes) &&
     (!query || recipe.name.includes(query) || recipe.required.concat(recipe.optional).some(([id]) => {
       const item = ingredientById[id]
       return [item.name, ...item.aliases].some(name => name.toLowerCase().includes(query))
@@ -217,7 +224,8 @@ function matchRecipes(selection, { category, maxMinutes, readyOnly, lightOnly, s
     const required = [...new Set(recipe.required.map(([id]) => id))]
     const missing = required.filter(id => !available.has(id))
     return {
-      id: recipe.id, name: recipe.name, category: recipe.category, minutes: recipe.minutes,
+      id: recipe.id, name: recipe.name, category: recipe.category, libraryCategory: recipe.libraryCategory,
+      minutes: recipe.minutes,
       timeText: durationText(recipe),
       difficulty: recipe.difficulty, required,
       image: recipeImage(recipe.coverPath),
@@ -266,5 +274,5 @@ function avoidIdsFromNotes(notes) {
 
 module.exports = {
   getIngredientOptions, getIngredientGroups, searchIngredientOptions, getRecipeCategories, getRecipe, matchRecipes,
-  groupFridgeMatches, stapleIds, resolveRecipeId, ingredientIds, availableIngredients, avoidIdsFromNotes
+  getRecipeTags, fatLossTag, groupFridgeMatches, stapleIds, resolveRecipeId, ingredientIds, availableIngredients, avoidIdsFromNotes
 }
