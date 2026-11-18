@@ -1,4 +1,4 @@
-<view class="theme-page theme-{{themeId}}">
+<view class="theme-page theme-{{themeId}} fridge-fill">
   <view class="screen">
     <view class="fridge-card">
       <view class="row">

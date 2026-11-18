@@ -52,6 +52,17 @@ Page({
     }
   },
 
+  onShareAppMessage() {
+    const recipe = this.data.recipe
+    const share = {
+      title: recipe ? `这道${recipe.name}，分享给你` : '吃饭得有谱，今晚吃什么',
+      path: recipe ? `/pages/recipe/index?id=${recipe.id}` : '/pages/home/index'
+    }
+    const image = recipe && recipe.image
+    if (image && /^https?:\/\//.test(image)) share.imageUrl = image
+    return share
+  },
+
   refreshRecipeRecords() {
     const { recipe } = this.data
     if (!recipe) return

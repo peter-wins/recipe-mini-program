@@ -1,6 +1,9 @@
 @import "../../styles/recipe-search.wxss";
 @import "../../styles/recipe-card.wxss";
 
+.fridge-fill { display: flex; flex-direction: column; height: 100vh; }
+.fridge-fill .screen { flex: 1; display: flex; flex-direction: column; min-height: 0; }
+
 .fridge-icon {
   display: flex;
   align-items: center;
@@ -35,10 +38,10 @@
 .fridge-picked-chip text { margin-left: 4rpx; }
 .fridge-expand { background: var(--theme-neutral, #f7f3ee); color: var(--theme-muted, #67554c); }
 .fridge-clear { background: transparent; color: var(--theme-muted, #75665e); }
-.fridge-edit { margin-top: 20rpx; }
+.fridge-edit { flex: 1; display: flex; flex-direction: column; min-height: 0; margin-top: 20rpx; }
 .recipe-search.fridge-search { margin-bottom: 16rpx; border-radius: 26rpx; }
 .fridge-picker-head { margin-bottom: 12rpx; }
-.fridge-picker-body { display: flex; gap: 18rpx; height: 640rpx; }
+.fridge-picker-body { flex: 1; display: flex; gap: 18rpx; min-height: 0; }
 .fridge-groups {
   flex: 0 0 180rpx;
   width: 180rpx;
