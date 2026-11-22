@@ -149,3 +149,9 @@ test('采购清单页头参考菜谱库：眉标＋大标题＋胶囊按钮', ()
   assert.ok(wxss.includes('filter: var(--theme-accent-icon)'))
   assert.ok(exists('assets/icon-plus.svg'))
 })
+
+test('首页快捷入口购物车图标单独放大，与其余三个视觉平衡', () => {
+  const wxss = read('pages/home/index.wxss')
+  assert.ok(wxss.includes('.shortcut-icon image { width: 36rpx; height: 36rpx; }'), '基准图标尺寸缺失')
+  assert.ok(wxss.includes('.shortcut-shopping image { width: 44rpx; height: 44rpx; }'), '购物车图标未单独放大')
+})
