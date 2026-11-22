@@ -34,6 +34,7 @@ button.home-search {
   display: flex;
   align-items: center;
   gap: 8rpx;
+  min-height: 0;
   padding: 0 18rpx;
   background: var(--theme-soft, #fff0e5);
   border: 1rpx solid var(--theme-border, #eadfd4);

@@ -239,6 +239,26 @@ test('同一功能复用同一图标：所有页面日历都走唯一 SVG 映射
   assert.ok(/\.meal-calendar-link \{[\s\S]*?border-radius: 20rpx;[\s\S]*?font-size: 24rpx;/.test(mealsWxss), '日历入口应为胶囊样式')
 })
 
+test('三个页头胶囊按钮尺寸统一：button 覆盖全局 min-height 与日历入口齐高', () => {
+  // 问问 AI 与手动添加是 button，需覆盖全局 button 的 min-height: 88rpx
+  const homeWxss = read('pages/home/index.wxss')
+  const shoppingWxss = read('pages/shopping/index.wxss')
+  const mealsWxss = read('pages/meals/index.wxss')
+  for (const [wxss, cls] of [[homeWxss, 'library-ai'], [shoppingWxss, 'shopping-add']]) {
+    const block = wxss.match(new RegExp('\\.' + cls + ' \\{[\\s\\S]*?\\}'))
+    assert.ok(block, `缺少 .${cls} 样式`)
+    assert.ok(block[0].includes('min-height: 0'), `.${cls} 未覆盖全局最小高度，会被撑高`)
+    assert.ok(block[0].includes('line-height: 62rpx'), `.${cls} 行高应与日历入口一致`)
+    assert.ok(block[0].includes('border-radius: 20rpx'), `.${cls} 圆角应与日历入口一致`)
+    assert.ok(block[0].includes('padding: 0 18rpx'), `.${cls} 内边距应与日历入口一致`)
+  }
+  // 日历入口是 navigator，同样 62rpx 行高、20rpx 圆角
+  const calBlock = mealsWxss.match(/\.meal-calendar-link \{[\s\S]*?\}/)
+  assert.ok(calBlock[0].includes('line-height: 62rpx'))
+  assert.ok(calBlock[0].includes('border-radius: 20rpx'))
+  assert.ok(calBlock[0].includes('padding: 0 18rpx'))
+})
+
 test('按钮五类体系与语义状态色变量齐备（规范第5/8条）', () => {
   const app = read('app.wxss')
   // 五类按钮
