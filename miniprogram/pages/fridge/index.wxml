@@ -1,16 +1,16 @@
 <wxs src="../../icons.wxs" module="icons" />
 <view class="theme-page theme-{{themeId}} fridge-fill">
   <view class="screen">
-    <swiper class="fridge-banner" indicator-dots indicator-color="rgba(255,255,255,0.6)" indicator-active-color="#994017" autoplay circular interval="4000" duration="400" aria-label="做菜灵感轮播">
+    <swiper class="fridge-banner" indicator-dots="{{banners.length > 1}}" indicator-color="rgba(255,255,255,0.6)" indicator-active-color="#994017" autoplay circular interval="4000" duration="400" aria-label="做菜灵感轮播">
       <swiper-item wx:for="{{banners}}" wx:key="title">
-        <view class="fridge-banner-slide">
+        <button class="fridge-banner-slide" bindtap="openFridgeMatches" hover-class="fridge-banner-pressed" aria-label="用现有食材做道好菜，查看匹配菜谱">
           <image class="fridge-banner-image" src="{{item.image}}" aria-hidden="true"/>
           <view class="fridge-banner-copy">
             <view class="fridge-banner-eyebrow">{{item.eyebrow}}</view>
             <view class="fridge-banner-title">{{item.title}}</view>
-            <view class="fridge-banner-sub">{{item.sub}}</view>
           </view>
-        </view>
+          <text class="fridge-banner-action">看看能做什么 ›</text>
+        </button>
       </swiper-item>
     </swiper>
 
@@ -18,35 +18,42 @@
       <view class="fridge-search-row">
         <view class="recipe-search fridge-search">
           <view class="search-mark" aria-hidden="true"></view>
-          <input class="recipe-search-input" value="{{search}}" bindinput="searchIngredients" confirm-type="search" placeholder="搜索食材，如 茄子、牛腩"/>
+          <input class="recipe-search-input" value="{{search}}" bindinput="searchIngredients" confirm-type="search" placeholder="搜索并添加食材，如茄子、牛腩"/>
           <button wx:if="{{search}}" class="link" bindtap="clearIngredientSearch">清除</button>
         </view>
-        <navigator class="fridge-cart" url="/pages/shopping/index" aria-label="采购清单" hover-class="card-pressed"><image src="{{icons.path('cart')}}" aria-hidden="true"/></navigator>
+        <navigator class="fridge-cart" url="/pages/shopping/index" aria-label="{{shoppingCount ? '采购清单，待买' + shoppingCount + '项' : '采购清单'}}" hover-class="card-pressed">
+          <image src="{{icons.path('cart')}}" aria-hidden="true"/>
+          <text wx:if="{{shoppingCount}}" class="fridge-cart-count" aria-hidden="true">{{shoppingCount > 99 ? '99+' : shoppingCount}}</text>
+        </navigator>
       </view>
 
-      <view class="row fridge-picker-head">
-        <text class="section">{{searching ? '搜索结果' : '常用食材'}}</text>
-      </view>
-      <view class="fridge-picker-body">
-        <scroll-view wx:if="{{!searching}}" class="fridge-groups" scroll-y enhanced show-scrollbar="{{false}}">
+      <scroll-view wx:if="{{!searching}}" class="fridge-groups" scroll-x enhanced show-scrollbar="{{false}}">
+        <view class="fridge-group-track">
           <button wx:for="{{fridgeGroupNames}}" wx:key="*this" class="fridge-group {{fridgeGroupIndex === index ? 'fridge-group-active' : ''}}" data-index="{{index}}" bindtap="selectIngredientGroup" aria-pressed="{{fridgeGroupIndex === index}}">{{item}}</button>
-        </scroll-view>
-        <scroll-view class="fridge-options-scroll" scroll-y enhanced show-scrollbar="{{false}}">
-          <view wx:if="{{!searching && fridgeGroupIndex === 0 && selected.length}}" class="row fridge-picked-bar">
-            <text class="fridge-picked-hint">点食材可移除</text>
-            <button class="text-btn fridge-clear" bindtap="clearInventory">清空</button>
+        </view>
+      </scroll-view>
+
+      <view class="row fridge-picker-head">
+        <view>
+          <view class="section">{{searching ? '搜索结果' : fridgeGroupNames[fridgeGroupIndex]}}</view>
+          <view wx:if="{{showingInventory}}" class="fridge-inventory-note">
+            <text>共 {{selected.length}} 种食材</text><text wx:if="{{selected.length}}"> · 点击食材可移除</text>
           </view>
-          <view wx:if="{{!visibleIngredients.length}}" class="empty fridge-empty">{{searching ? '没找到这个食材，试试其他叫法。' : (fridgeGroupIndex === 0 ? '还没登记食材，去其它分组勾选吧' : '这个分组暂时没有食材')}}</view>
+        </view>
+        <button wx:if="{{showingInventory && selected.length}}" class="text-btn fridge-clear" bindtap="clearInventory" hover-class="hover" aria-label="清空已有食材">清空</button>
+      </view>
+      <scroll-view class="fridge-options-scroll" scroll-y enhanced show-scrollbar="{{false}}" scroll-into-view="{{ingredientListAnchor}}">
+        <view id="{{ingredientListAnchor}}">
+          <view wx:if="{{!visibleIngredients.length}}" class="empty fridge-empty">{{searching ? '没找到这个食材，试试其他叫法。' : (showingInventory ? '还没登记食材，可以搜索或从分类里添加' : '这个分组暂时没有食材')}}</view>
           <view wx:else class="fridge-options">
-            <button wx:for="{{visibleIngredients}}" wx:key="id" class="fridge-option {{item.checked ? 'fridge-option-checked' : ''}}" data-id="{{item.id}}" bindtap="toggleIngredient" aria-pressed="{{item.checked}}">
+            <button wx:for="{{visibleIngredients}}" wx:key="id" class="fridge-option {{showingInventory ? '' : (item.checked ? 'fridge-option-checked' : '')}}" data-id="{{item.id}}" bindtap="toggleIngredient" aria-label="{{(item.checked ? '移除' : '登记') + item.name}}">
               <text class="fridge-option-name">{{item.name}}</text>
-              <text class="fridge-option-mark" aria-hidden="true">{{item.checked ? '✓' : '+'}}</text>
+              <text class="fridge-option-mark {{showingInventory ? 'fridge-option-remove' : ''}}" aria-hidden="true">{{showingInventory ? '−' : (item.checked ? '✓' : '+')}}</text>
             </button>
           </view>
-          <button wx:if="{{hasMoreIngredients}}" class="link fridge-more" bindtap="loadMoreIngredients">显示更多结果</button>
-          <view wx:if="{{!searching && fridgeGroupIndex === 0 && selected.length}}" class="fridge-picked-foot">去其它分组继续添加</view>
-        </scroll-view>
-      </view>
+          <button wx:if="{{hasMoreIngredients}}" class="link fridge-more" bindtap="loadMoreIngredients">{{showingInventory ? '展开全部食材' : '显示更多结果'}}</button>
+        </view>
+      </scroll-view>
     </view>
   </view>
 </view>

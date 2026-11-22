@@ -1,21 +1,25 @@
 const { getCatalogSource, getIngredientOptions, getIngredientGroups, searchIngredientOptions } = require('../../catalog')
-const { readInventory, saveInventory } = require('../../inventory')
+const { readKitchen, saveInventory } = require('../../inventory')
+const { countShoppingItems } = require('../../shopping')
 const { applyTheme } = require('../../theme')
 
 const fridgeGroups = getIngredientGroups()
 const ingredientPageSize = 24
-const MY_FRIDGE_GROUP = '手边有的'
+const inventoryPageSize = 18
+const MY_FRIDGE_GROUP = '已有食材'
 
 function ingredientView(selected, search, groupIndex, limit) {
   const searching = Boolean(search.trim())
-  // 分组 0 固定为「手边有的」，内容跟随已登记食材；其余分组顺延一位对应 catalog 分组
+  const showingInventory = !searching && groupIndex === 0
   const items = searching
     ? searchIngredientOptions(search)
-    : groupIndex === 0
+    : showingInventory
       ? getIngredientOptions().filter(item => selected.includes(item.id))
       : fridgeGroups[groupIndex - 1].items
   return {
     searching,
+    showingInventory,
+    ingredientListAnchor: searching ? 'fridge-search-results' : `fridge-group-${groupIndex}`,
     visibleIngredients: items.slice(0, limit).map(({ id, name }) => ({ id, name, checked: selected.includes(id) })),
     hasMoreIngredients: items.length > limit
   }
@@ -24,17 +28,17 @@ function ingredientView(selected, search, groupIndex, limit) {
 Page({
   data: {
     selected: [],
+    shoppingCount: 0,
     search: '',
     fridgeGroupNames: [MY_FRIDGE_GROUP, ...fridgeGroups.map(group => group.name)],
     fridgeGroupIndex: 0,
-    ingredientLimit: ingredientPageSize,
+    ingredientLimit: inventoryPageSize,
     banners: [{
       eyebrow: '今日灵感',
       title: '用现有食材做道好菜',
-      sub: '3 道菜谱等你发现',
       image: '/assets/banner-cook.svg'
     }],
-    ...ingredientView([], '', 0, ingredientPageSize)
+    ...ingredientView([], '', 0, inventoryPageSize)
   },
 
   onShow() {
@@ -44,7 +48,9 @@ Page({
 
   refreshKitchenData() {
     try {
-      const selected = readInventory()
+      const { inventory: selected, shopping } = readKitchen()
+      const shoppingCount = countShoppingItems(shopping)
+      if (shoppingCount !== this.data.shoppingCount) this.setData({ shoppingCount })
       const source = getCatalogSource()
       if (source !== this.catalogSource || selected.join(',') !== this.data.selected.join(',')) this.updateSelection(selected)
       this.catalogSource = source
@@ -58,19 +64,23 @@ Page({
   },
 
   searchIngredients(event) {
-    this.applyIngredientView({ search: event.detail.value, ingredientLimit: ingredientPageSize })
+    const search = event.detail.value
+    this.applyIngredientView({ search, ingredientLimit: search.trim() || this.data.fridgeGroupIndex !== 0 ? ingredientPageSize : inventoryPageSize })
   },
 
   clearIngredientSearch() {
-    this.applyIngredientView({ search: '', ingredientLimit: ingredientPageSize })
+    const ingredientLimit = this.data.fridgeGroupIndex === 0 ? inventoryPageSize : ingredientPageSize
+    this.applyIngredientView({ search: '', ingredientLimit })
   },
 
   selectIngredientGroup(event) {
-    this.applyIngredientView({ fridgeGroupIndex: Number(event.currentTarget.dataset.index), ingredientLimit: ingredientPageSize })
+    const fridgeGroupIndex = Number(event.currentTarget.dataset.index)
+    this.applyIngredientView({ fridgeGroupIndex, ingredientLimit: fridgeGroupIndex === 0 ? inventoryPageSize : ingredientPageSize })
   },
 
   loadMoreIngredients() {
-    this.applyIngredientView({ ingredientLimit: this.data.ingredientLimit + ingredientPageSize })
+    const { showingInventory, selected, ingredientLimit } = this.data
+    this.applyIngredientView({ ingredientLimit: showingInventory ? selected.length : ingredientLimit + ingredientPageSize })
   },
 
   applyIngredientView(patch) {
@@ -78,10 +88,27 @@ Page({
     this.setData({ ...patch, ...ingredientView(selected, search, fridgeGroupIndex, ingredientLimit) })
   },
 
+  openFridgeMatches() {
+    const pages = getCurrentPages()
+    const previous = pages[pages.length - 2]
+    if (previous && previous.route === 'pages/fridge-matches/index') {
+      wx.navigateBack()
+      return
+    }
+    wx.navigateTo({
+      url: '/pages/fridge-matches/index',
+      fail: () => wx.showToast({ title: '暂时无法打开菜谱，请重试', icon: 'none' })
+    })
+  },
+
   clearInventory() {
+    const count = this.data.selected.length
+    if (!count) return
     wx.showModal({
-      title: '清空冰箱食材？',
+      title: '清空已有食材？',
+      content: `确定清空全部 ${count} 种食材吗？收藏和采购清单会保留。`,
       confirmText: '清空',
+      confirmColor: '#c04040',
       success: ({ confirm }) => {
         if (confirm) this.saveSelection([])
       }

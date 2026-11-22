@@ -11,7 +11,7 @@ const ingredients = [
     id: 'spinach',
     name: '菠菜',
     group: '叶菜',
-    image: '/assets/guide-spinach.svg',
+    image: '/assets/guide-spinach.png',
     tint: '#DFEDD9',
     season: '叶菜 · 四季常见',
     therapy: '味甘、性凉，具有补血止血、利五脏、通肠胃、活血脉、助消化、止渴润肠等功效。',

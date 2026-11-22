@@ -2,32 +2,40 @@
 @import "../../styles/recipe-card.wxss";
 
 .fridge-fill { display: flex; flex-direction: column; height: 100vh; }
-/* 全屏列表页：覆盖 .screen 的 900rpx 居中限宽，内容铺满屏幕 */
 .fridge-fill .screen {
   flex: 1;
   display: flex;
   flex-direction: column;
   min-height: 0;
   width: 100%;
-  max-width: none;
-  margin-left: 0;
-  margin-right: 0;
-  padding-left: 20rpx;
-  padding-right: 20rpx;
 }
 
 /* 顶部轮播灵感卡 */
 .fridge-banner { flex: 0 0 auto; height: 232rpx; border-radius: var(--card-radius, 28rpx); overflow: hidden; }
-.fridge-banner-slide { position: relative; height: 100%; border-radius: var(--card-radius, 28rpx); overflow: hidden; background: #f6d9a8; }
+.fridge-banner-slide {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  padding: 0;
+  border-radius: var(--card-radius, 28rpx);
+  overflow: hidden;
+  background: #f6d9a8;
+  color: var(--theme-accent-text, #783414);
+  text-align: left;
+  line-height: 1.35;
+}
+.theme-green .fridge-banner-slide, .theme-blue .fridge-banner-slide { background: var(--theme-selected); }
+.fridge-banner-pressed { opacity: .8; }
 .fridge-banner-image { position: absolute; inset: 0; width: 100%; height: 100%; }
 .fridge-banner-copy { position: absolute; left: 28rpx; top: 32rpx; max-width: 62%; }
-.fridge-banner-eyebrow { color: #803c1e; font-size: 22rpx; }
-.fridge-banner-title { margin-top: 4rpx; color: #5d2f14; font-size: 32rpx; font-weight: 750; line-height: 1.3; }
-.fridge-banner-sub { margin-top: 4rpx; color: #803c1e; font-size: 22rpx; }
+.fridge-banner-eyebrow { font-size: 22rpx; }
+.fridge-banner-title { margin-top: 4rpx; font-size: 32rpx; font-weight: 750; line-height: 1.3; }
+.fridge-banner-action { position: absolute; left: 28rpx; bottom: 24rpx; font-size: 23rpx; font-weight: 650; }
 
 .fridge-search-row { display: flex; align-items: center; gap: 16rpx; }
 .fridge-search-row .recipe-search { flex: 1; min-width: 0; }
 .fridge-cart {
+  position: relative;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -37,38 +45,59 @@
   background: var(--theme-soft, #fff2e8);
 }
 .fridge-cart image { width: 40rpx; height: 40rpx; }
+.fridge-cart-count {
+  position: absolute;
+  top: -6rpx;
+  right: -6rpx;
+  min-width: 34rpx;
+  height: 34rpx;
+  box-sizing: border-box;
+  padding: 0 7rpx;
+  border: 2rpx solid var(--theme-page-bg, #fff8f0);
+  border-radius: 999rpx;
+  background: var(--theme-accent-text, #994017);
+  color: #fff;
+  font-size: 20rpx;
+  font-weight: 700;
+  line-height: 30rpx;
+  text-align: center;
+}
 .fridge-edit { flex: 1; display: flex; flex-direction: column; min-height: 0; margin-top: 24rpx; }
 .recipe-search.fridge-search { margin-bottom: 0; border-radius: 22rpx; }
-.fridge-picker-head { margin-top: 24rpx; margin-bottom: 12rpx; }
-.fridge-picker-body { flex: 1; display: flex; gap: 18rpx; min-height: 0; }
-.fridge-groups {
-  flex: 0 0 180rpx;
-  width: 180rpx;
-  height: 100%;
-  border-radius: 18rpx;
-  background: var(--theme-neutral, #f7f3ee);
+.fridge-search .search-mark { border-color: #75665e; }
+.fridge-search .search-mark::after { background: #75665e; }
+.fridge-picker-head {
+  flex-shrink: 0;
+  align-items: flex-start;
+  margin-top: 20rpx;
+  padding-bottom: 16rpx;
 }
-.fridge-group {
-  display: block;
+.fridge-groups {
+  flex-shrink: 0;
   width: 100%;
-  padding: 0 16rpx;
-  border-radius: 14rpx;
+  margin-top: 16rpx;
+  white-space: nowrap;
+}
+.fridge-group-track { display: inline-flex; gap: 8rpx; }
+.fridge-group {
+  flex-shrink: 0;
+  padding: 0 18rpx;
+  border-radius: 16rpx;
   background: transparent;
   color: var(--theme-muted, #67554c);
   font-size: 25rpx;
-  line-height: 76rpx;
-  text-align: left;
+  line-height: 88rpx;
 }
-.fridge-group-active { background: var(--theme-surface, #fff); color: var(--theme-accent-text, #783414); font-weight: 700; }
-.fridge-options-scroll { flex: 1; min-width: 0; height: 100%; }
-.fridge-options { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12rpx; }
+.fridge-group-active { background: var(--theme-selected, #ffe8d5); color: var(--theme-accent-text, #783414); font-weight: 700; }
+.fridge-options-scroll { flex: 1; min-height: 0; height: 0; }
+.fridge-options { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12rpx; }
 .fridge-option {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 10rpx;
   min-width: 0;
-  min-height: 76rpx;
+  min-height: 88rpx;
   padding: 12rpx 14rpx;
   border: 1rpx solid var(--theme-border, #f0e4d8);
   border-radius: 14rpx;
@@ -80,19 +109,22 @@
 }
 .fridge-option-name { min-width: 0; overflow-wrap: anywhere; }
 .fridge-option-mark { flex-shrink: 0; color: var(--theme-accent-text, #994017); font-weight: 700; }
+.fridge-option-remove {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24rpx;
+  height: 24rpx;
+  box-sizing: border-box;
+  border: 2rpx solid currentColor;
+  border-radius: 50%;
+  color: #75665e;
+  font-size: 19rpx;
+  font-weight: 600;
+  line-height: 1;
+}
 .fridge-option-checked { background: var(--theme-selected, #ffe8d5); border-color: var(--theme-selected-border, #e9a879); color: var(--theme-accent-text, #783414); }
 .fridge-empty { padding: 30rpx 0; }
 .fridge-more { display: block; margin: 14rpx auto 0; }
-/* 手边有的分组：移除提示 + 清空（规范第5条危险操作用语义色） */
-.fridge-picked-bar { margin-bottom: 12rpx; }
-.fridge-picked-hint { color: var(--theme-muted, #75665e); font-size: 24rpx; }
-.text-btn.fridge-clear {
-  padding: 0 8rpx;
-  min-height: 0;
-  background: transparent;
-  border: 0;
-  color: var(--state-danger, #c04040);
-  font-size: 24rpx;
-  line-height: 1.5;
-}
-.fridge-picked-foot { margin-top: 16rpx; color: var(--theme-muted, #75665e); font-size: 23rpx; text-align: center; }
+.fridge-inventory-note { margin-top: 2rpx; color: var(--theme-muted, #75665e); font-size: 22rpx; }
+.fridge-clear { padding-right: 0; color: var(--state-danger, #c04040); font-size: 24rpx; }

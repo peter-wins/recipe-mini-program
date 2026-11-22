@@ -360,7 +360,7 @@ test('四个页头距顶部统一：容器 20rpx + 页头 12rpx = 实际 32rpx',
   assert.ok(/padding: 12rpx /.test(shoppingRule), '采购页页头顶部间距应为 12rpx')
 })
 
-test('冰箱页改版：轮播置顶、手边有的置顶分组、采购图标独立于搜索栏', () => {
+test('冰箱页改版：轮播置顶、已有食材置顶分组、采购图标独立于搜索栏', () => {
   const wxml = read('pages/fridge/index.wxml')
   const wxss = read('pages/fridge/index.wxss')
 
@@ -370,12 +370,13 @@ test('冰箱页改版：轮播置顶、手边有的置顶分组、采购图标�
   assert.ok(exists('assets/banner-cook.svg'), '缺少轮播占位图')
   assert.ok(wxss.includes('.fridge-banner {'), '缺少轮播样式')
 
-  // 2. 用户要的「手边有的」卡片已删除，改为左分组第一项
+  // 2. 「已有食材」放在横滑分类首位
   assert.ok(!wxml.includes('fridge-card'), '不应再保留旧的顶部食材卡')
+  assert.match(wxml, /class="fridge-groups" scroll-x/)
   const js = read('pages/fridge/index.js')
-  assert.ok(js.includes("const MY_FRIDGE_GROUP = '手边有的'"), '应定义手边有的分组')
-  assert.ok(js.includes('fridgeGroupNames: [MY_FRIDGE_GROUP, ...'), '手边有的应置顶第一组')
-  assert.ok(js.includes('groupIndex === 0'), '分组0应走手边有的逻辑')
+  assert.ok(js.includes("const MY_FRIDGE_GROUP = '已有食材'"), '应定义已有食材分组')
+  assert.ok(js.includes('fridgeGroupNames: [MY_FRIDGE_GROUP, ...'), '已有食材应置顶第一组')
+  assert.ok(js.includes('groupIndex === 0'), '分组0应走已有食材逻辑')
 
   // 3. 采购图标在搜索栏外，与搜索框是兄弟节点，不被包裹
   assert.ok(/<view class="fridge-search-row">[\s\S]*?<view class="recipe-search fridge-search">[\s\S]*?<\/view>\s*<navigator class="fridge-cart"/.test(wxml), '采购图标应在搜索栏外')
@@ -383,13 +384,14 @@ test('冰箱页改版：轮播置顶、手边有的置顶分组、采购图标�
   assert.ok(!wxml.includes('fridge-icon'), '旧图标类应移除')
   assert.ok(wxss.includes('.fridge-cart {'), '缺少独立采购图标样式')
 
-  // 4. 清空入口移入手边有的分组
-  assert.ok(wxml.includes('fridge-picked-bar'), '手边有的分组应有清空操作条')
-  assert.ok(wxml.includes('fridge-clear'), '应保留清空入口')
-  assert.ok(wxss.includes('var(--state-danger,'), '清空走危险操作语义色') 
+  // 4. 已有食材标题下显示总数与移除提示，清空直达二次确认
+  assert.match(wxml, /共 {{selected.length}} 种食材/)
+  assert.ok(wxml.includes('点击食材可移除'))
+  assert.ok(wxml.includes('bindtap="clearInventory"'), '清空按钮应直接打开确认弹窗')
+  assert.ok(js.includes("confirmColor: '#c04040'"), '清空确认使用危险色')
 })
 
-test('冰箱页「手边有的」分组内容跟随已登记食材，其它分组顺延', () => {
+test('冰箱页「已有食材」分组内容跟随已登记食材，其它分组顺延', () => {
   const originalPage = global.Page
   let opts
   try {
@@ -403,7 +405,7 @@ test('冰箱页「手边有的」分组内容跟随已登记食材，其它分�
   for (const key of Object.keys(opts)) {
     if (typeof opts[key] === 'function' && key !== 'setData') page[key] = opts[key].bind(page)
   }
-  assert.equal(page.data.fridgeGroupNames[0], '手边有的')
+  assert.equal(page.data.fridgeGroupNames[0], '已有食材')
   assert.equal(page.data.fridgeGroupNames.length, 7)
   assert.equal(page.data.fridgeGroupNames[1], '蔬菜')
   assert.equal(page.data.fridgeGroupIndex, 0)
@@ -413,7 +415,18 @@ test('冰箱页「手边有的」分组内容跟随已登记食材，其它分�
   const tomato = getIngredientOptionsForTest().find(item => item.id === 'tomato')
   page.updateSelection([egg.id, tomato.id])
   assert.deepEqual(page.data.visibleIngredients.map(item => item.name).sort(), [egg.name, tomato.name].sort())
-  assert.ok(page.data.visibleIngredients.every(item => item.checked), '手边有的分组里都是已选状态')
+  assert.ok(page.data.visibleIngredients.every(item => item.checked), '已有食材分组里都是已选状态')
+
+  const stockedIds = getIngredientOptionsForTest().slice(0, 19).map(item => item.id)
+  page.updateSelection(stockedIds.slice(0, 18))
+  assert.equal(page.data.visibleIngredients.length, 18)
+  assert.equal(page.data.hasMoreIngredients, false)
+  page.updateSelection(stockedIds)
+  assert.equal(page.data.visibleIngredients.length, 18)
+  assert.equal(page.data.hasMoreIngredients, true)
+  page.loadMoreIngredients()
+  assert.equal(page.data.visibleIngredients.length, 19)
+  assert.equal(page.data.hasMoreIngredients, false)
 
   // 切到蔬菜分组（索引1）不应把手边食材当成普通分组内容
   page.selectIngredientGroup({ currentTarget: { dataset: { index: 1 } } })
@@ -470,7 +483,18 @@ test('食材指南两个页面结构完整且走主题', () => {
 
   assert.ok(app.pages.includes('pages/guide/index'))
   assert.ok(app.pages.includes('pages/guide-detail/index'))
-  assert.ok(exists('assets/guide-spinach.svg'))
+  assert.ok(exists('assets/guide-spinach.svg')) // 其它占位食材仍共用
+  assert.ok(exists('assets/guide-spinach.png'), '菠菜应用真实插画 PNG')
+
+  // 菠菜插画：透明底 PNG、2:1 横版、菠菜本体引用新图
+  const guideData = require('../miniprogram/guide-data')
+  assert.equal(guideData.getIngredient('spinach').image, '/assets/guide-spinach.png')
+  assert.ok(guideData.getIngredient('cabbage').image === '/assets/guide-spinach.svg', '未做图的占位食材仍用旧图')
+  const fs = require('fs')
+  const png = fs.readFileSync('miniprogram/assets/guide-spinach.png')
+  assert.equal(png.readUInt32BE(16), 1200, '宽度应为 1200')
+  assert.equal(png.readUInt32BE(20), 600, '高度应为 600')
+  assert.equal(png[25], 6, '应为 RGBA 透明 PNG（颜色类型 6）')
 })
 
 test('采购清单「加入清单」按钮局部降到 76rpx，不动全局最小点击区', () => {
