@@ -49,7 +49,9 @@
                 </button>
               </view>
               <button class="shopping-bought" bindtap="markBought" disabled="{{updating}}" data-key="{{item.key}}" aria-label="{{'已买' + item.name + (item.canRestock ? '，加入冰箱' : '')}}">已买</button>
-              <button class="link shopping-remove" bindtap="removeItem" disabled="{{updating}}" data-key="{{item.key}}" aria-label="{{'从清单移除' + item.name}}">移除</button>
+              <button class="shopping-remove" bindtap="removeItem" disabled="{{updating}}" data-key="{{item.key}}" aria-label="{{'从清单移除' + item.name}}">
+                <text class="shopping-remove-icon" aria-hidden="true">−</text>
+              </button>
             </view>
             <view wx:if="{{item.expanded}}" class="shopping-details">
               <view wx:for="{{item.details}}" wx:for-item="detail" wx:key="key" class="row subtle shopping-detail">

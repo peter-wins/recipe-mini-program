@@ -38,14 +38,36 @@
 .shopping-check { display: flex; flex: 0 0 34rpx; height: 34rpx; align-items: center; justify-content: center; box-sizing: border-box; border: 2rpx solid var(--theme-selected-border, #d9b59a); border-radius: 50%; font-size: 23rpx; }
 .shopping-row-selected .shopping-check { border-color: var(--theme-accent, #c87137); background: var(--theme-accent, #c87137); color: #fff; }
 /* 行内小按钮局部降到 64rpx，配合单行名称+用量，避免撑高整行；不改全局 88rpx 最小点击区 */
-.shopping-bought, .shopping-remove { flex-shrink: 0; min-width: 72rpx; min-height: 64rpx; padding: 0 7rpx; font-size: 24rpx; line-height: 64rpx; }
-.shopping-bought { min-width: 96rpx; border-radius: 14rpx; background: var(--theme-selected, #fbecdc); color: var(--theme-accent-text, #994017); font-weight: 650; }
+.shopping-bought { flex-shrink: 0; min-width: 96rpx; min-height: 64rpx; padding: 0 7rpx; font-size: 24rpx; line-height: 64rpx; border-radius: 14rpx; background: var(--theme-selected, #fbecdc); color: var(--theme-accent-text, #994017); font-weight: 650; }
+/* 移除按钮复用冰箱页「已有食材」的圆形描边减号图标 */
+.shopping-remove {
+  display: flex;
+  flex: 0 0 64rpx;
+  min-width: 64rpx;
+  min-height: 64rpx;
+  padding: 0;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+}
+.shopping-remove-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24rpx;
+  height: 24rpx;
+  box-sizing: border-box;
+  border: 2rpx solid currentColor;
+  border-radius: 50%;
+  color: #75665e;
+  font-size: 19rpx;
+  font-weight: 600;
+  line-height: 1;
+}
 .shopping-export { margin-top: 24rpx; text-align: center; }
 .shopping-export .primary { width: 100%; min-height: 88rpx; line-height: 88rpx; }
 .shopping-export-hint { margin-top: 10rpx; font-size: 23rpx; }
 .shopping-poster-canvas { position: fixed; left: -9999rpx; top: 0; width: 750px; height: 1px; pointer-events: none; }
-/* 规范第5条：移除是危险操作，用独立语义色 */
-.shopping-remove { color: var(--state-danger, #c04040); }
 .shopping-entry { display: block; }
 .shopping-entry-fields { display: flex; align-items: flex-start; gap: 16rpx; }
 .shopping-entry-field { flex: 2; min-width: 0; font-size: 26rpx; color: var(--theme-muted, #75665e); }
