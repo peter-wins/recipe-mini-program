@@ -4,44 +4,30 @@
 .fridge-fill { display: flex; flex-direction: column; height: 100vh; }
 .fridge-fill .screen { flex: 1; display: flex; flex-direction: column; min-height: 0; }
 
-.fridge-icon {
+/* 顶部轮播灵感卡 */
+.fridge-banner { flex: 0 0 auto; height: 232rpx; border-radius: var(--card-radius, 28rpx); overflow: hidden; }
+.fridge-banner-slide { position: relative; height: 100%; border-radius: var(--card-radius, 28rpx); overflow: hidden; background: #f6d9a8; }
+.fridge-banner-image { position: absolute; inset: 0; width: 100%; height: 100%; }
+.fridge-banner-copy { position: absolute; left: 28rpx; top: 32rpx; max-width: 62%; }
+.fridge-banner-eyebrow { color: #803c1e; font-size: 22rpx; }
+.fridge-banner-title { margin-top: 4rpx; color: #5d2f14; font-size: 32rpx; font-weight: 750; line-height: 1.3; }
+.fridge-banner-sub { margin-top: 4rpx; color: #803c1e; font-size: 22rpx; }
+
+.fridge-search-row { display: flex; align-items: center; gap: 16rpx; }
+.fridge-search-row .recipe-search { flex: 1; min-width: 0; }
+.fridge-cart {
   display: flex;
   align-items: center;
   justify-content: center;
-  flex: 0 0 68rpx;
-  height: 68rpx;
-  border-radius: 20rpx;
+  flex: 0 0 86rpx;
+  height: 86rpx;
+  border-radius: 22rpx;
   background: var(--theme-soft, #fff2e8);
 }
-.fridge-icon image { width: 36rpx; height: 36rpx; }
-.fridge-card {
-  padding: 24rpx;
-  border-radius: var(--card-radius, 28rpx);
-  background: var(--theme-surface, #fff);
-}
-.fridge-picked {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10rpx;
-  margin-top: 20rpx;
-}
-.fridge-picked-chip, .fridge-expand, .fridge-clear {
-  max-width: 100%;
-  padding: 0 16rpx;
-  border-radius: 999rpx;
-  background: var(--theme-soft, #fff2e8);
-  color: var(--theme-accent-text, #803c1e);
-  font-size: 24rpx;
-  line-height: 58rpx;
-  overflow-wrap: anywhere;
-}
-.fridge-picked-chip text { margin-left: 4rpx; }
-.fridge-expand { background: var(--theme-neutral, #f7f3ee); color: var(--theme-muted, #67554c); }
-/* 规范第5条：危险操作用独立语义色，不随主题 */
-.fridge-clear { background: transparent; color: var(--state-danger, #c04040); }
-.fridge-edit { flex: 1; display: flex; flex-direction: column; min-height: 0; margin-top: 20rpx; }
-.recipe-search.fridge-search { margin-bottom: 16rpx; border-radius: 26rpx; }
-.fridge-picker-head { margin-bottom: 12rpx; }
+.fridge-cart image { width: 40rpx; height: 40rpx; }
+.fridge-edit { flex: 1; display: flex; flex-direction: column; min-height: 0; margin-top: 24rpx; }
+.recipe-search.fridge-search { margin-bottom: 0; border-radius: 22rpx; }
+.fridge-picker-head { margin-top: 24rpx; margin-bottom: 12rpx; }
 .fridge-picker-body { flex: 1; display: flex; gap: 18rpx; min-height: 0; }
 .fridge-groups {
   flex: 0 0 180rpx;
@@ -85,3 +71,16 @@
 .fridge-option-checked { background: var(--theme-selected, #ffe8d5); border-color: var(--theme-selected-border, #e9a879); color: var(--theme-accent-text, #783414); }
 .fridge-empty { padding: 30rpx 0; }
 .fridge-more { display: block; margin: 14rpx auto 0; }
+/* 手边有的分组：移除提示 + 清空（规范第5条危险操作用语义色） */
+.fridge-picked-bar { margin-bottom: 12rpx; }
+.fridge-picked-hint { color: var(--theme-muted, #75665e); font-size: 24rpx; }
+.text-btn.fridge-clear {
+  padding: 0 8rpx;
+  min-height: 0;
+  background: transparent;
+  border: 0;
+  color: var(--state-danger, #c04040);
+  font-size: 24rpx;
+  line-height: 1.5;
+}
+.fridge-picked-foot { margin-top: 16rpx; color: var(--theme-muted, #75665e); font-size: 23rpx; text-align: center; }

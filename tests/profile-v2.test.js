@@ -358,3 +358,72 @@ test('四个页头距顶部统一：容器 20rpx + 页头 12rpx = 实际 32rpx',
   assert.ok(/padding-top: 12rpx/.test(mealRule), '搭配页页头顶部间距应为 12rpx')
   assert.ok(/padding: 12rpx /.test(shoppingRule), '采购页页头顶部间距应为 12rpx')
 })
+
+test('冰箱页改版：轮播置顶、手边有的置顶分组、采购图标独立于搜索栏', () => {
+  const wxml = read('pages/fridge/index.wxml')
+  const wxss = read('pages/fridge/index.wxss')
+
+  // 1. 顶部轮播：swiper + indicator + banner 资源，且位于搜索栏之前
+  assert.ok(/<swiper[\s\S]*?indicator-dots[\s\S]*?fridge-banner/.test(wxml) || wxml.includes('<swiper class="fridge-banner"'), '顶部应有轮播图')
+  assert.ok(wxml.indexOf('fridge-banner') < wxml.indexOf('fridge-search-row'), '轮播应在搜索栏之上')
+  assert.ok(exists('assets/banner-cook.svg'), '缺少轮播占位图')
+  assert.ok(wxss.includes('.fridge-banner {'), '缺少轮播样式')
+
+  // 2. 用户要的「手边有的」卡片已删除，改为左分组第一项
+  assert.ok(!wxml.includes('fridge-card'), '不应再保留旧的顶部食材卡')
+  const js = read('pages/fridge/index.js')
+  assert.ok(js.includes("const MY_FRIDGE_GROUP = '手边有的'"), '应定义手边有的分组')
+  assert.ok(js.includes('fridgeGroupNames: [MY_FRIDGE_GROUP, ...'), '手边有的应置顶第一组')
+  assert.ok(js.includes('groupIndex === 0'), '分组0应走手边有的逻辑')
+
+  // 3. 采购图标在搜索栏外，与搜索框是兄弟节点，不被包裹
+  assert.ok(/<view class="fridge-search-row">[\s\S]*?<view class="recipe-search fridge-search">[\s\S]*?<\/view>\s*<navigator class="fridge-cart"/.test(wxml), '采购图标应在搜索栏外')
+  assert.ok(wxml.includes("icons.path('cart')"), '采购图标应走映射')
+  assert.ok(!wxml.includes('fridge-icon'), '旧图标类应移除')
+  assert.ok(wxss.includes('.fridge-cart {'), '缺少独立采购图标样式')
+
+  // 4. 清空入口移入手边有的分组
+  assert.ok(wxml.includes('fridge-picked-bar'), '手边有的分组应有清空操作条')
+  assert.ok(wxml.includes('fridge-clear'), '应保留清空入口')
+  assert.ok(wxss.includes('var(--state-danger,'), '清空走危险操作语义色') 
+})
+
+test('冰箱页「手边有的」分组内容跟随已登记食材，其它分组顺延', () => {
+  const originalPage = global.Page
+  let opts
+  try {
+    global.Page = value => { opts = value }
+    delete require.cache[require.resolve('../miniprogram/pages/fridge/index.js')]
+    require('../miniprogram/pages/fridge/index.js')
+  } finally {
+    global.Page = originalPage
+  }
+  const page = { data: opts.data, setData(patch) { Object.assign(this.data, patch) } }
+  for (const key of Object.keys(opts)) {
+    if (typeof opts[key] === 'function' && key !== 'setData') page[key] = opts[key].bind(page)
+  }
+  assert.equal(page.data.fridgeGroupNames[0], '手边有的')
+  assert.equal(page.data.fridgeGroupNames.length, 7)
+  assert.equal(page.data.fridgeGroupNames[1], '蔬菜')
+  assert.equal(page.data.fridgeGroupIndex, 0)
+  assert.deepEqual(page.data.visibleIngredients, [])
+
+  const egg = getIngredientOptionsForTest().find(item => item.id === 'egg')
+  const tomato = getIngredientOptionsForTest().find(item => item.id === 'tomato')
+  page.updateSelection([egg.id, tomato.id])
+  assert.deepEqual(page.data.visibleIngredients.map(item => item.name).sort(), [egg.name, tomato.name].sort())
+  assert.ok(page.data.visibleIngredients.every(item => item.checked), '手边有的分组里都是已选状态')
+
+  // 切到蔬菜分组（索引1）不应把手边食材当成普通分组内容
+  page.selectIngredientGroup({ currentTarget: { dataset: { index: 1 } } })
+  assert.ok(page.data.visibleIngredients.some(item => item.id !== egg.id), '蔬菜分组应展示目录内容')
+
+  // 搜索走全量搜索，不受分组索引影响
+  page.searchIngredients({ detail: { value: '牛腩' } })
+  assert.ok(page.data.searching)
+  assert.ok(page.data.visibleIngredients.length > 0)
+})
+
+function getIngredientOptionsForTest() {
+  return require('../miniprogram/catalog').getIngredientOptions()
+}

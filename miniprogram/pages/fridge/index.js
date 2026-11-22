@@ -1,13 +1,19 @@
 const { getCatalogSource, getIngredientOptions, getIngredientGroups, searchIngredientOptions } = require('../../catalog')
-const { readInventory, saveInventory, summarizeInventory } = require('../../inventory')
+const { readInventory, saveInventory } = require('../../inventory')
 const { applyTheme } = require('../../theme')
 
 const fridgeGroups = getIngredientGroups()
 const ingredientPageSize = 24
+const MY_FRIDGE_GROUP = '手边有的'
 
 function ingredientView(selected, search, groupIndex, limit) {
   const searching = Boolean(search.trim())
-  const items = searching ? searchIngredientOptions(search) : getIngredientGroups()[groupIndex].items
+  // 分组 0 固定为「手边有的」，内容跟随已登记食材；其余分组顺延一位对应 catalog 分组
+  const items = searching
+    ? searchIngredientOptions(search)
+    : groupIndex === 0
+      ? getIngredientOptions().filter(item => selected.includes(item.id))
+      : fridgeGroups[groupIndex - 1].items
   return {
     searching,
     visibleIngredients: items.slice(0, limit).map(({ id, name }) => ({ id, name, checked: selected.includes(id) })),
@@ -18,13 +24,16 @@ function ingredientView(selected, search, groupIndex, limit) {
 Page({
   data: {
     selected: [],
-    selectedItems: [],
     search: '',
-    fridgeGroupNames: fridgeGroups.map(group => group.name),
+    fridgeGroupNames: [MY_FRIDGE_GROUP, ...fridgeGroups.map(group => group.name)],
     fridgeGroupIndex: 0,
     ingredientLimit: ingredientPageSize,
-    showAllSelected: false,
-    fridgeSummary: summarizeInventory([]),
+    banners: [{
+      eyebrow: '今日灵感',
+      title: '用现有食材做道好菜',
+      sub: '3 道菜谱等你发现',
+      image: '/assets/banner-cook.svg'
+    }],
     ...ingredientView([], '', 0, ingredientPageSize)
   },
 
@@ -69,10 +78,6 @@ Page({
     this.setData({ ...patch, ...ingredientView(selected, search, fridgeGroupIndex, ingredientLimit) })
   },
 
-  toggleSelectedIngredients() {
-    this.setData({ showAllSelected: !this.data.showAllSelected })
-  },
-
   clearInventory() {
     wx.showModal({
       title: '清空冰箱食材？',
@@ -99,11 +104,6 @@ Page({
   },
 
   updateSelection(selected) {
-    this.applyIngredientView({
-      selected,
-      selectedItems: getIngredientOptions().filter(item => selected.includes(item.id)).map(({ id, name }) => ({ id, name })),
-      showAllSelected: selected.length > 8 && this.data.showAllSelected,
-      fridgeSummary: summarizeInventory(selected)
-    })
+    this.applyIngredientView({ selected })
   }
 })

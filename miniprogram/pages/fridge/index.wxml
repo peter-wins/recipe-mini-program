@@ -1,28 +1,27 @@
 <wxs src="../../icons.wxs" module="icons" />
 <view class="theme-page theme-{{themeId}} fridge-fill">
   <view class="screen">
-    <view class="fridge-card">
-      <view class="row">
-        <view>
-          <view class="section">手边有 {{fridgeSummary.count}} 种食材</view>
-          <view class="subtle">{{fridgeSummary.staples ? '另有 ' + fridgeSummary.staples + ' 样常备调料' : '点选食材即可登记'}}</view>
+    <swiper class="fridge-banner" indicator-dots indicator-color="rgba(255,255,255,0.6)" indicator-active-color="#994017" autoplay circular interval="4000" duration="400" aria-label="做菜灵感轮播">
+      <swiper-item wx:for="{{banners}}" wx:key="title">
+        <view class="fridge-banner-slide">
+          <image class="fridge-banner-image" src="{{item.image}}" aria-hidden="true"/>
+          <view class="fridge-banner-copy">
+            <view class="fridge-banner-eyebrow">{{item.eyebrow}}</view>
+            <view class="fridge-banner-title">{{item.title}}</view>
+            <view class="fridge-banner-sub">{{item.sub}}</view>
+          </view>
         </view>
-        <navigator class="fridge-icon" url="/pages/shopping/index" aria-label="采购清单" hover-class="card-pressed"><image src="{{icons.path('cart')}}" aria-hidden="true"/></navigator>
-      </view>
-      <view wx:if="{{selected.length}}" class="fridge-picked">
-        <block wx:for="{{selectedItems}}" wx:key="id">
-          <button wx:if="{{showAllSelected || index < 8}}" class="fridge-picked-chip" data-id="{{item.id}}" bindtap="toggleIngredient" aria-label="移除{{item.name}}">{{item.name}}<text aria-hidden="true"> ×</text></button>
-        </block>
-        <button wx:if="{{selected.length > 8}}" class="fridge-expand" bindtap="toggleSelectedIngredients" aria-expanded="{{showAllSelected}}">{{showAllSelected ? '收起' : '还有 ' + (selected.length - 8) + ' 样'}}</button>
-        <button wx:if="{{selected.length <= 8 || showAllSelected}}" class="fridge-clear" bindtap="clearInventory">清空</button>
-      </view>
-    </view>
+      </swiper-item>
+    </swiper>
 
     <view id="ingredient-picker" class="fridge-edit">
-      <view class="recipe-search fridge-search">
-        <view class="search-mark" aria-hidden="true"></view>
-        <input class="recipe-search-input" value="{{search}}" bindinput="searchIngredients" confirm-type="search" placeholder="搜索食材，如 茄子、牛腩"/>
-        <button wx:if="{{search}}" class="link" bindtap="clearIngredientSearch">清除</button>
+      <view class="fridge-search-row">
+        <view class="recipe-search fridge-search">
+          <view class="search-mark" aria-hidden="true"></view>
+          <input class="recipe-search-input" value="{{search}}" bindinput="searchIngredients" confirm-type="search" placeholder="搜索食材，如 茄子、牛腩"/>
+          <button wx:if="{{search}}" class="link" bindtap="clearIngredientSearch">清除</button>
+        </view>
+        <navigator class="fridge-cart" url="/pages/shopping/index" aria-label="采购清单" hover-class="card-pressed"><image src="{{icons.path('cart')}}" aria-hidden="true"/></navigator>
       </view>
 
       <view class="row fridge-picker-head">
@@ -33,7 +32,11 @@
           <button wx:for="{{fridgeGroupNames}}" wx:key="*this" class="fridge-group {{fridgeGroupIndex === index ? 'fridge-group-active' : ''}}" data-index="{{index}}" bindtap="selectIngredientGroup" aria-pressed="{{fridgeGroupIndex === index}}">{{item}}</button>
         </scroll-view>
         <scroll-view class="fridge-options-scroll" scroll-y enhanced show-scrollbar="{{false}}">
-          <view wx:if="{{!visibleIngredients.length}}" class="empty fridge-empty">没找到这个食材，试试其他叫法。</view>
+          <view wx:if="{{!searching && fridgeGroupIndex === 0 && selected.length}}" class="row fridge-picked-bar">
+            <text class="fridge-picked-hint">点食材可移除</text>
+            <button class="text-btn fridge-clear" bindtap="clearInventory">清空</button>
+          </view>
+          <view wx:if="{{!visibleIngredients.length}}" class="empty fridge-empty">{{searching ? '没找到这个食材，试试其他叫法。' : (fridgeGroupIndex === 0 ? '还没登记食材，去其它分组勾选吧' : '这个分组暂时没有食材')}}</view>
           <view wx:else class="fridge-options">
             <button wx:for="{{visibleIngredients}}" wx:key="id" class="fridge-option {{item.checked ? 'fridge-option-checked' : ''}}" data-id="{{item.id}}" bindtap="toggleIngredient" aria-pressed="{{item.checked}}">
               <text class="fridge-option-name">{{item.name}}</text>
@@ -41,6 +44,7 @@
             </button>
           </view>
           <button wx:if="{{hasMoreIngredients}}" class="link fridge-more" bindtap="loadMoreIngredients">显示更多结果</button>
+          <view wx:if="{{!searching && fridgeGroupIndex === 0 && selected.length}}" class="fridge-picked-foot">去其它分组继续添加</view>
         </scroll-view>
       </view>
     </view>
