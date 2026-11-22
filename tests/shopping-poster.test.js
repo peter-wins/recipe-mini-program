@@ -37,7 +37,7 @@ test('清单图只写菜名与用量，不含操作按钮文案', () => {
   assert.equal(layout.rows[0].quantity, '200 克')
 })
 
-test('文本清单：标题、日期、逐项名称用量与项数，适合粘贴转发', () => {
+test('文本清单：标题、日期与逐项名称用量，适合粘贴转发', () => {
   const text = buildText([
     { name: '菠菜', quantity: '200 克' },
     { name: '鸡蛋', quantity: '2 个' },
@@ -49,8 +49,8 @@ test('文本清单：标题、日期、逐项名称用量与项数，适合粘�
   assert.equal(lines[1], '菠菜 200 克')
   assert.equal(lines[2], '鸡蛋 2 个')
   assert.equal(lines[3], '牛奶', '无用量时只留名称，不留多余空格')
-  assert.match(lines[4], /^共 3 项$/)
-  for (const word of ['已买', '移除', '多选', '复制缺料', '手动添加']) {
+  assert.equal(lines.length, 4, '文字清单不含「共 N 项」等尾部文案')
+  for (const word of ['已买', '移除', '多选', '复制缺料', '手动添加', '共 3 项']) {
     assert.ok(!text.includes(word), `文字清单不应出现「${word}」`)
   }
 })
@@ -67,9 +67,11 @@ test('绘制指令写入每一行且不重复叠加', () => {
   const ctx = {
     fillRect: (...args) => calls.push(['fillRect', ...args]),
     fillText: (text, x, y) => calls.push(['fillText', text, x, y]),
+    measureText: text => ({ width: text.length * 19 }),
     beginPath: () => calls.push(['beginPath']),
     moveTo: (...args) => calls.push(['moveTo', ...args]),
     lineTo: (...args) => calls.push(['lineTo', ...args]),
+    arc: (...args) => calls.push(['arc', ...args]),
     stroke: () => calls.push(['stroke']),
     setLineDash: () => {},
     scale: () => {}
@@ -89,6 +91,12 @@ test('绘制指令写入每一行且不重复叠加', () => {
   const noteCall = calls.find(call => call[0] === 'fillText' && /用量.*实际用途为准/.test(call[1]))
   assert.ok(noteCall, '图上应画出用量提示')
   assert.ok(noteCall[3] < 564, '提示画在画布底部区域')
+  assert.ok(texts.includes('i'), '提示前应有图标字符')
+  assert.ok(calls.some(call => call[0] === 'arc'), '提示图标应为圆形描边')
+  const iconCall = calls.find(call => call[0] === 'arc')
+  const iCall = calls.find(call => call[0] === 'fillText' && call[1] === 'i')
+  assert.equal(iconCall[1], iCall[2], '图标圆心与字母 i 水平对齐')
+  assert.ok(noteCall[2] > iCall[2], '提示文字在图标右侧')
   assert.equal(calls.filter(call => call[0] === 'fillRect').length, 1)
 })
 
@@ -97,7 +105,7 @@ test('导出清单图：取 canvas、按像素比绘制并保存相册', async (
   const previousWx = global.wx
   let definition
   const calls = []
-  const ctx = { fillRect: () => {}, fillText: () => {}, beginPath: () => {}, moveTo: () => {}, lineTo: () => {}, stroke: () => {}, setLineDash: () => {}, scale: (x, y) => calls.push(['scale', x, y]) }
+  const ctx = { fillRect: () => {}, fillText: () => {}, measureText: text => ({ width: text.length * 19 }), beginPath: () => {}, moveTo: () => {}, lineTo: () => {}, arc: () => {}, stroke: () => {}, setLineDash: () => {}, scale: (x, y) => calls.push(['scale', x, y]) }
   const canvas = { getContext: () => ctx }
   try {
     global.Page = value => { definition = value }
@@ -191,7 +199,7 @@ test('复制文字清单：调用剪贴板写入逐项内容并提示成功', ()
     assert.match(clipboard, /^采购清单（/)
     assert.ok(clipboard.includes('菠菜 200 克'))
     assert.ok(clipboard.includes('鸡蛋 2 个'))
-    assert.ok(clipboard.includes('共 2 项'))
+    assert.ok(!clipboard.includes('共 2 项'), '文字清单不含项数尾行')
     assert.ok(toasts.includes('已复制，去粘贴吧'))
   } finally {
     global.wx = previousWx
@@ -243,7 +251,7 @@ test('相册权限被拒时给出去设置的弹窗，不误报成功', () => {
 
   let modal
   const toasts = []
-  const ctx = { fillRect: () => {}, fillText: () => {}, beginPath: () => {}, moveTo: () => {}, lineTo: () => {}, stroke: () => {}, setLineDash: () => {}, scale: () => {} }
+  const ctx = { fillRect: () => {}, fillText: () => {}, measureText: text => ({ width: text.length * 19 }), beginPath: () => {}, moveTo: () => {}, lineTo: () => {}, arc: () => {}, stroke: () => {}, setLineDash: () => {}, scale: () => {} }
   try {
     global.wx = {
       showLoading: () => {},

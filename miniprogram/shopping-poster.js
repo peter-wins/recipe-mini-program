@@ -33,7 +33,7 @@ function buildLayout(items, date) {
   }
 }
 
-// 文本清单：与图片同源的标题/日期/项数，适合粘贴到微信、备忘录
+// 文本清单：与图片同源的标题/日期/逐项内容，适合粘贴到微信、备忘录
 function buildText(items, date) {
   const rows = (items || []).map(item => {
     const name = item.name === undefined || item.name === null ? '' : String(item.name)
@@ -42,8 +42,7 @@ function buildText(items, date) {
   })
   return [
     `采购清单（${dateLabel(date)}）`,
-    ...rows,
-    `共 ${rows.length} 项`
+    ...rows
   ].join('\n')
 }
 
@@ -86,10 +85,29 @@ function draw(ctx, layout) {
 
   const footerTop = headerHeight + rows.length * rowHeight + 48
   if (note) {
+    const noteFont = '19px sans-serif'
+    ctx.font = noteFont
+    const noteWidth = typeof ctx.measureText === 'function' ? ctx.measureText(note).width : 0
+    const iconRadius = 11
+    const gap = 8
+    const totalWidth = iconRadius * 2 + gap + noteWidth
+    const startX = (width - totalWidth) / 2
+    const centerY = footerTop + 44
+
+    ctx.strokeStyle = '#A08C7D'
+    ctx.lineWidth = 1.5
+    ctx.beginPath()
+    ctx.arc(startX + iconRadius, centerY - 6, iconRadius, 0, Math.PI * 2)
+    ctx.stroke()
     ctx.textAlign = 'center'
+    ctx.fillStyle = '#A08C7D'
+    ctx.font = 'bold 15px sans-serif'
+    ctx.fillText('i', startX + iconRadius, centerY - 1)
+
+    ctx.textAlign = 'left'
     ctx.fillStyle = '#75665E'
-    ctx.font = '19px sans-serif'
-    ctx.fillText(note, width / 2, footerTop + 44)
+    ctx.font = noteFont
+    ctx.fillText(note, startX + iconRadius * 2 + gap, centerY)
   }
   ctx.textAlign = 'left'
   void height
