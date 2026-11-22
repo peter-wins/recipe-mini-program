@@ -1,0 +1,35 @@
+<wxs src="../../icons.wxs" module="icons" />
+<view class="theme-page theme-{{themeId}} guide-fill">
+  <view class="screen guide-screen">
+    <view class="guide-intro">
+      <view class="section">认识食材，做对菜</view>
+      <view class="subtle">挑得新鲜、存得妥当、吃得明白</view>
+    </view>
+
+    <view class="recipe-search guide-search">
+      <view class="search-mark" aria-hidden="true"></view>
+      <input class="recipe-search-input" value="{{search}}" bindinput="searchIngredients" confirm-type="search" placeholder="搜索食材，如 菠菜"/>
+      <button wx:if="{{search}}" class="link" bindtap="clearSearch">清除</button>
+    </view>
+
+    <view class="guide-body">
+      <scroll-view wx:if="{{!searching}}" class="guide-groups" scroll-y enhanced show-scrollbar="{{false}}">
+        <button wx:for="{{groups}}" wx:key="*this" class="guide-group {{groupIndex === index ? 'guide-group-active' : ''}}" data-index="{{index}}" bindtap="selectGroup" aria-pressed="{{groupIndex === index}}">{{item}}</button>
+      </scroll-view>
+      <scroll-view class="guide-list-scroll" scroll-y enhanced show-scrollbar="{{false}}">
+        <view wx:if="{{!visibleIngredients.length}}" class="empty guide-empty">{{searching ? '没找到这个食材' : '这个分类还在整理中'}}</view>
+        <view wx:else class="guide-list">
+          <button wx:for="{{visibleIngredients}}" wx:key="id" class="guide-card" data-id="{{item.id}}" bindtap="openDetail" hover-class="card-pressed">
+            <view class="guide-card-image" style="background:{{item.tint}}">
+              <image src="{{item.image}}" mode="aspectFit" aria-hidden="true"/>
+            </view>
+            <view class="guide-card-copy">
+              <view class="guide-card-name">{{item.name}}</view>
+              <view class="guide-card-count">{{item.recipeCount ? item.recipeCount + ' 道做法' : '整理中'}}</view>
+            </view>
+          </button>
+        </view>
+      </scroll-view>
+    </view>
+  </view>
+</view>

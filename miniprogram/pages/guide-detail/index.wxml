@@ -1,0 +1,40 @@
+<view class="theme-page theme-{{themeId}} guide-detail">
+  <view class="screen" wx:if="{{item}}">
+    <view class="detail-hero" style="background:{{item.tint}}">
+      <image src="{{item.image}}" mode="aspectFit" aria-hidden="true"/>
+      <view wx:if="{{item.season}}" class="detail-season">{{item.season}}</view>
+    </view>
+
+    <view wx:if="{{item.pending}}" class="detail-pending">这本书里的介绍还在整理，先把关联的做法收进来啦。</view>
+
+    <view wx:if="{{item.therapy}}" class="detail-card">
+      <view class="detail-row"><text class="detail-tag detail-tag-therapy">食疗</text><text class="detail-row-text">{{item.therapy}}</text></view>
+      <view wx:if="{{item.audience}}" class="detail-row"><text class="detail-tag detail-tag-audience">人群</text><text class="detail-row-text">{{item.audience}}</text></view>
+    </view>
+
+    <block wx:if="{{item.storage.length}}">
+      <view class="detail-heading">挑选与保存</view>
+      <view class="detail-card detail-list">
+        <view wx:for="{{item.storage}}" wx:key="*this" class="detail-list-item">{{item}}</view>
+      </view>
+    </block>
+
+    <block wx:if="{{item.tips.length}}">
+      <view class="detail-heading">下厨小贴士</view>
+      <view class="detail-card detail-tips">
+        <view wx:for="{{item.tips}}" wx:key="*this" class="detail-tip">{{item}}</view>
+      </view>
+    </block>
+
+    <view class="detail-heading detail-heading-row"><text>用{{item.name}}做菜</text><text wx:if="{{item.recipes.length}}" class="detail-count">{{item.recipes.length}} 道</text></view>
+    <view wx:if="{{!item.recipes.length}}" class="empty">这本书里的做法还在整理中。</view>
+    <view wx:else class="detail-recipes">
+      <button wx:for="{{item.recipes}}" wx:key="id" class="detail-recipe" data-id="{{item.id}}" bindtap="openRecipe" hover-class="card-pressed">
+        <image wx:if="{{item.image}}" src="{{item.image}}" mode="aspectFill" aria-hidden="true"/>
+        <view wx:else class="detail-recipe-photo" aria-hidden="true"></view>
+        <text class="detail-recipe-name">{{item.name}}</text>
+        <text wx:if="{{item.minutes}}" class="detail-recipe-time">{{item.minutes}} 分钟</text>
+      </button>
+    </view>
+  </view>
+</view>

@@ -25,17 +25,18 @@ test('我的页按我的厨房与偏好与设置分组，五个改动点到位',
   // 3. 功能入口分两组
   assert.ok(wxml.includes('>我的厨房</view>'))
   assert.ok(wxml.includes('>偏好与设置</view>'))
-  for (const label of ['冰箱食材', '采购清单', '做饭日历', '主题外观', '意见反馈', '关于']) {
+  for (const label of ['冰箱食材', '采购清单', '做饭日历', '食材指南', '主题外观', '意见反馈', '关于']) {
     assert.ok(wxml.includes(label), `缺少入口 ${label}`)
   }
   assert.ok(wxml.includes('/pages/meal-calendar/index'))
+  assert.ok(wxml.includes('/pages/guide/index'))
   assert.ok(wxml.includes('open-type="contact"'))
 
   // 入口两行结构与副标题文案
-  for (const desc of ['随手记下家里的食材', '买菜不遗漏', '安排每天吃什么']) {
+  for (const desc of ['随手记下家里的食材', '买菜不遗漏', '安排每天吃什么', '认识食材，做对菜']) {
     assert.ok(wxml.includes(desc), `缺少副标题 ${desc}`)
   }
-  assert.ok((wxml.match(/class="profile-row-copy"/g) || []).length === 6)
+  assert.ok((wxml.match(/class="profile-row-copy"/g) || []).length === 7)
   assert.ok(wxss.includes('.profile-row-desc'))
   assert.ok(wxml.includes('吃饭得有谱 · 让每一餐都有好心情'))
 
@@ -427,3 +428,47 @@ test('冰箱页「手边有的」分组内容跟随已登记食材，其它分�
 function getIngredientOptionsForTest() {
   return require('../miniprogram/catalog').getIngredientOptions()
 }
+
+test('食材指南：分组、菠菜介绍原文与菜谱关联', () => {
+  const guide = require('../miniprogram/guide-data')
+  assert.deepEqual(guide.groups, ['叶菜', '根茎', '瓜果', '菌菇', '蛋豆', '肉水产'])
+
+  const list = guide.listIngredients()
+  assert.ok(list.some(item => item.id === 'spinach' && item.group === '叶菜'))
+  assert.ok(list.some(item => item.id === 'cabbage'))
+  assert.ok(list.every(item => typeof item.recipeCount === 'number'))
+
+  const spinach = guide.getIngredient('spinach')
+  assert.ok(spinach.therapy.includes('补血止血'))
+  assert.ok(spinach.audience.includes('高血压'))
+  assert.equal(spinach.storage.length, 3)
+  assert.equal(spinach.tips.length, 2)
+  assert.ok(spinach.tips.some(tip => tip.includes('草酸')))
+  assert.ok(spinach.recipes.length > 0, '菠菜应关联到现有菜谱')
+  assert.ok(spinach.recipes.every(r => r.id && r.name))
+
+  assert.equal(guide.getIngredient('not-exist'), null)
+  assert.ok(guide.getIngredient('cabbage').pending, '占位条目应标记待补录')
+})
+
+test('食材指南两个页面结构完整且走主题', () => {
+  const listWxml = read('pages/guide/index.wxml')
+  const detailWxml = read('pages/guide-detail/index.wxml')
+  const detailJs = read('pages/guide-detail/index.js')
+  const app = JSON.parse(read('app.json'))
+
+  assert.ok(listWxml.includes('theme-page theme-{{themeId}}'))
+  assert.ok(listWxml.includes('guide-groups') && listWxml.includes('guide-list'))
+  assert.ok(listWxml.includes('searchIngredients') && listWxml.includes('openDetail'))
+
+  assert.ok(detailWxml.includes('theme-page theme-{{themeId}}'))
+  for (const field of ['detail-tag-therapy', 'detail-tag-audience', '挑选与保存', '下厨小贴士', '用{{item.name}}做菜']) {
+    assert.ok(detailWxml.includes(field), `详情页缺少 ${field}`)
+  }
+  assert.ok(detailWxml.includes('bindtap="openRecipe"'))
+  assert.ok(detailJs.includes('/pages/recipe/index?id='))
+
+  assert.ok(app.pages.includes('pages/guide/index'))
+  assert.ok(app.pages.includes('pages/guide-detail/index'))
+  assert.ok(exists('assets/guide-spinach.svg'))
+})
