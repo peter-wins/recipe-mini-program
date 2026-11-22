@@ -568,6 +568,12 @@ test('菜谱页去掉复制缺料，采购清单页提供生成清单图', () =>
   assert.ok(/\.shopping-remove \{[^}]*min-height: 64rpx/.test(shoppingWxss), '移除按钮局部降高，避免撑高整行')
   assert.ok(shoppingWxml.includes('shopping-remove-icon'), '移除按钮使用图标而非文字')
   assert.ok(/\.shopping-remove-icon \{[^}]*border-radius: 50%/.test(shoppingWxss), '移除图标为圆形描边减号')
+  assert.ok(shoppingWxml.includes("icons.path('copy')"), '复制按钮图标走统一映射')
+  assert.ok(exists('assets/icon-copy.svg'), '复制图标文件存在')
+  assert.ok(read('icons.wxs').includes('copy: \'icon-copy.svg\''), '映射注册了复制图标')
+  assert.ok(shoppingWxml.includes('bindtap="copyTextList"'), '复制按钮绑定复制方法')
+  assert.ok(shoppingJs.includes('setClipboardData'), '复制方法写入剪贴板')
+  assert.ok(shoppingWxml.includes('图发微信或打印'), '提示文案覆盖图文两种用途')
   assert.ok(/button \{[^}]*min-height: 88rpx/.test(read('app.wxss')), '全局最小点击区规范保持不变')
 })
 

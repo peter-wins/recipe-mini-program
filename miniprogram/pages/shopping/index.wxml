@@ -63,7 +63,10 @@
       </view>
       <view class="shopping-export">
         <button class="primary" bindtap="exportPoster" disabled="{{updating}}">生成清单图</button>
-        <view class="subtle shopping-export-hint">存到相册，发给家人或自己打印</view>
+        <button class="link shopping-copy" bindtap="copyTextList" disabled="{{updating}}" aria-label="复制文字清单">
+          <image src="{{icons.path('copy')}}" aria-hidden="true"/>复制文字清单
+        </button>
+        <view class="subtle shopping-export-hint">图发微信或打印 · 文字粘贴到备忘录或聊天</view>
       </view>
     </block>
   </view>

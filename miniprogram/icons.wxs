@@ -24,6 +24,7 @@ var ICONS = {
   info: 'icon-info.svg',
   calendarLine: 'icon-calendar-line.svg',
   plus: 'icon-plus.svg',
+  copy: 'icon-copy.svg',
   camera: 'icon-camera.svg',
   categories: 'icon-categories.svg',
   ingredients: 'icon-ingredients.svg',

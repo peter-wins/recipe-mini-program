@@ -1,7 +1,7 @@
 const assert = require('node:assert/strict')
 const test = require('node:test')
 
-const { posterWidth, buildLayout, draw, shortText } = require('../miniprogram/shopping-poster')
+const { posterWidth, buildLayout, buildText, draw, shortText } = require('../miniprogram/shopping-poster')
 
 test('清单图布局：宽度固定，高度随条目数增长不被截断', () => {
   const empty = buildLayout([])
@@ -33,6 +33,24 @@ test('清单图只写菜名与用量，不含操作按钮文案', () => {
   }
   assert.equal(layout.rows[0].name, '菠菜')
   assert.equal(layout.rows[0].quantity, '200 克')
+})
+
+test('文本清单：标题、日期、逐项名称用量与项数，适合粘贴转发', () => {
+  const text = buildText([
+    { name: '菠菜', quantity: '200 克' },
+    { name: '鸡蛋', quantity: '2 个' },
+    { name: '牛奶', quantity: '' }
+  ], new Date(2026, 10, 22))
+  const lines = text.split('\n')
+
+  assert.match(lines[0], /^采购清单（11 月 22 日）$/)
+  assert.equal(lines[1], '菠菜 200 克')
+  assert.equal(lines[2], '鸡蛋 2 个')
+  assert.equal(lines[3], '牛奶', '无用量时只留名称，不留多余空格')
+  assert.match(lines[4], /^共 3 项$/)
+  for (const word of ['已买', '移除', '多选', '复制缺料', '手动添加']) {
+    assert.ok(!text.includes(word), `文字清单不应出现「${word}」`)
+  }
 })
 
 test('超长名称省略，避免文字溢出画布', () => {
@@ -130,6 +148,76 @@ test('导出清单图：取 canvas、按像素比绘制并保存相册', async (
     assert.deepEqual(calls.find(call => call[0] === 'save'), ['save', '/tmp/poster.png'])
     assert.deepEqual(calls.find(call => call[0] === 'toast'), ['toast', '已存到相册'])
     assert.equal(page.data.posterHeight, 564, '画布高度随清单条目数增长')
+  } finally {
+    global.wx = previousWx
+  }
+})
+
+test('复制文字清单：调用剪贴板写入逐项内容并提示成功', () => {
+  const previousPage = global.Page
+  const previousWx = global.wx
+  let definition
+  try {
+    global.Page = value => { definition = value }
+    delete require.cache[require.resolve('../miniprogram/pages/shopping/index.js')]
+    require('../miniprogram/pages/shopping/index.js')
+  } finally {
+    global.Page = previousPage
+  }
+
+  let clipboard
+  const toasts = []
+  try {
+    global.wx = {
+      setClipboardData: options => { clipboard = options.data; options.success() },
+      showToast: options => toasts.push(options.title)
+    }
+    const items = [
+      { name: '菠菜', quantity: '200 克' },
+      { name: '鸡蛋', quantity: '2 个' }
+    ]
+    const page = {
+      ...definition,
+      data: { items, updating: false },
+      setData(update) { Object.assign(this.data, update) }
+    }
+    page.copyTextList()
+    assert.match(clipboard, /^采购清单（/)
+    assert.ok(clipboard.includes('菠菜 200 克'))
+    assert.ok(clipboard.includes('鸡蛋 2 个'))
+    assert.ok(clipboard.includes('共 2 项'))
+    assert.ok(toasts.includes('已复制，去粘贴吧'))
+  } finally {
+    global.wx = previousWx
+  }
+})
+
+test('复制失败时给出提示，不误报成功', () => {
+  const previousPage = global.Page
+  const previousWx = global.wx
+  let definition
+  try {
+    global.Page = value => { definition = value }
+    delete require.cache[require.resolve('../miniprogram/pages/shopping/index.js')]
+    require('../miniprogram/pages/shopping/index.js')
+  } finally {
+    global.Page = previousPage
+  }
+
+  const toasts = []
+  try {
+    global.wx = {
+      setClipboardData: options => options.fail(),
+      showToast: options => toasts.push(options.title)
+    }
+    const page = {
+      ...definition,
+      data: { items: [{ name: '菠菜', quantity: '200 克' }], updating: false },
+      setData(update) { Object.assign(this.data, update) }
+    }
+    page.copyTextList()
+    assert.ok(toasts.includes('复制失败，请重试'))
+    assert.ok(!toasts.includes('已复制，去粘贴吧'), '失败不应提示成功')
   } finally {
     global.wx = previousWx
   }

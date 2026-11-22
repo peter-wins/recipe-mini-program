@@ -32,6 +32,20 @@ function buildLayout(items, date) {
   }
 }
 
+// 文本清单：与图片同源的标题/日期/项数，适合粘贴到微信、备忘录
+function buildText(items, date) {
+  const rows = (items || []).map(item => {
+    const name = item.name === undefined || item.name === null ? '' : String(item.name)
+    const quantity = item.quantity === undefined || item.quantity === null ? '' : String(item.quantity)
+    return quantity ? `${name} ${quantity}` : name
+  })
+  return [
+    `采购清单（${dateLabel(date)}）`,
+    ...rows,
+    `共 ${rows.length} 项`
+  ].join('\n')
+}
+
 function draw(ctx, layout) {
   const { width, height, title, subtitle, rows, footer } = layout
   ctx.fillStyle = '#FFFDF9'
@@ -78,4 +92,4 @@ function draw(ctx, layout) {
   void height
 }
 
-module.exports = { posterWidth, dateLabel, shortText, buildLayout, draw }
+module.exports = { posterWidth, dateLabel, shortText, buildLayout, buildText, draw }

@@ -1,7 +1,7 @@
 const { applyTheme } = require('../../theme')
 const { listShopping, removeShoppingItem, saveManualShopping, manualNameLimit, manualQuantityLimit,
   buyShoppingItems, undoShoppingPurchase } = require('../../shopping')
-const { buildLayout, draw } = require('../../shopping-poster')
+const { buildLayout, buildText, draw } = require('../../shopping-poster')
 
 const undoWindow = 10000
 
@@ -159,6 +159,16 @@ Page({
     } finally {
       this.setData({ updating: false })
     }
+  },
+
+  copyTextList() {
+    const items = this.data.items
+    if (!items.length || this.data.updating) return
+    wx.setClipboardData({
+      data: buildText(items),
+      success: () => wx.showToast({ title: '已复制，去粘贴吧', icon: 'success' }),
+      fail: () => wx.showToast({ title: '复制失败，请重试', icon: 'none' })
+    })
   },
 
   exportPoster() {
