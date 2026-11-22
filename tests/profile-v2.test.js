@@ -556,6 +556,10 @@ test('菜谱页去掉复制缺料，采购清单页提供生成清单图', () =>
   assert.ok(shoppingWxml.includes('id="shopping-poster"'), '应有离屏 canvas 节点')
   assert.ok(shoppingJs.includes('canvasToTempFilePath') && shoppingJs.includes('saveImageToPhotosAlbum'), '应导出图片并保存相册')
   assert.ok(/auth|deny/.test(shoppingJs), '应识别相册权限被拒')
+
+  const shoppingWxss = read('pages/shopping/index.wxss')
+  assert.ok(/\.shopping-export \.primary \{[^}]*line-height: 88rpx/.test(shoppingWxss), '导出按钮行高应与胶囊高度一致，文字垂直居中')
+  assert.ok(/\.shopping-export \.primary \{[^}]*min-height: 88rpx/.test(shoppingWxss), '导出按钮高度显式锁定 88rpx')
 })
 
 test('食材指南发布校验：版本号、数量与已有 ID 保护', () => {
