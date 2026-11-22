@@ -2,8 +2,8 @@ const test = require('node:test')
 const assert = require('node:assert/strict')
 const { APP_VERSION, RELEASE_NOTES, readVersion, versionInfo } = require('../miniprogram/app-version')
 
-test('本地版本号为 1.2.2 且更新说明覆盖三大改动点', () => {
-  assert.equal(APP_VERSION, '1.2.2')
+test('本地版本号为 1.2.3 且更新说明覆盖三大改动点', () => {
+  assert.equal(APP_VERSION, '1.2.3')
   assert.ok(RELEASE_NOTES.some(note => note.includes('我的')), '应包含我的页改版')
   assert.ok(RELEASE_NOTES.some(note => note.includes('冰箱')), '应包含冰箱页改版')
   assert.ok(RELEASE_NOTES.some(note => note.includes('图标')), '应包含图标统一')

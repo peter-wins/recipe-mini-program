@@ -1,6 +1,6 @@
 // 版本信息集中在这里维护：发版时更新 APP_VERSION 与 RELEASE_NOTES 即可。
 // 真机上优先读取微信后台配置的版本号，开发/异常环境回退到本地常量。
-const APP_VERSION = '1.2.2'
+const APP_VERSION = '1.2.3'
 const RELEASE_NOTES = [
   '「我的」页全新改版，新增主题外观与关于页',
   '冰箱页新增灵感轮播，手边食材置顶更顺手',
