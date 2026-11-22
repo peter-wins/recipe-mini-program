@@ -31,6 +31,20 @@ test('我的页按我的厨房与偏好与设置分组，五个改动点到位',
   assert.ok(wxml.includes('/pages/meal-calendar/index'))
   assert.ok(wxml.includes('open-type="contact"'))
 
+  // 入口两行结构与副标题文案
+  for (const desc of ['随手记下家里的食材', '买菜不遗漏', '安排每天吃什么']) {
+    assert.ok(wxml.includes(desc), `缺少副标题 ${desc}`)
+  }
+  assert.ok((wxml.match(/class="profile-row-copy"/g) || []).length === 6)
+  assert.ok(wxss.includes('.profile-row-desc'))
+  assert.ok(wxml.includes('吃饭得有谱 · 让每一餐都有好心情'))
+
+  // 统计第三项改名烹饪记录
+  assert.ok(wxml.includes('烹饪记录'))
+  assert.ok(!wxml.includes('>做过的菜</'))
+  const recordsJs = read('pages/records/index.js')
+  assert.ok(recordsJs.includes("cooked: '烹饪记录'"))
+
   // 4. 主题平铺移除，改为二级页入口
   assert.ok(!wxml.includes('theme-options'))
   assert.ok(!wxml.includes('id="profile-themes"'))

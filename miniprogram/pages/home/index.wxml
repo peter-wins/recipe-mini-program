@@ -162,22 +162,48 @@
     <view class="profile-stats">
       <navigator class="profile-stat" url="/pages/records/index?type=favorites" hover-class="card-pressed"><text class="stat-count">{{favorites.length}}</text>我的收藏</navigator>
       <navigator class="profile-stat" url="/pages/records/index?type=history" hover-class="card-pressed"><text class="stat-count">{{history.length}}</text>浏览历史</navigator>
-      <navigator class="profile-stat" url="/pages/records/index?type=cooked" hover-class="card-pressed"><text class="stat-count">{{cooked.length}}</text>做过的菜</navigator>
+      <navigator class="profile-stat" url="/pages/records/index?type=cooked" hover-class="card-pressed"><text class="stat-count">{{cooked.length}}</text>烹饪记录</navigator>
     </view>
 
     <view class="profile-group-title">我的厨房</view>
     <view class="profile-links">
-      <button class="profile-row" bindtap="openFridge"><image src="/assets/icon-fridge.svg" aria-hidden="true"/>冰箱食材<text class="profile-arrow">›</text></button>
-      <navigator class="profile-row" url="/pages/shopping/index" hover-class="pressed"><image src="/assets/icon-cart.svg" aria-hidden="true"/>采购清单<text class="profile-hint" wx:if="{{shoppingCount}}">待买 {{shoppingCount}} 项</text><text class="profile-arrow">›</text></navigator>
-      <navigator class="profile-row" url="/pages/meal-calendar/index" hover-class="pressed"><image src="/assets/icon-calendar-line.svg" aria-hidden="true"/>做饭日历<text class="profile-arrow">›</text></navigator>
+      <button class="profile-row" bindtap="openFridge">
+        <image src="/assets/icon-fridge.svg" aria-hidden="true"/>
+        <view class="profile-row-copy"><view class="profile-row-title">冰箱食材</view><view class="profile-row-desc">随手记下家里的食材</view></view>
+        <text class="profile-arrow">›</text>
+      </button>
+      <navigator class="profile-row" url="/pages/shopping/index" hover-class="pressed">
+        <image src="/assets/icon-cart.svg" aria-hidden="true"/>
+        <view class="profile-row-copy"><view class="profile-row-title">采购清单</view><view class="profile-row-desc">买菜不遗漏<text wx:if="{{shoppingCount}}" class="profile-row-count">，待买 {{shoppingCount}} 项</text></view></view>
+        <text class="profile-arrow">›</text>
+      </navigator>
+      <navigator class="profile-row" url="/pages/meal-calendar/index" hover-class="pressed">
+        <image src="/assets/icon-calendar-line.svg" aria-hidden="true"/>
+        <view class="profile-row-copy"><view class="profile-row-title">做饭日历</view><view class="profile-row-desc">安排每天吃什么</view></view>
+        <text class="profile-arrow">›</text>
+      </navigator>
     </view>
 
     <view class="profile-group-title">偏好与设置</view>
     <view class="profile-links">
-      <navigator class="profile-row" url="/pages/appearance/index" hover-class="pressed"><image src="/assets/icon-theme.svg" aria-hidden="true"/>主题外观<text class="profile-hint">{{themeName}}</text><text class="profile-arrow">›</text></navigator>
-      <button class="profile-row" open-type="contact"><image src="/assets/icon-feedback.svg" aria-hidden="true"/>意见反馈<text class="profile-arrow">›</text></button>
-      <navigator class="profile-row" url="/pages/about/index" hover-class="pressed"><image src="/assets/icon-info.svg" aria-hidden="true"/>关于<text class="profile-hint">吃饭得有谱 {{versionLabel}}</text><text class="profile-arrow">›</text></navigator>
+      <navigator class="profile-row" url="/pages/appearance/index" hover-class="pressed">
+        <image src="/assets/icon-theme.svg" aria-hidden="true"/>
+        <view class="profile-row-copy"><view class="profile-row-title">主题外观</view></view>
+        <text class="profile-hint">{{themeName}}</text><text class="profile-arrow">›</text>
+      </navigator>
+      <button class="profile-row" open-type="contact">
+        <image src="/assets/icon-feedback.svg" aria-hidden="true"/>
+        <view class="profile-row-copy"><view class="profile-row-title">意见反馈</view></view>
+        <text class="profile-arrow">›</text>
+      </button>
+      <navigator class="profile-row" url="/pages/about/index" hover-class="pressed">
+        <image src="/assets/icon-info.svg" aria-hidden="true"/>
+        <view class="profile-row-copy"><view class="profile-row-title">关于</view></view>
+        <text class="profile-hint">{{versionLabel}}</text><text class="profile-arrow">›</text>
+      </navigator>
     </view>
+
+    <view class="profile-footer">吃饭得有谱 · 让每一餐都有好心情</view>
   </block>
 
 </view>

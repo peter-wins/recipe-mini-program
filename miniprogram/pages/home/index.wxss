@@ -378,6 +378,11 @@ button.home-search {
   text-align: left;
 }
 .profile-row + .profile-row { border-top: 1rpx solid var(--theme-border, #f0e4d8); }
-.profile-row image { width: 34rpx; height: 34rpx; flex-shrink: 0; }
-.profile-hint { max-width: 340rpx; margin-left: auto; overflow: hidden; color: var(--theme-muted, #75665e); font-size: 22rpx; text-overflow: ellipsis; white-space: nowrap; }
-.profile-arrow { flex-shrink: 0; margin-left: 8rpx; color: var(--theme-muted, #75665e); font-size: 33rpx; }
+.profile-row image { width: 36rpx; height: 36rpx; flex-shrink: 0; }
+.profile-row-copy { flex: 1; min-width: 0; }
+.profile-row-title { color: var(--theme-text, #5D4037); font-size: 29rpx; line-height: 1.4; }
+.profile-row-desc { margin-top: 6rpx; color: var(--theme-muted, #9a8578); font-size: 22rpx; line-height: 1.4; }
+.profile-row-count { color: var(--theme-accent-text, #994017); }
+.profile-hint { max-width: 300rpx; margin-left: auto; overflow: hidden; color: var(--theme-muted, #75665e); font-size: 24rpx; text-overflow: ellipsis; white-space: nowrap; }
+.profile-arrow { flex-shrink: 0; margin-left: 8rpx; color: var(--theme-muted, #9a8578); font-size: 33rpx; }
+.profile-footer { margin-top: 36rpx; color: var(--theme-muted, #9a8578); font-size: 22rpx; text-align: center; }

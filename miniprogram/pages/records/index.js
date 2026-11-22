@@ -3,7 +3,7 @@ const { readActivity, clearBrowsingHistory } = require('../../activity')
 const { getRecipe } = require('../../catalog')
 const { readFavorites } = require('../../favorites')
 
-const titles = { history: '浏览历史', cooked: '做过的菜', favorites: '我的收藏' }
+const titles = { history: '浏览历史', cooked: '烹饪记录', favorites: '我的收藏' }
 
 Page({
   data: { type: 'history', recipes: [], hasHistory: false },
