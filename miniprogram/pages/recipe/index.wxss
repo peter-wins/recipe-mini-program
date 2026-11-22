@@ -150,6 +150,7 @@
 .detail-schedule { flex: 0 0 144rpx; padding: 0; background: transparent; white-space: nowrap; }
 .detail-schedule .meal-calendar-icon { flex: 0 0 30rpx; width: 32rpx; box-sizing: border-box; margin: 2rpx 0 3rpx; }
 .detail-saved { color: var(--theme-accent-text, #994017); font-weight: 700; }
+.detail-saved image { filter: var(--theme-accent-icon); }
 .detail-prev { color: var(--theme-accent-text, #994017); line-height: 86rpx; }
 .detail-prev[disabled] { background: transparent; color: #8a7b70; }
 .detail-bar .detail-prev { flex: 0 0 118rpx; }
