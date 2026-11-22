@@ -1,14 +1,14 @@
 const { applyTheme } = require('../../theme')
 const { listShopping, removeShoppingItem, saveManualShopping, manualNameLimit, manualQuantityLimit,
   buyShoppingItems, undoShoppingPurchase } = require('../../shopping')
-const { buildLayout, buildText, draw } = require('../../shopping-poster')
+const { buildLayout, buildText, draw, usageNote } = require('../../shopping-poster')
 
 const undoWindow = 10000
 
 Page({
   data: {
     items: [], updating: false, manualOpen: false, focusQuantity: false, manualNameLimit, manualQuantityLimit,
-    selecting: false, selectedCount: 0, undoCount: 0, posterWidth: 750, posterHeight: 412
+    selecting: false, selectedCount: 0, undoCount: 0, posterWidth: 750, posterHeight: 412, usageNote
   },
 
   onShow() {

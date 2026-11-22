@@ -574,6 +574,8 @@ test('菜谱页去掉复制缺料，采购清单页提供生成清单图', () =>
   assert.ok(shoppingWxml.includes('bindtap="copyTextList"'), '复制按钮绑定复制方法')
   assert.ok(shoppingJs.includes('setClipboardData'), '复制方法写入剪贴板')
   assert.ok(shoppingWxml.includes('图发微信或打印'), '提示文案覆盖图文两种用途')
+  assert.ok(shoppingWxml.includes('{{usageNote}}'), '清单页应显示用量提示')
+  assert.ok(shoppingJs.includes('usageNote'), '页面从绘图模块复用同一句提示文案')
   assert.ok(/button \{[^}]*min-height: 88rpx/.test(read('app.wxss')), '全局最小点击区规范保持不变')
 })
 

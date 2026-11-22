@@ -4,8 +4,9 @@ const posterWidth = 750
 const sidePadding = 56
 const headerHeight = 190
 const rowHeight = 76
-const footerHeight = 110
+const footerHeight = 152
 const bottomPadding = 36
+const usageNote = '用量根据菜谱计算，购买请以实际用途为准'
 
 function dateLabel(date) {
   const value = date instanceof Date ? date : new Date()
@@ -28,7 +29,8 @@ function buildLayout(items, date) {
     title: '采购清单',
     subtitle: `${dateLabel(date)} · 一次买齐，心里有谱`,
     rows,
-    footer: `共 ${rows.length} 项 · 吃饭得有谱`
+    footer: `共 ${rows.length} 项 · 吃饭得有谱`,
+    note: usageNote
   }
 }
 
@@ -47,7 +49,7 @@ function buildText(items, date) {
 }
 
 function draw(ctx, layout) {
-  const { width, height, title, subtitle, rows, footer } = layout
+  const { width, height, title, subtitle, rows, footer, note } = layout
   ctx.fillStyle = '#FFFDF9'
   ctx.fillRect(0, 0, width, height)
 
@@ -88,8 +90,13 @@ function draw(ctx, layout) {
   ctx.fillStyle = '#75665E'
   ctx.font = '20px sans-serif'
   ctx.fillText(footer, width / 2, footerTop + 44)
+  if (note) {
+    ctx.fillStyle = '#A08C7D'
+    ctx.font = '18px sans-serif'
+    ctx.fillText(note, width / 2, footerTop + 84)
+  }
   ctx.textAlign = 'left'
   void height
 }
 
-module.exports = { posterWidth, dateLabel, shortText, buildLayout, buildText, draw }
+module.exports = { posterWidth, usageNote, dateLabel, shortText, buildLayout, buildText, draw }

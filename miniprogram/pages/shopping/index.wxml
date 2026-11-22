@@ -32,6 +32,7 @@
         <text class="section">{{selecting ? '已选 ' + selectedCount + ' 项' : '待买 ' + items.length + ' 项'}}</text>
         <button class="link shopping-multi" bindtap="toggleBatchMode" aria-pressed="{{selecting}}">{{selecting ? '取消多选' : '多选'}}</button>
       </view>
+      <view class="subtle shopping-usage-note">{{usageNote}}</view>
       <view class="shopping-list">
         <view wx:for="{{items}}" wx:key="key" class="shopping-row {{item.selected ? 'shopping-row-selected' : ''}}">
           <button wx:if="{{selecting}}" class="shopping-select-row" bindtap="toggleSelection" data-key="{{item.key}}" aria-pressed="{{item.selected}}" aria-label="{{item.name + '，' + item.quantity}}">

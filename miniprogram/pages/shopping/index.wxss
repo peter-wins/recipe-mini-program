@@ -24,6 +24,7 @@
 .shopping-screen-with-bar { padding-bottom: calc(204rpx + env(safe-area-inset-bottom)); }
 .shopping-list-head { margin-top: 22rpx; }
 .shopping-list-head .section { font-size: 28rpx; }
+.shopping-usage-note { margin-top: 6rpx; font-size: 23rpx; line-height: 1.5; }
 .shopping-multi { padding-right: 0; }
 .shopping-list { border: 1rpx solid var(--theme-border, #f0e4d8); border-radius: var(--card-radius, 28rpx); background: var(--theme-surface, #fff); overflow: hidden; }
 .shopping-row { padding: 12rpx 20rpx; }
