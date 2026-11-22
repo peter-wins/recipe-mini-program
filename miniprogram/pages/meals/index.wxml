@@ -14,7 +14,7 @@
       <view class="subtle meal-subtitle">看看手边食材能搭哪一餐</view>
     </view>
     <navigator class="meal-calendar-link" url="/pages/meal-calendar/index" aria-label="做饭日历" hover-class="card-pressed">
-      <view class="meal-calendar-icon" aria-hidden="true"></view>
+      <image class="meal-calendar-icon" src="{{icons.path('calendar')}}" aria-hidden="true"/>
     </navigator>
   </view>
 

@@ -211,7 +211,7 @@ test('图标映射模块是唯一数据源，所有页面引用都走映射', ()
   assert.ok(iconUsers.length >= 9, '映射应被多个页面复用')
 })
 
-test('同一功能复用同一图标：日历两个语义键指向同一 SVG 文件', () => {
+test('同一功能复用同一图标：所有页面日历都走唯一 SVG 映射', () => {
   const wxs = read('icons.wxs')
   assert.ok(wxs.includes("calendar: 'icon-calendar-line.svg'"))
   assert.ok(wxs.includes("calendarLine: 'icon-calendar-line.svg'"))
@@ -219,6 +219,19 @@ test('同一功能复用同一图标：日历两个语义键指向同一 SVG 文
   assert.ok(!exists('assets/icon-shortcut-calendar.svg'), '不应保留重复日历图标')
   // 唯一日历图标含日历轮廓
   assert.ok(read('assets/icon-calendar-line.svg').includes('<rect'))
+  // 首页、搭配页、菜谱页的日历图标都通过映射引用（做饭日历页自身即日历，无此入口）
+  for (const page of ['home', 'meals', 'recipe']) {
+    const wxml = read(`pages/${page}/index.wxml`)
+    assert.ok(wxml.includes("icons.path('calendar')"), `${page} 日历未走映射`)
+  }
+  // CSS 伪元素画的旧日历图标已彻底清除
+  const app = read('app.wxss')
+  assert.ok(!app.includes('.meal-calendar-icon'), '全局 CSS 日历图标未清除')
+  for (const page of ['meals', 'recipe']) {
+    const wxml = read(`pages/${page}/index.wxml`)
+    assert.ok(!/<view class="meal-calendar-icon"/.test(wxml), `${page} 仍用 view 当 CSS 日历图标`)
+    assert.ok(/<image class="meal-calendar-icon" src="\{\{icons\.path\('calendar'\)\}\}"/.test(wxml), `${page} 日历图标未换成 SVG image`)
+  }
 })
 
 test('按钮五类体系与语义状态色变量齐备（规范第5/8条）', () => {

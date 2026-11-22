@@ -65,7 +65,7 @@
   background: var(--theme-surface, #fff);
   color: var(--theme-accent-text, #994017);
 }
-.meal-calendar-icon { flex-basis: 36rpx; height: 33rpx; }
+.meal-calendar-icon { width: 36rpx; height: 36rpx; }
 .meal-create-card {
   display: flex;
   flex-direction: column;

@@ -124,7 +124,7 @@
       <text>{{saved ? '已收藏' : '收藏'}}</text>
     </button>
     <button class="detail-schedule" bindtap="scheduleRecipe">
-      <view class="meal-calendar-icon" aria-hidden="true"></view>
+      <image class="meal-calendar-icon" src="{{icons.path('calendar')}}" aria-hidden="true"/>
       <text>安排到日历</text>
     </button>
     <button class="primary" bindtap="startCooking">开始烹饪</button>

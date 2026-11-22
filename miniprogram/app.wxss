@@ -109,33 +109,6 @@ button[disabled] { opacity: .55; color: var(--state-disabled, #b9aca2); }
 .primary.hover, .secondary.hover, .danger-btn.hover, .icon-btn.hover { opacity: .75; transform: scale(.98); }
 .text-btn.hover, .link.hover { opacity: .6; }
 
-.meal-calendar-icon {
-  position: relative;
-  flex: 0 0 28rpx;
-  height: 25rpx;
-  box-sizing: border-box;
-  border: 2rpx solid currentColor;
-  border-radius: 5rpx;
-}
-.meal-calendar-icon::before {
-  position: absolute;
-  top: -6rpx;
-  right: 5rpx;
-  left: 5rpx;
-  height: 9rpx;
-  border-right: 2rpx solid currentColor;
-  border-left: 2rpx solid currentColor;
-  content: '';
-}
-.meal-calendar-icon::after {
-  position: absolute;
-  top: 7rpx;
-  right: 0;
-  left: 0;
-  border-top: 2rpx solid currentColor;
-  content: '';
-}
-
 /* ---------- 筛选器 ---------- */
 .actions, .ingredients { display: flex; align-items: center; flex-wrap: wrap; gap: 14rpx; }
 .chevron { margin-left: 6rpx; color: var(--theme-accent-text, #a57455); }
