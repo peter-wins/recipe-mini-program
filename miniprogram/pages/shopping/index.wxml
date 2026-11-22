@@ -2,8 +2,11 @@
   <view class="screen shopping-screen {{selecting || undoCount ? 'shopping-screen-with-bar' : ''}}">
     <view class="page-head shopping-head">
       <view class="row shopping-head-row">
-        <view class="headline">采购清单</view>
-        <button wx:if="{{!manualOpen}}" class="link shopping-add" bindtap="openManualEntry">＋ 手动添加</button>
+        <view class="shopping-head-copy">
+          <view class="shopping-eyebrow">一次买齐，心里有谱</view>
+          <view class="shopping-title">采购清单</view>
+        </view>
+        <button wx:if="{{!manualOpen}}" class="shopping-add" bindtap="openManualEntry"><image src="/assets/icon-plus.svg" aria-hidden="true"/>手动添加</button>
       </view>
     </view>
     <form wx:if="{{manualOpen}}" class="purchase-row shopping-entry" bindsubmit="addManualItem">

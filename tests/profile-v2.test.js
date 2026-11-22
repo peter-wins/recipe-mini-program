@@ -112,3 +112,40 @@ test('新入口图标文件齐备', () => {
     assert.ok(exists(`assets/${icon}`), `缺少 ${icon}`)
   }
 })
+
+test('主题强调色图标变量在三套主题齐备，三处图标跟随', () => {
+  const app = read('app.wxss')
+  assert.ok(app.includes('--theme-accent-icon: brightness'), '暖杏默认缺失')
+  assert.ok(app.includes('.theme-green'))
+  assert.ok(app.includes('.theme-blue'))
+  assert.equal((app.match(/--theme-accent-icon:/g) || []).length, 3, '三套主题都应定义图标 filter')
+
+  const homeWxss = read('pages/home/index.wxss')
+  assert.ok(homeWxss.includes('.library-ai image { width: 27rpx; height: 27rpx; filter: var(--theme-accent-icon); }'))
+  assert.ok(homeWxss.includes('.profile-avatar image { width: 46rpx; height: 46rpx; filter: var(--theme-accent-icon); }'))
+  assert.ok(homeWxss.includes('.main-nav .nav-current image { filter: var(--theme-accent-icon); }'))
+  assert.ok(!homeWxss.includes('--theme-nav-icon'), '旧变量名应清除')
+
+  const aboutWxss = read('pages/about/index.wxss')
+  assert.ok(aboutWxss.includes('.about-logo image { width: 62rpx; height: 62rpx; filter: var(--theme-accent-icon); }'))
+})
+
+test('关于页与外观页接入主题 class，颜色随主题变化', () => {
+  for (const page of ['about', 'appearance']) {
+    const wxml = read(`pages/${page}/index.wxml`)
+    assert.ok(wxml.includes('theme-page theme-{{themeId}}'), `${page} 未接入主题`)
+  }
+})
+
+test('采购清单页头参考菜谱库：眉标＋大标题＋胶囊按钮', () => {
+  const wxml = read('pages/shopping/index.wxml')
+  const wxss = read('pages/shopping/index.wxss')
+  assert.ok(wxml.includes('shopping-eyebrow'))
+  assert.ok(wxml.includes('一次买齐，心里有谱'))
+  assert.ok(wxml.includes('shopping-title'))
+  assert.ok(wxml.includes('class="shopping-add"'))
+  assert.ok(wxml.includes('/assets/icon-plus.svg'))
+  assert.ok(wxss.includes('.shopping-title'))
+  assert.ok(wxss.includes('filter: var(--theme-accent-icon)'))
+  assert.ok(exists('assets/icon-plus.svg'))
+})

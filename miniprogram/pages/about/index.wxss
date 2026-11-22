@@ -9,7 +9,7 @@
   border-radius: 36rpx;
   background: var(--theme-neutral, #f1e6d9);
 }
-.about-logo image { width: 62rpx; height: 62rpx; }
+.about-logo image { width: 62rpx; height: 62rpx; filter: var(--theme-accent-icon); }
 .about-name { margin-top: 26rpx; color: var(--theme-text, #4e342c); font-size: 40rpx; font-weight: 750; }
 .about-slogan { margin-top: 10rpx; color: var(--theme-muted, #75665e); font-size: 25rpx; }
 .about-card { padding: 12rpx 28rpx 28rpx; border-radius: 30rpx; background: #fff; }

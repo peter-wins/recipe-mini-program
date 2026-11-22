@@ -1,4 +1,4 @@
-<view class="appearance-page">
+<view class="appearance-page theme-page theme-{{themeId}}">
   <view class="appearance-intro">选一个顺眼的颜色，做饭的心情也会不一样。</view>
   <view class="appearance-options">
     <button wx:for="{{themeOptions}}" wx:key="id" class="appearance-option {{themeId === item.id ? 'appearance-option-selected' : ''}}" data-id="{{item.id}}" bindtap="changeTheme" aria-pressed="{{themeId === item.id}}">

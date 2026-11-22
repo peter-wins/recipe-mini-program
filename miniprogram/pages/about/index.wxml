@@ -1,4 +1,4 @@
-<view class="about-page">
+<view class="about-page theme-page theme-{{themeId}}">
   <view class="about-hero">
     <view class="about-logo" aria-hidden="true">
       <image src="/assets/icon-chef-line.svg"/>

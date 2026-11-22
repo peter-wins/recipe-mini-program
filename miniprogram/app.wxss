@@ -249,13 +249,25 @@ button::after { border: 0; }
 .cooking-controls button[disabled] { background: transparent; color: #897f72; }
 
 .theme-page {
+  --theme-page-bg: #fff8f0;
+  --theme-text: #5d4037;
+  --theme-muted: #75665e;
+  --theme-border: #eadfd4;
+  --theme-accent: #ff8a3d;
+  --theme-accent-text: #994017;
+  --theme-soft: #fff0e5;
+  --theme-selected: #fbecdc;
+  --theme-selected-border: #d9b59a;
+  --theme-placeholder: #f4e9de;
+  --theme-neutral: #f1e6d9;
   --theme-surface: #fff;
   --card-radius: 28rpx;
   --stock-ready: #397454;
   --stock-missing: #c04040;
+  --theme-accent-icon: brightness(.68) sepia(.8) saturate(4);
   min-height: 100vh;
-  background: var(--theme-page-bg, #fff8f0);
-  color: var(--theme-text, #5d4037);
+  background: var(--theme-page-bg);
+  color: var(--theme-text);
 }
 .theme-green {
   --theme-page-bg: #f2f7ee;
@@ -269,7 +281,7 @@ button::after { border: 0; }
   --theme-selected-border: #a9c5a1;
   --theme-placeholder: #e4ede0;
   --theme-neutral: #edf2eb;
-  --theme-nav-icon: grayscale(1) brightness(.65) sepia(1) hue-rotate(58deg) saturate(2);
+  --theme-accent-icon: grayscale(1) brightness(.65) sepia(1) hue-rotate(58deg) saturate(2);
 }
 .theme-blue {
   --theme-page-bg: #f0f5fb;
@@ -283,5 +295,5 @@ button::after { border: 0; }
   --theme-selected-border: #a7bfdc;
   --theme-placeholder: #e0eaf5;
   --theme-neutral: #eaf0f7;
-  --theme-nav-icon: grayscale(1) brightness(.65) sepia(1) hue-rotate(158deg) saturate(3);
+  --theme-accent-icon: grayscale(1) brightness(.65) sepia(1) hue-rotate(158deg) saturate(3);
 }
