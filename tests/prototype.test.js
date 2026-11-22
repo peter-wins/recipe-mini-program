@@ -1134,7 +1134,8 @@ test('收藏后爱心切换为实心图标', () => {
   const wxss = fs.readFileSync(require.resolve('../miniprogram/pages/recipe/index.wxss'), 'utf8')
   assert.ok(wxml.includes("saved ? '/assets/icon-favorites-filled.svg' : '/assets/icon-favorites.svg'"))
   assert.ok(fs.existsSync(require.resolve('../miniprogram/assets/icon-favorites-filled.svg')))
-  assert.ok(!wxss.includes('detail-saved image'))
+  // 规范第4条：选中态图标用主题强调色（普通图标保持中性色）
+  assert.ok(wxss.includes('detail-saved image { filter: var(--theme-accent-icon); }'))
 })
 
 test('我的页有意见反馈入口，走微信客服会话', () => {
