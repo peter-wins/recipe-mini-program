@@ -269,7 +269,7 @@ button.home-search {
 .home-fridge { padding-top: 36rpx; border-top: 1rpx solid var(--theme-border, #e8d8cb); }
 .home-fridge-heading { min-height: 58rpx; }
 .home-fridge-heading .section { font-size: 36rpx; font-weight: 750; line-height: 1.3; }
-.home-fridge-link { flex-shrink: 0; color: var(--theme-accent-text, #96512f); font-size: 23rpx; }
+.home-fridge-link { flex-shrink: 0; color: var(--theme-accent-text, #994017); font-size: 24rpx; }
 .home-fridge-description { margin: 2rpx 0 14rpx; color: var(--theme-muted, #75665e); font-size: 25rpx; line-height: 1.45; }
 .home-fridge-empty { margin-top: 10rpx; color: var(--theme-muted, #75665e); font-size: 26rpx; }
 .home-fridge-empty .link { display: block; margin-top: 6rpx; padding-left: 0; }

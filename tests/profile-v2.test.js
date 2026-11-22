@@ -242,6 +242,18 @@ test('同一功能复用同一图标：所有页面日历都走唯一 SVG 映射
   assert.ok(/\.meal-calendar-link \{[\s\S]*?border-radius: 20rpx;[\s\S]*?font-size: 24rpx;/.test(mealsWxss), '日历入口应为胶囊样式')
 })
 
+test('首页三个「查看更多」入口字号与颜色统一', () => {
+  const wxss = read('pages/home/index.wxss')
+  const dinner = wxss.match(/\.home-dinner-link \{[^}]*\}/)
+  const fridge = wxss.match(/\.home-fridge-link \{[^}]*\}/)
+  assert.ok(dinner && fridge, '缺少入口样式')
+  for (const rule of [dinner[0], fridge[0]]) {
+    assert.ok(rule.includes('font-size: 24rpx'), '三处入口字号应统一为 24rpx')
+    assert.ok(rule.includes('var(--theme-accent-text'), '颜色应走主题变量')
+  }
+  assert.ok(!fridge[0].includes('#96512f'), '不应残留偏红的旧色值')
+})
+
 test('菜谱库标题区与搭配页统一：大标题在上＋副标题在下', () => {
   const homeWxml = read('pages/home/index.wxml')
   const homeWxss = read('pages/home/index.wxss')
