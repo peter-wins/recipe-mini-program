@@ -266,6 +266,21 @@ test('菜谱库标题区与搭配页统一：大标题在上＋副标题在下',
   assert.ok(titleRule && !titleRule[0].includes('margin-top'), '标题不应再有上边距')
 })
 
+test('三个页头胶囊按钮强化明显度：加深描边＋加粗文字（三主题联动）', () => {
+  const sources = [
+    ['问问 AI', read('pages/home/index.wxss'), 'library-ai'],
+    ['做饭日历', read('pages/meals/index.wxss'), 'meal-calendar-link'],
+    ['手动添加', read('pages/shopping/index.wxss'), 'shopping-add'],
+  ]
+  for (const [name, wxss, cls] of sources) {
+    const block = wxss.match(new RegExp('\\.' + cls + ' \\{[\\s\\S]*?\\}'))
+    assert.ok(block, `缺少 .${cls}`)
+    assert.ok(block[0].includes('border: 1rpx solid var(--theme-selected-border'), `${name} 描边未加深到规范次要按钮标准`)
+    assert.ok(block[0].includes('font-weight: 600'), `${name} 文字未加粗`)
+    assert.ok(block[0].includes('color: var(--theme-accent-text'), `${name} 未显式设置主题色文字`)
+  }
+})
+
 test('四个页头统一搭配页布局：标题在上副标题在下、右侧元素顶部对齐', () => {
   // 首页：标题在副标题之上，炒锅保留且顶部对齐
   const homeWxml = read('pages/home/index.wxml')

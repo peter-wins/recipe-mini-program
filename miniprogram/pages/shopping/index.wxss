@@ -11,11 +11,12 @@
   gap: 8rpx;
   min-height: 0;
   padding: 0 18rpx;
-  border: 1rpx solid var(--theme-border, #eadfd4);
+  border: 1rpx solid var(--theme-selected-border, #d9b59a);
   border-radius: 20rpx;
   background: var(--theme-soft, #fff0e5);
   color: var(--theme-accent-text, #994017);
   font-size: 24rpx;
+  font-weight: 600;
   line-height: 62rpx;
   white-space: nowrap;
 }

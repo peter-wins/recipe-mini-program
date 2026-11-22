@@ -38,9 +38,11 @@ button.home-search {
   min-height: 0;
   padding: 0 18rpx;
   background: var(--theme-soft, #fff0e5);
-  border: 1rpx solid var(--theme-border, #eadfd4);
+  border: 1rpx solid var(--theme-selected-border, #d9b59a);
   border-radius: 20rpx;
+  color: var(--theme-accent-text, #994017);
   font-size: 24rpx;
+  font-weight: 600;
   line-height: 62rpx;
   white-space: nowrap;
 }
