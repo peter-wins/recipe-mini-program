@@ -456,7 +456,6 @@ test('智能推荐遵守限时和食材条件，并提示未识别的需求', ()
 
 test('菜谱页分页，采购保留原用量，旧收藏映射到新菜谱', () => {
   const storage = new Map([['fridge-ingredient-ids-v1', ['potato', 'potato', 'unknown']]])
-  let clipboard
   let navigationTitle
   let navigationUrl
   let toast
@@ -470,7 +469,6 @@ test('菜谱页分页，采购保留原用量，旧收藏映射到新菜谱', ()
       if (failWrites) throw new Error('storage unavailable')
       storage.set(key, value)
     },
-    setClipboardData: ({ data }) => { clipboard = data },
     showToast: options => { toast = options },
     showModal: options => { pendingModal = options },
     navigateTo: ({ url }) => { navigationUrl = url },
@@ -735,8 +733,7 @@ test('菜谱页分页，采购保留原用量，旧收藏映射到新菜谱', ()
   detail.setData({ recipe: { ...detail.data.recipe, image: 'https://example.com/cover.jpg' } })
   assert.equal(detail.onShareAppMessage().imageUrl, 'https://example.com/cover.jpg')
   detail.togglePurchaseItem({ currentTarget: { dataset: { id: 'egg' } } })
-  detail.copyMissing()
-  assert.equal(clipboard, '西红柿炒鸡蛋（1 人份）缺料清单\n西红柿 1个(约180g)')
+  assert.equal(typeof detail.copyMissing, 'undefined', '复制缺料按钮已移除')
   detail.savePurchaseItems()
   assert.equal(detail.data.hasSavedPurchase, true)
   detail.savePurchaseItems()

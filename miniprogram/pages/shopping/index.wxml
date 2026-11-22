@@ -59,8 +59,13 @@
           </block>
         </view>
       </view>
+      <view class="shopping-export">
+        <button class="primary" bindtap="exportPoster" disabled="{{updating}}">生成清单图</button>
+        <view class="subtle shopping-export-hint">存到相册，发给家人或自己打印</view>
+      </view>
     </block>
   </view>
+  <canvas type="2d" id="shopping-poster" class="shopping-poster-canvas" style="width:{{posterWidth}}px;height:{{posterHeight}}px;"></canvas>
   <view wx:if="{{selecting || undoCount}}" class="shopping-dock">
     <view wx:if="{{undoCount}}" class="shopping-undo row" aria-live="polite">
       <text>已买 {{undoCount}} 项</text>

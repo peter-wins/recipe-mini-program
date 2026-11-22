@@ -38,6 +38,10 @@
 .shopping-row-selected .shopping-check { border-color: var(--theme-accent, #c87137); background: var(--theme-accent, #c87137); color: #fff; }
 .shopping-bought, .shopping-remove { flex-shrink: 0; min-width: 72rpx; padding: 0 7rpx; font-size: 24rpx; line-height: 60rpx; }
 .shopping-bought { min-width: 96rpx; border-radius: 14rpx; background: var(--theme-selected, #fbecdc); color: var(--theme-accent-text, #994017); font-weight: 650; }
+.shopping-export { margin-top: 24rpx; text-align: center; }
+.shopping-export .primary { width: 100%; }
+.shopping-export-hint { margin-top: 10rpx; font-size: 23rpx; }
+.shopping-poster-canvas { position: fixed; left: -9999rpx; top: 0; width: 750px; height: 1px; pointer-events: none; }
 /* 规范第5条：移除是危险操作，用独立语义色 */
 .shopping-remove { color: var(--state-danger, #c04040); }
 .shopping-entry { display: block; }

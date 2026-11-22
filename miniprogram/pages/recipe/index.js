@@ -297,16 +297,5 @@ Page({
     } finally {
       this.setData({ savingPurchase: false })
     }
-  },
-
-  copyMissing() {
-    const recipe = this.data.recipe
-    if (!recipe || !this.data.purchaseItems.length) return
-
-    const items = this.data.purchaseItems.map(item => `${item.name} ${item.quantity}`)
-    wx.setClipboardData({
-      data: [`${recipe.name}（${recipe.servings} 人份）缺料清单`, ...items].join('\n'),
-      fail: () => wx.showToast({ title: '复制失败，请重试', icon: 'none' })
-    })
   }
 })

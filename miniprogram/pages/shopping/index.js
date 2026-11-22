@@ -1,13 +1,14 @@
 const { applyTheme } = require('../../theme')
 const { listShopping, removeShoppingItem, saveManualShopping, manualNameLimit, manualQuantityLimit,
   buyShoppingItems, undoShoppingPurchase } = require('../../shopping')
+const { buildLayout, draw } = require('../../shopping-poster')
 
 const undoWindow = 10000
 
 Page({
   data: {
     items: [], updating: false, manualOpen: false, focusQuantity: false, manualNameLimit, manualQuantityLimit,
-    selecting: false, selectedCount: 0, undoCount: 0
+    selecting: false, selectedCount: 0, undoCount: 0, posterWidth: 750, posterHeight: 412
   },
 
   onShow() {
@@ -157,6 +158,67 @@ Page({
       wx.showToast({ title: '更新失败，请重试', icon: 'none' })
     } finally {
       this.setData({ updating: false })
+    }
+  },
+
+  exportPoster() {
+    const items = this.data.items
+    if (!items.length || this.data.updating) return
+    wx.showLoading({ title: '生成中' })
+    const layout = buildLayout(items)
+    this.setData({ posterWidth: layout.width, posterHeight: layout.height })
+
+    const finish = () => wx.hideLoading()
+    const fail = message => { finish(); wx.showToast({ title: message, icon: 'none' }) }
+
+    const saveImage = filePath => {
+      wx.saveImageToPhotosAlbum({
+        filePath,
+        success: () => { finish(); wx.showToast({ title: '已存到相册', icon: 'success' }) },
+        fail: error => {
+          finish()
+          const denied = /auth|deny|denied/i.test((error && error.errMsg) || '')
+          if (denied) {
+            wx.showModal({
+              title: '需要相册权限',
+              content: '请允许保存到相册，才能把清单图发给家人',
+              confirmText: '去设置',
+              success: result => {
+                if (result.confirm && typeof wx.openSetting === 'function') wx.openSetting()
+              }
+            })
+          } else {
+            wx.showToast({ title: '保存失败，请重试', icon: 'none' })
+          }
+        }
+      })
+    }
+
+    try {
+      wx.createSelectorQuery().in(this).select('#shopping-poster').fields({ node: true, size: true }).exec(result => {
+        const canvas = result && result[0] && result[0].node
+        if (!canvas || typeof canvas.getContext !== 'function') {
+          fail('生成失败，请重试')
+          return
+        }
+        try {
+          const ctx = canvas.getContext('2d')
+          const ratio = (wx.getSystemInfoSync && wx.getSystemInfoSync().pixelRatio) || 1
+          canvas.width = Math.floor(layout.width * ratio)
+          canvas.height = Math.floor(layout.height * ratio)
+          ctx.scale(ratio, ratio)
+          draw(ctx, layout)
+          wx.canvasToTempFilePath({
+            canvas,
+            success: res => saveImage(res.tempFilePath),
+            fail: () => fail('生成图片失败，请重试')
+          }, this)
+        } catch {
+          fail('生成失败，请重试')
+        }
+      })
+    } catch {
+      fail('生成失败，请重试')
     }
   }
 })

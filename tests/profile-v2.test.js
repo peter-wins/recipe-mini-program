@@ -542,6 +542,22 @@ test('食材指南云同步接入启动流程，两个页面可刷新', () => {
   assert.ok(listJs.includes('getGuideGroups'), '列表分组应跟随云端数据')
 })
 
+test('菜谱页去掉复制缺料，采购清单页提供生成清单图', () => {
+  const recipeWxml = read('pages/recipe/index.wxml')
+  const recipeJs = read('pages/recipe/index.js')
+  const shoppingWxml = read('pages/shopping/index.wxml')
+  const shoppingJs = read('pages/shopping/index.js')
+
+  assert.ok(!recipeWxml.includes('复制缺料'), '菜谱详情页不再有复制缺料按钮')
+  assert.ok(!recipeJs.includes('copyMissing'), '复制缺料方法已移除')
+  assert.ok(recipeWxml.includes('看清单'), '看清单仍保留')
+
+  assert.ok(shoppingWxml.includes('生成清单图'), '采购清单页应有生成清单图按钮')
+  assert.ok(shoppingWxml.includes('id="shopping-poster"'), '应有离屏 canvas 节点')
+  assert.ok(shoppingJs.includes('canvasToTempFilePath') && shoppingJs.includes('saveImageToPhotosAlbum'), '应导出图片并保存相册')
+  assert.ok(/auth|deny/.test(shoppingJs), '应识别相册权限被拒')
+})
+
 test('食材指南发布校验：版本号、数量与已有 ID 保护', () => {
   const { bundled } = require('../miniprogram/guide-data')
   const { validRelease, validateGuide, parseRelease } = require('../miniprogram/guide-release')

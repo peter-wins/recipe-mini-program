@@ -57,7 +57,6 @@
       <view wx:if="{{inventoryReady}}" class="purchase-summary">
         <text class="shopping-note">{{hasSavedPurchase && !purchaseItems.length ? '更新后会移除这道菜的采购项' : (purchaseItems.length ? '已勾选 ' + purchaseItems.length + ' 项待买' : '这次无需补货，点食材可勾选')}}</text>
         <navigator wx:if="{{purchaseItems.length || hasSavedPurchase}}" class="link" url="/pages/shopping/index">看清单</navigator>
-        <button wx:if="{{purchaseItems.length}}" class="link" bindtap="copyMissing">复制缺料</button>
       </view>
 
       <view class="ingredient-list">
