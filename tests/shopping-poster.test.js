@@ -18,7 +18,7 @@ test('清单图布局：宽度固定，高度随条目数增长不被截断', ()
   assert.equal(three.rows.length, 3)
   assert.equal(three.title, '采购清单')
   assert.match(three.subtitle, /11 月 22 日/)
-  assert.match(three.footer, /共 3 项/)
+  assert.equal(three.footer, undefined, '图上不再有「共 N 项 · 吃饭得有谱」')
   assert.match(three.note, /用量.*实际用途为准/)
   assert.equal(three.note, require('../miniprogram/shopping-poster').usageNote)
 })
@@ -28,9 +28,9 @@ test('清单图只写菜名与用量，不含操作按钮文案', () => {
     { name: '菠菜', quantity: '200 克' },
     { name: '鸡蛋', quantity: '2 个' }
   ])
-  const text = [layout.title, layout.subtitle, layout.footer,
+  const text = [layout.title, layout.subtitle, layout.note,
     ...layout.rows.flatMap(row => [row.name, row.quantity])].join(' ')
-  for (const word of ['已买', '移除', '多选', '复制缺料', '手动添加']) {
+  for (const word of ['已买', '移除', '多选', '复制缺料', '手动添加', '吃饭得有谱']) {
     assert.ok(!text.includes(word), `图上不应出现「${word}」`)
   }
   assert.equal(layout.rows[0].name, '菠菜')
@@ -85,7 +85,10 @@ test('绘制指令写入每一行且不重复叠加', () => {
   assert.equal(texts.filter(text => text === '鸡蛋').length, 1)
   assert.ok(texts.includes('200 克') && texts.includes('2 个'))
   assert.ok(texts.includes('采购清单'))
-  assert.ok(texts.some(text => /用量.*实际用途为准/.test(text)), '图上应画出用量提示')
+  assert.ok(!texts.some(text => /吃饭得有谱|共 \d+ 项/.test(text)), '图上不画「共 N 项 · 吃饭得有谱」')
+  const noteCall = calls.find(call => call[0] === 'fillText' && /用量.*实际用途为准/.test(call[1]))
+  assert.ok(noteCall, '图上应画出用量提示')
+  assert.ok(noteCall[3] < 564, '提示画在画布底部区域')
   assert.equal(calls.filter(call => call[0] === 'fillRect').length, 1)
 })
 
@@ -147,10 +150,10 @@ test('导出清单图：取 canvas、按像素比绘制并保存相册', async (
     page.exportPoster()
     assert.ok(calls.some(call => call[0] === 'query'), '应查询 canvas 节点')
     assert.deepEqual(calls.find(call => call[0] === 'scale'), ['scale', 2, 2], '按设备像素比放大')
-    assert.deepEqual(calls.find(call => call[0] === 'toTemp'), ['toTemp', 1500, 1212], '画布按布局尺寸放大')
+    assert.deepEqual(calls.find(call => call[0] === 'toTemp'), ['toTemp', 1500, 1128], '画布按布局尺寸放大')
     assert.deepEqual(calls.find(call => call[0] === 'save'), ['save', '/tmp/poster.png'])
     assert.deepEqual(calls.find(call => call[0] === 'toast'), ['toast', '已存到相册'])
-    assert.equal(page.data.posterHeight, 606, '画布高度随清单条目数增长')
+    assert.equal(page.data.posterHeight, 564, '画布高度随清单条目数增长')
   } finally {
     global.wx = previousWx
   }
