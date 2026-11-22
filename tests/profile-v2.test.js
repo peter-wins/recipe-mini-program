@@ -493,9 +493,17 @@ test('食材指南两个页面结构完整且走主题', () => {
   assert.ok(exists('assets/guide-spinach.svg')) // 其它占位食材仍共用
   assert.ok(exists('assets/guide-spinach.png'), '菠菜应用真实插画 PNG')
 
-  // 菠菜插画：透明底 PNG、2:1 横版、菠菜本体引用新图
+  // 菠菜插画：透明底 PNG、2:1 横版；源图留在包内，展示走云端 guide-covers/
   const guideData = require('../miniprogram/guide-data')
-  assert.equal(guideData.getIngredient('spinach').image, '/assets/guide-spinach.png')
+  const { cloudStorageBase } = require('../miniprogram/recipe-image')
+  assert.equal(guideData.getIngredient('spinach').image, cloudStorageBase + 'guide-covers/spinach.png', '菠菜图应从云端加载')
+  const listConfig = JSON.parse(read('pages/guide/index.json'))
+  const detailConfig = JSON.parse(read('pages/guide-detail/index.json'))
+  for (const config of [listConfig, detailConfig]) {
+    assert.equal(config.usingComponents['recipe-cover'], '/components/recipe-cover/index', '食材页应复用菜谱封面组件加载云图')
+  }
+  assert.ok((listWxml.match(/<recipe-cover/g) || []).length >= 1, '列表页应用封面组件渲染食材图')
+  assert.ok((detailWxml.match(/<recipe-cover/g) || []).length >= 2, '详情页食材图与关联菜谱图都应走封面组件')
   assert.ok(guideData.getIngredient('cabbage').image === '/assets/guide-spinach.svg', '未做图的占位食材仍用旧图')
   const fs = require('fs')
   const png = fs.readFileSync('miniprogram/assets/guide-spinach.png')

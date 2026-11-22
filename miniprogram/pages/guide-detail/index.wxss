@@ -8,7 +8,7 @@
   align-items: center;
   justify-content: center;
 }
-.detail-hero image { width: 100%; height: 100%; }
+.detail-hero .detail-hero-cover { width: 100%; height: 100%; }
 .detail-season {
   position: absolute;
   left: 20rpx;
@@ -70,6 +70,6 @@
   text-align: left;
   line-height: normal;
 }
-.detail-recipe image, .detail-recipe-photo { flex: 0 0 88rpx; width: 88rpx; height: 88rpx; border-radius: 12rpx; background: var(--theme-soft, #fff0e5); }
+.detail-recipe .detail-recipe-cover, .detail-recipe-photo { flex: 0 0 88rpx; width: 88rpx; height: 88rpx; border-radius: 12rpx; overflow: hidden; background: var(--theme-soft, #fff0e5); }
 .detail-recipe-name { flex: 1; min-width: 0; color: var(--theme-text, #5d4037); font-size: 28rpx; font-weight: 600; }
 .detail-recipe-time { flex: 0 0 auto; color: var(--theme-muted, #75665e); font-size: 23rpx; }

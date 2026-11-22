@@ -21,7 +21,7 @@
         <view wx:else class="guide-list">
           <button wx:for="{{visibleIngredients}}" wx:key="id" class="guide-card" data-id="{{item.id}}" bindtap="openDetail" hover-class="card-pressed">
             <view class="guide-card-image" style="background:{{item.tint}}">
-              <image src="{{item.image}}" mode="aspectFit" aria-hidden="true"/>
+              <recipe-cover class="guide-card-cover" src="{{item.image}}" mode="aspectFit" lazy="{{true}}"/>
             </view>
             <view class="guide-card-copy">
               <view class="guide-card-name">{{item.name}}</view>

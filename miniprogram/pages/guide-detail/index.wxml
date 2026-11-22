@@ -1,7 +1,7 @@
 <view class="theme-page theme-{{themeId}} guide-detail">
   <view class="screen" wx:if="{{item}}">
     <view class="detail-hero" style="background:{{item.tint}}">
-      <image src="{{item.image}}" mode="aspectFit" aria-hidden="true"/>
+      <recipe-cover class="detail-hero-cover" src="{{item.image}}" mode="aspectFit" label="{{item.name}}插画"/>
       <view wx:if="{{item.season}}" class="detail-season">{{item.season}}</view>
     </view>
 
@@ -30,7 +30,7 @@
     <view wx:if="{{!item.recipes.length}}" class="empty">这本书里的做法还在整理中。</view>
     <view wx:else class="detail-recipes">
       <button wx:for="{{item.recipes}}" wx:key="id" class="detail-recipe" data-id="{{item.id}}" bindtap="openRecipe" hover-class="card-pressed">
-        <image wx:if="{{item.image}}" src="{{item.image}}" mode="aspectFill" aria-hidden="true"/>
+        <recipe-cover wx:if="{{item.image}}" class="detail-recipe-cover" src="{{item.image}}" lazy="{{true}}"/>
         <view wx:else class="detail-recipe-photo" aria-hidden="true"></view>
         <text class="detail-recipe-name">{{item.name}}</text>
         <text wx:if="{{item.minutes}}" class="detail-recipe-time">{{item.minutes}} 分钟</text>

@@ -1,4 +1,6 @@
 {
-  "usingComponents": {},
+  "usingComponents": {
+    "recipe-cover": "/components/recipe-cover/index"
+  },
   "navigationBarTitleText": "食材详情"
 }
