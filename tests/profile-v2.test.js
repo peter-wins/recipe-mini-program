@@ -232,6 +232,11 @@ test('同一功能复用同一图标：所有页面日历都走唯一 SVG 映射
     assert.ok(!/<view class="meal-calendar-icon"/.test(wxml), `${page} 仍用 view 当 CSS 日历图标`)
     assert.ok(/<image class="meal-calendar-icon" src="\{\{icons\.path\('calendar'\)\}\}"/.test(wxml), `${page} 日历图标未换成 SVG image`)
   }
+  // 搭配页日历入口是图标+文字胶囊（与菜谱库「问问 AI」一致）
+  const mealsWxml = read('pages/meals/index.wxml')
+  assert.ok(/meal-calendar-link[\s\S]*?<image class="meal-calendar-icon"[\s\S]*?<text>做饭日历<\/text>[\s\S]*?<\/navigator>/.test(mealsWxml), '搭配页日历入口应带「做饭日历」文字')
+  const mealsWxss = read('pages/meals/index.wxss')
+  assert.ok(/\.meal-calendar-link \{[\s\S]*?border-radius: 20rpx;[\s\S]*?font-size: 24rpx;/.test(mealsWxss), '日历入口应为胶囊样式')
 })
 
 test('按钮五类体系与语义状态色变量齐备（规范第5/8条）', () => {

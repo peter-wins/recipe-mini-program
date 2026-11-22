@@ -57,15 +57,17 @@
   flex-shrink: 0;
   align-self: flex-start;
   align-items: center;
-  justify-content: center;
-  width: 68rpx;
-  height: 68rpx;
-  border: 1rpx solid var(--theme-border, #f0e4d8);
+  gap: 8rpx;
+  padding: 0 18rpx;
+  border: 1rpx solid var(--theme-border, #eadfd4);
   border-radius: 20rpx;
-  background: var(--theme-surface, #fff);
+  background: var(--theme-soft, #fff0e5);
   color: var(--theme-accent-text, #994017);
+  font-size: 24rpx;
+  line-height: 62rpx;
+  white-space: nowrap;
 }
-.meal-calendar-icon { width: 36rpx; height: 36rpx; }
+.meal-calendar-icon { width: 27rpx; height: 27rpx; }
 .meal-create-card {
   display: flex;
   flex-direction: column;
