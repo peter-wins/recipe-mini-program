@@ -1,3 +1,4 @@
+<wxs src="../../icons.wxs" module="icons" />
 <import src="../../templates/recipe-card.wxml"/>
 <import src="../../templates/fridge-preview.wxml"/>
 

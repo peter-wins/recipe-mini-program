@@ -325,7 +325,8 @@ button.home-search {
   line-height: 1.2;
 }
 .main-nav .nav-item image { width: 34rpx; height: 34rpx; }
-.main-nav .nav-current { background: transparent; color: var(--theme-accent-text, #994017); }
+/* 规范第6条：导航仅用颜色＋文字权重表达选中，图标规格四页一致 */
+.main-nav .nav-current { background: transparent; color: var(--theme-accent-text, #994017); font-weight: 700; }
 .main-nav .nav-current image { filter: var(--theme-accent-icon); }
 .profile-head {
   display: flex;
