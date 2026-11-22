@@ -560,6 +560,12 @@ test('菜谱页去掉复制缺料，采购清单页提供生成清单图', () =>
   const shoppingWxss = read('pages/shopping/index.wxss')
   assert.ok(/\.shopping-export \.primary \{[^}]*line-height: 88rpx/.test(shoppingWxss), '导出按钮行高应与胶囊高度一致，文字垂直居中')
   assert.ok(/\.shopping-export \.primary \{[^}]*min-height: 88rpx/.test(shoppingWxss), '导出按钮高度显式锁定 88rpx')
+
+  assert.ok(/\.shopping-item-copy \{[^}]*display: flex/.test(shoppingWxss), '食材名与用量容器应横排')
+  assert.ok(/\.shopping-item-name \{[^}]*display: inline/.test(shoppingWxss), '食材名不应独占一行')
+  assert.ok(/\.shopping-row-main \{[^}]*min-height: 64rpx/.test(shoppingWxss), '列表行高应收紧')
+  assert.ok(/\.shopping-bought, \.shopping-remove \{[^}]*min-height: 64rpx/.test(shoppingWxss), '行内按钮局部降高，避免撑高整行')
+  assert.ok(/button \{[^}]*min-height: 88rpx/.test(read('app.wxss')), '全局最小点击区规范保持不变')
 })
 
 test('食材指南发布校验：版本号、数量与已有 ID 保护', () => {

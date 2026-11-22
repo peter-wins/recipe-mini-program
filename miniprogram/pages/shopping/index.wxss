@@ -26,17 +26,19 @@
 .shopping-list-head .section { font-size: 28rpx; }
 .shopping-multi { padding-right: 0; }
 .shopping-list { border: 1rpx solid var(--theme-border, #f0e4d8); border-radius: var(--card-radius, 28rpx); background: var(--theme-surface, #fff); overflow: hidden; }
-.shopping-row { padding: 16rpx 20rpx; }
+.shopping-row { padding: 12rpx 20rpx; }
 .shopping-row + .shopping-row { border-top: 1rpx solid var(--theme-border, #f0e4d8); }
-.shopping-row-main { display: flex; align-items: center; gap: 10rpx; min-height: 76rpx; }
+.shopping-row-main { display: flex; align-items: center; gap: 10rpx; min-height: 64rpx; }
 .shopping-row-selected { background: var(--theme-soft, #fff4ec); }
-.shopping-item-copy { flex: 1; min-width: 0; }
+/* 用量跟在食材名后面，同一行排布；过长时换行不溢出 */
+.shopping-item-copy { flex: 1; min-width: 0; display: flex; align-items: center; flex-wrap: wrap; column-gap: 8rpx; }
 .shopping-select-row { display: flex; width: 100%; min-height: 76rpx; margin: 0; padding: 0; align-items: center; gap: 14rpx; background: transparent; line-height: 1.4; text-align: left; }
 .shopping-select-row .shopping-item-name { flex: 1; }
 .shopping-selected-quantity { max-width: 36%; text-align: right; overflow-wrap: anywhere; }
 .shopping-check { display: flex; flex: 0 0 34rpx; height: 34rpx; align-items: center; justify-content: center; box-sizing: border-box; border: 2rpx solid var(--theme-selected-border, #d9b59a); border-radius: 50%; font-size: 23rpx; }
 .shopping-row-selected .shopping-check { border-color: var(--theme-accent, #c87137); background: var(--theme-accent, #c87137); color: #fff; }
-.shopping-bought, .shopping-remove { flex-shrink: 0; min-width: 72rpx; padding: 0 7rpx; font-size: 24rpx; line-height: 60rpx; }
+/* 行内小按钮局部降到 64rpx，配合单行名称+用量，避免撑高整行；不改全局 88rpx 最小点击区 */
+.shopping-bought, .shopping-remove { flex-shrink: 0; min-width: 72rpx; min-height: 64rpx; padding: 0 7rpx; font-size: 24rpx; line-height: 64rpx; }
 .shopping-bought { min-width: 96rpx; border-radius: 14rpx; background: var(--theme-selected, #fbecdc); color: var(--theme-accent-text, #994017); font-weight: 650; }
 .shopping-export { margin-top: 24rpx; text-align: center; }
 .shopping-export .primary { width: 100%; min-height: 88rpx; line-height: 88rpx; }
@@ -62,17 +64,17 @@
 .shopping-entry-actions { display: flex; justify-content: flex-end; align-items: center; gap: 12rpx; margin-top: 14rpx; }
 /* 「加入清单」与文字「取消」视觉齐平：局部降到 76rpx，不改全局最小点击区规范 */
 .shopping-entry-actions .primary { min-height: 76rpx; line-height: 76rpx; }
-.shopping-item-name { display: block; min-width: 0; font-size: 29rpx; font-weight: 650; line-height: 1.35; overflow-wrap: anywhere; }
+.shopping-item-name { display: inline; min-width: 0; font-size: 29rpx; font-weight: 650; line-height: 1.35; overflow-wrap: anywhere; }
 .shopping-quantity {
-  display: flex;
+  display: inline-flex;
   align-items: center;
-  gap: 8rpx;
+  gap: 6rpx;
   max-width: 100%;
-  min-height: 40rpx;
-  padding: 2rpx 0 0;
+  min-height: 0;
+  padding: 0;
   color: var(--theme-muted, #75665e);
   font-size: 24rpx;
-  line-height: 1.4;
+  line-height: 1.35;
   white-space: normal;
   text-align: left;
 }
