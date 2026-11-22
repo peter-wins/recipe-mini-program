@@ -181,6 +181,13 @@
         </button>
       </view>
     </view>
+    <view class="profile-version">
+      <view class="profile-version-head">
+        <text class="profile-version-badge">{{versionLabel}}</text>
+        <text class="profile-version-title">本次更新</text>
+      </view>
+      <view wx:for="{{releaseNotes}}" wx:key="*this" class="profile-version-note">{{item}}</view>
+    </view>
   </block>
 
 </view>

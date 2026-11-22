@@ -9,6 +9,7 @@ const { festivalOf } = require('../../festival')
 const { greetingInfo } = require('../../home-greeting')
 const { rotateLightInspiration } = require('../../meal-plans')
 const { dateKey, parseDate, mealSlots, readCalendar, resolveCalendarMeal } = require('../../meal-calendar')
+const { versionInfo } = require('../../app-version')
 
 const primaryCategories = ['荤菜', '素菜', '海鲜', '蛋类', '主食', '汤羹', '甜品', '饮品', '酱料']
 function libraryCategories() {
@@ -59,7 +60,8 @@ Page({
     methodTags,
     favorites: [],
     history: [],
-    cooked: []
+    cooked: [],
+    ...versionInfo()
   },
 
   onLoad({ view, date, slot } = {}) {
