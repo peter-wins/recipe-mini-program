@@ -335,3 +335,26 @@ test('按钮五类体系与语义状态色变量齐备（规范第5/8条）', ()
   assert.ok(read('pages/fridge/index.wxss').includes('var(--state-danger,')
     || read('pages/shopping/index.wxss').includes('var(--state-danger,'))
 })
+
+test('四个页头距顶部统一：容器 20rpx + 页头 12rpx = 实际 32rpx', () => {
+  const appWxss = read('app.wxss')
+  const homeWxss = read('pages/home/index.wxss')
+  const mealsWxss = read('pages/meals/index.wxss')
+  const shoppingWxss = read('pages/shopping/index.wxss')
+
+  // 容器层：.screen 默认 padding-top 20rpx，首页 match 的 home-screen 特例须与之对齐
+  const screenRule = appWxss.match(/\.screen \{[\s\S]*?\}/)[0]
+  assert.ok(/padding: 20rpx/.test(screenRule), '.screen 默认顶部间距应为 20rpx')
+  const homeScreenRule = homeWxss.match(/\.screen\.home-screen \{[^}]*\}/)[0]
+  assert.ok(/padding-top: 20rpx/.test(homeScreenRule), '首页容器应与其它页顶部对齐（20rpx）')
+
+  // 页头层：四页自身顶部间距统一为 12rpx
+  const greetingRule = homeWxss.match(/\.home-greeting \{[^}]*\}/)[0]
+  const libraryRule = homeWxss.match(/\.library-header \{[^}]*\}/)[0]
+  const mealRule = mealsWxss.match(/\.meal-page \{[^}]*\}/)[0]
+  const shoppingRule = shoppingWxss.match(/\.shopping-head \{[^}]*\}/)[0]
+  assert.ok(/margin: 12rpx/.test(greetingRule), '首页页头顶部间距应为 12rpx')
+  assert.ok(/margin: 12rpx/.test(libraryRule), '菜谱库页头顶部间距应为 12rpx')
+  assert.ok(/padding-top: 12rpx/.test(mealRule), '搭配页页头顶部间距应为 12rpx')
+  assert.ok(/padding: 12rpx /.test(shoppingRule), '采购页页头顶部间距应为 12rpx')
+})

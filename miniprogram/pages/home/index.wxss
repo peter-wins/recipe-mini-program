@@ -15,7 +15,7 @@ button.home-search {
   text-align: left;
   font-weight: 400;
 }
-.screen.home-screen { padding-top: 28rpx; }
+.screen.home-screen { padding-top: 20rpx; }
 .more-recipes-link {
   display: flex;
   align-items: center;

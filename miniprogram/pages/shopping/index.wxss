@@ -1,4 +1,4 @@
-.shopping-head { padding: 22rpx 0 24rpx; }
+.shopping-head { padding: 12rpx 0 24rpx; }
 .shopping-head-row { gap: 16rpx; align-items: center; }
 .shopping-head-copy { flex: 1; min-width: 0; }
 .shopping-title { color: var(--theme-text, #4e342c); font-size: 50rpx; font-weight: 750; line-height: 1.2; }

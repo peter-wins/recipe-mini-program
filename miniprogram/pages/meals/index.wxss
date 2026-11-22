@@ -1,6 +1,6 @@
 @import "../../styles/recipe-card.wxss";
 
-.meal-page { padding-top: 8rpx; }
+.meal-page { padding-top: 12rpx; }
 .meal-hero { flex-wrap: wrap; align-items: center; gap: 12rpx; }
 .meal-hero-copy { flex: 1 1 240rpx; }
 .meal-hero-copy, .meal-card-copy { min-width: 0; }
