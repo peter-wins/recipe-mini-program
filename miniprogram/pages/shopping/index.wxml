@@ -1,27 +1,71 @@
 <view class="theme-page theme-{{themeId}}">
-  <view class="screen">
-    <view class="page-head">
-      <view class="headline">采购清单</view>
-      <view wx:if="{{items.length}}" class="subtle">待买 {{items.length}} 种食材</view>
-    </view>
-    <view wx:if="{{!items.length}}" class="empty">从菜谱详情加入缺少的食材。</view>
-    <view wx:for="{{items}}" wx:key="key" class="purchase-row">
-      <view class="row">
-        <text class="recipe-name shopping-item-name">{{item.name}}</text>
-        <button class="link shopping-quantity" bindtap="toggleDetails" data-key="{{item.key}}" aria-expanded="{{item.expanded}}" aria-label="{{item.name + '，' + item.quantity + '，用量明细'}}">
-          <text>{{item.quantity}}</text>
-          <text class="shopping-chevron" aria-hidden="true">{{item.expanded ? '⌃' : '⌄'}}</text>
-        </button>
+  <view class="screen shopping-screen {{selecting || undoCount ? 'shopping-screen-with-bar' : ''}}">
+    <view class="page-head shopping-head">
+      <view class="row shopping-head-row">
+        <view class="headline">采购清单</view>
+        <button wx:if="{{!manualOpen}}" class="link shopping-add" bindtap="openManualEntry">＋ 手动添加</button>
       </view>
-      <view wx:if="{{item.expanded}}" class="shopping-details">
-        <view wx:for="{{item.details}}" wx:for-item="detail" wx:key="key" class="row subtle shopping-detail">
-          <text>{{detail.title}}</text><text class="quantity">{{detail.quantity}}</text>
+      <view wx:if="{{items.length}}" class="subtle">待买 {{items.length}} 项</view>
+    </view>
+    <form wx:if="{{manualOpen}}" class="purchase-row shopping-entry" bindsubmit="addManualItem">
+      <view class="shopping-entry-fields">
+        <view class="shopping-entry-field">
+          <text>名称</text>
+          <input name="name" class="shopping-entry-input" placeholder="例如牛奶、厨房纸" aria-label="名称" maxlength="{{manualNameLimit}}" focus="{{!focusQuantity}}" confirm-type="next" confirm-hold="{{true}}" bindconfirm="focusManualQuantity"/>
+        </view>
+        <view class="shopping-entry-field">
+          <text>用量（选填）</text>
+          <input name="quantity" class="shopping-entry-input" placeholder="例如 2 盒" aria-label="用量，选填" maxlength="{{manualQuantityLimit}}" focus="{{focusQuantity}}"/>
         </view>
       </view>
-      <view class="actions">
-        <button class="primary" bindtap="markBought" disabled="{{!!updatingKey}}" data-key="{{item.key}}" aria-label="已买{{item.name}}，加入冰箱">已买入库</button>
-        <button class="link" bindtap="removeItem" disabled="{{!!updatingKey}}" data-key="{{item.key}}" aria-label="从清单移除{{item.name}}">移除</button>
+      <view class="shopping-entry-actions">
+        <button class="link" bindtap="closeManualEntry">取消</button>
+        <button class="primary" form-type="submit">加入清单</button>
       </view>
+    </form>
+    <view wx:if="{{!items.length && !manualOpen}}" class="empty">目前没有待买的东西。</view>
+    <block wx:if="{{items.length}}">
+      <view class="row shopping-list-head">
+        <text class="section">{{selecting ? '已选 ' + selectedCount + ' 项' : '待买清单'}}</text>
+        <button class="link shopping-multi" bindtap="toggleBatchMode" aria-pressed="{{selecting}}">{{selecting ? '取消多选' : '多选'}}</button>
+      </view>
+      <view class="shopping-list">
+        <view wx:for="{{items}}" wx:key="key" class="shopping-row {{item.selected ? 'shopping-row-selected' : ''}}">
+          <button wx:if="{{selecting}}" class="shopping-select-row" bindtap="toggleSelection" data-key="{{item.key}}" aria-pressed="{{item.selected}}" aria-label="{{item.name + '，' + item.quantity}}">
+            <text class="shopping-check" aria-hidden="true">{{item.selected ? '✓' : ''}}</text>
+            <text class="shopping-item-name">{{item.name}}</text>
+            <text class="subtle shopping-selected-quantity">{{item.quantity}}</text>
+          </button>
+          <block wx:else>
+            <view class="shopping-row-main">
+              <view class="shopping-item-copy">
+                <text class="shopping-item-name">{{item.name}}</text>
+                <button class="link shopping-quantity" bindtap="toggleDetails" data-key="{{item.key}}" aria-expanded="{{item.expanded}}" aria-label="{{item.quantity + '，用量明细'}}">
+                  <text>{{item.quantity}}</text>
+                  <text class="shopping-chevron" aria-hidden="true">{{item.expanded ? '⌃' : '⌄'}}</text>
+                </button>
+              </view>
+              <button class="shopping-bought" bindtap="markBought" disabled="{{updating}}" data-key="{{item.key}}" aria-label="{{'已买' + item.name + (item.canRestock ? '，加入冰箱' : '')}}">已买</button>
+              <button class="link shopping-remove" bindtap="removeItem" disabled="{{updating}}" data-key="{{item.key}}" aria-label="{{'从清单移除' + item.name}}">移除</button>
+            </view>
+            <view wx:if="{{item.expanded}}" class="shopping-details">
+              <view wx:for="{{item.details}}" wx:for-item="detail" wx:key="key" class="row subtle shopping-detail">
+                <text>{{detail.title}}</text><text class="quantity">{{detail.quantity}}</text>
+              </view>
+            </view>
+          </block>
+        </view>
+      </view>
+    </block>
+  </view>
+  <view wx:if="{{selecting || undoCount}}" class="shopping-dock">
+    <view wx:if="{{undoCount}}" class="shopping-undo row" aria-live="polite">
+      <text>已买 {{undoCount}} 项</text>
+      <button class="link shopping-undo-action" bindtap="undoBought">撤销</button>
+    </view>
+    <view wx:if="{{selecting}}" class="shopping-batch row">
+      <button class="link" bindtap="toggleAll">{{selectedCount === items.length ? '取消全选' : '全选'}}</button>
+      <button class="primary" bindtap="markSelectedBought" disabled="{{!selectedCount || updating}}">{{selectedCount ? '标记 ' + selectedCount + ' 项已买' : '标记已买'}}</button>
     </view>
   </view>
 </view>

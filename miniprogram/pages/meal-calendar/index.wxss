@@ -41,6 +41,9 @@
 .calendar-meal-label { flex-shrink: 0; font-size: 30rpx; font-weight: 750; }
 .calendar-meal-action, .calendar-meal-menu { min-width: 76rpx; padding: 0 4rpx; line-height: 76rpx; }
 .calendar-meal-action { font-size: 26rpx; }
+.calendar-recipe-actions { display: flex; flex-shrink: 0; align-items: center; gap: 8rpx; }
+.calendar-recipe-actions .calendar-meal-action { white-space: nowrap; }
+.calendar-replace-action { color: var(--theme-muted, #75665e); font-size: 24rpx; }
 .calendar-meal-menu { color: var(--theme-muted, #75665e); font-size: 42rpx; letter-spacing: 2rpx; text-align: right; }
 .calendar-plan-name { min-width: 0; font-size: 24rpx; line-height: 1.4; overflow-wrap: anywhere; }
 .calendar-dishes { display: grid; gap: 18rpx; padding: 0 0 16rpx; }

@@ -43,6 +43,11 @@ Page({
     }
   },
 
+  refreshCatalogData() {
+    const picker = this.selectComponent('#recipe-picker')
+    if (picker) picker.refreshCatalogData()
+  },
+
   openMealPairings() {
     wx.navigateTo({
       url: '/pages/home/index?view=meals&date=' + this.date + '&slot=' + this.slot,

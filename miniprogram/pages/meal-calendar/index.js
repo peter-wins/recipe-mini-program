@@ -1,8 +1,9 @@
 const { applyTheme } = require('../../theme')
-const { getMealPlans, getArchivedMealPlan } = require('../../meal-plans')
+const { getRecipe } = require('../../catalog')
+const { getMealPlans, getAdjustedMealPlan } = require('../../meal-plans')
 const { getMealShoppingPreview, saveMealShopping } = require('../../shopping')
 const { dateKey, parseDate, changeMonth, calendarMonth, mealSlots, readCalendar, saveCalendarMeal,
-  sameCalendarMeal, getCalendarDishes, snapshotMealPlan } = require('../../meal-calendar')
+  sameCalendarMeal, snapshotMealPlan, appendCalendarRecipe, resolveCalendarMeal } = require('../../meal-calendar')
 
 Page({
   data: {
@@ -11,10 +12,15 @@ Page({
     intent: null, purchasePreview: null
   },
 
-  onLoad({ planId, date, slot } = {}) {
+  onLoad({ planId, recipeId = '', date, slot } = {}) {
     this.planId = planId
     this.requestedSlot = slot
-    this.setData({ selectedDate: planId && parseDate(date) ? date : dateKey(new Date()) })
+    try {
+      this.recipeId = decodeURIComponent(recipeId)
+    } catch {
+      this.recipeId = ''
+    }
+    this.setData({ selectedDate: parseDate(date) ? date : dateKey(new Date()) })
   },
 
   onShow() {
@@ -22,13 +28,25 @@ Page({
     this.refreshPlanningData()
   },
 
+  refreshCatalogData() {
+    this.refreshPlanningData()
+  },
+
   refreshPlanningData() {
     try {
       this.plans = getMealPlans([], { goal: 'all' })
       this.plansById = new Map(this.plans.map(plan => [plan.id, plan]))
-      const plan = this.plansById.get(this.planId)
+      const plan = this.planId && (getAdjustedMealPlan(this.planId) || this.plansById.get(this.planId))
       if (this.planId && !plan) wx.showToast({ title: '这套搭配暂时不可用', icon: 'none' })
-      if (plan) {
+      const recipe = this.recipeId && getRecipe(this.recipeId)
+      if (recipe) {
+        this.recipeId = ''
+        this.setData({ intent: {
+          entry: { type: 'recipe', id: recipe.id },
+          title: recipe.name,
+          hint: '选日期和餐次，已有菜谱可追加或替换'
+        } })
+      } else if (plan) {
         const meal = mealSlots.find(item => item.id === this.requestedSlot)
         const hint = meal ? '点「' + meal.label + '」安排，也可以另选餐次' : '选择日期和餐次'
         this.setData({ intent: { entry: snapshotMealPlan(plan), title: plan.title, hint } })
@@ -41,17 +59,6 @@ Page({
     this.refreshCalendar()
   },
 
-  resolveMeal(entry) {
-    if (!entry) return null
-    if (entry.type === 'plan' && !entry.dishes) {
-      return (this.plansById && this.plansById.get(entry.id)) || getArchivedMealPlan(entry.id)
-    }
-    const dishes = getCalendarDishes(entry)
-    if (!dishes.length) return null
-    const title = entry.title || (dishes.length === 1 ? dishes[0].name : dishes.length + ' 道菜')
-    return { title, dishes }
-  },
-
   refreshCalendar(selectedDate = this.data.selectedDate, update = {}) {
     try {
       const schedule = readCalendar()
@@ -59,7 +66,7 @@ Page({
       const day = schedule[selectedDate] || {}
       const meals = mealSlots.map(slot => {
         const entry = day[slot.id] || null
-        const meal = this.resolveMeal(entry)
+        const meal = resolveCalendarMeal(entry, this.plansById)
         const dishes = meal ? meal.dishes : []
         return { ...slot, entry, title: meal ? meal.title : '菜谱暂不可用', dishes }
       })
@@ -96,8 +103,29 @@ Page({
     const meal = this.data.meals.find(item => item.id === slot)
     if (!meal) return
     const { intent } = this.data
-    if (intent) this.arrangeMeal(slot, intent.entry)
+    if (intent && intent.entry.type === 'recipe') this.appendRecipe(meal, intent)
+    else if (intent) this.arrangeMeal(slot, intent.entry)
     else if (!meal.entry) this.openChooser(event)
+  },
+
+  appendRecipe(meal, intent) {
+    const legacyPlan = meal.entry && meal.entry.type === 'plan' && !meal.entry.dishes
+      ? resolveCalendarMeal(meal.entry, this.plansById) : null
+    const entry = appendCalendarRecipe(meal.entry, { id: intent.entry.id, name: intent.title }, legacyPlan)
+    if (!entry) {
+      wx.showToast({ title: '原安排暂不可读取，可选择替换', icon: 'none' })
+      return
+    }
+    if (entry === meal.entry) {
+      wx.showToast({ title: '这餐已经有这道菜', icon: 'none' })
+      return
+    }
+    this.commitMeal(this.data.selectedDate, meal.id, entry, meal.entry)
+  },
+
+  replaceWithRecipe(event) {
+    const { intent } = this.data
+    if (intent && intent.entry.type === 'recipe') this.arrangeMeal(event.currentTarget.dataset.slot, intent.entry)
   },
 
   openMealMenu(event) {
@@ -124,6 +152,7 @@ Page({
   },
 
   cancelIntent() {
+    this.recipeId = ''
     this.setData({ intent: null })
   },
 
@@ -135,7 +164,7 @@ Page({
         const date = new Date(today.getFullYear(), today.getMonth(), today.getDate() + offset)
         const day = schedule[dateKey(date)] || {}
         return mealSlots.flatMap(slot => {
-          const meal = this.resolveMeal(day[slot.id])
+          const meal = resolveCalendarMeal(day[slot.id], this.plansById)
           return meal ? meal.dishes.map(dish => dish.id) : []
         })
       })

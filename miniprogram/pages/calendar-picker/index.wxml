@@ -10,7 +10,7 @@
         <button class="link calendar-picker-pairings" bindtap="openMealPairings">去搭配 <text aria-hidden="true">›</text></button>
       </view>
       <view wx:if="{{replacing}}" class="subtle calendar-picker-current">当前安排 · {{currentTitle}}</view>
-      <recipe-picker initial="{{selected}}" confirm-text="{{(replacing ? '替换' : '加入') + label}}" busy="{{saving}}" bind:confirm="onPickerConfirm"/>
+      <recipe-picker id="recipe-picker" initial="{{selected}}" confirm-text="{{(replacing ? '替换' : '加入') + label}}" busy="{{saving}}" bind:confirm="onPickerConfirm"/>
     </view>
   </block>
 </view>

@@ -104,6 +104,10 @@
 .meal-dishes { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12rpx; margin-top: 17rpx; }
 .meal-dishes-single { grid-template-columns: minmax(0, 1fr); }
 .meal-dish { display: block; min-width: 0; border-radius: 16rpx; }
+.meal-swap-hint { margin-top: 14rpx; color: var(--theme-accent-text, #994017); font-size: 24rpx; }
+.meal-swap-hint + .meal-dishes { margin-top: 8rpx; }
+.meal-dish-swap { width: 100%; margin: 0; padding: 6rpx; border: 1rpx solid var(--theme-selected-border, #e6c5ad); background: var(--theme-selected, #fbecdc); text-align: left; line-height: 1.4; }
+.meal-dish-swap .meal-dish-name { margin: 8rpx 4rpx 5rpx; }
 .meal-dish-cover { display: block; height: 178rpx; overflow: hidden; border-radius: 16rpx; }
 .meal-dishes-single .meal-dish-cover { height: 226rpx; }
 .meal-photo-empty { display: flex; align-items: center; justify-content: center; background: var(--theme-placeholder, #f4e5d7); }
@@ -121,6 +125,7 @@
   border-top: 1rpx solid var(--theme-border, #f0e4d8);
 }
 .meal-card-actions button { margin: 0; }
+.meal-card-actions .meal-swap { margin-right: auto; padding: 0 10rpx 0 0; font-size: 25rpx; white-space: nowrap; }
 .meal-add, .meal-buy { min-height: 72rpx; }
 .meal-add { border-color: transparent; }
 .meal-buy { background: var(--theme-surface, #fff); }

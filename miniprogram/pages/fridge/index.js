@@ -1,14 +1,13 @@
-const { getIngredientOptions, getIngredientGroups, searchIngredientOptions } = require('../../catalog')
+const { getCatalogSource, getIngredientOptions, getIngredientGroups, searchIngredientOptions } = require('../../catalog')
 const { readInventory, saveInventory, summarizeInventory } = require('../../inventory')
 const { applyTheme } = require('../../theme')
 
-const options = getIngredientOptions()
 const fridgeGroups = getIngredientGroups()
 const ingredientPageSize = 24
 
 function ingredientView(selected, search, groupIndex, limit) {
   const searching = Boolean(search.trim())
-  const items = searching ? searchIngredientOptions(search) : fridgeGroups[groupIndex].items
+  const items = searching ? searchIngredientOptions(search) : getIngredientGroups()[groupIndex].items
   return {
     searching,
     visibleIngredients: items.slice(0, limit).map(({ id, name }) => ({ id, name, checked: selected.includes(id) })),
@@ -37,10 +36,16 @@ Page({
   refreshKitchenData() {
     try {
       const selected = readInventory()
-      if (selected.join(',') !== this.data.selected.join(',')) this.updateSelection(selected)
+      const source = getCatalogSource()
+      if (source !== this.catalogSource || selected.join(',') !== this.data.selected.join(',')) this.updateSelection(selected)
+      this.catalogSource = source
     } catch {
       wx.showToast({ title: '暂时无法读取冰箱', icon: 'none' })
     }
+  },
+
+  refreshCatalogData() {
+    this.refreshKitchenData()
   },
 
   searchIngredients(event) {
@@ -96,7 +101,7 @@ Page({
   updateSelection(selected) {
     this.applyIngredientView({
       selected,
-      selectedItems: options.filter(item => selected.includes(item.id)).map(({ id, name }) => ({ id, name })),
+      selectedItems: getIngredientOptions().filter(item => selected.includes(item.id)).map(({ id, name }) => ({ id, name })),
       showAllSelected: selected.length > 8 && this.data.showAllSelected,
       fridgeSummary: summarizeInventory(selected)
     })

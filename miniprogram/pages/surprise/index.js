@@ -1,13 +1,12 @@
-const { getIngredientOptions, getRecipe, matchRecipes, groupFridgeMatches } = require('../../catalog')
+const { getCatalogSource, getIngredientName, getRecipe, matchRecipes, groupFridgeMatches } = require('../../catalog')
 const { readInventory, summarizeInventory } = require('../../inventory')
 const { applyTheme } = require('../../theme')
 
-const names = new Map(getIngredientOptions().map(item => [item.id, item.name]))
 const mainCategories = new Set(['水产', '荤菜', '素菜', '汤', '主食', '早餐'])
 
 function pickReason(recipe) {
   if (recipe.missingCount === 0) {
-    const used = recipe.required.filter(id => names.has(id)).slice(0, 3).map(id => names.get(id))
+    const used = recipe.required.map(getIngredientName).filter(Boolean).slice(0, 3)
     return used.length ? `冰箱里的${used.join('、')}都能用上` : '冰箱里的食材刚好够'
   }
   if (recipe.missingCount === 1) return `只差${recipe.missingText}，补一样就能做`
@@ -31,15 +30,23 @@ Page({
   onShow() {
     applyTheme(this)
     const key = readInventory().slice().sort().join(',')
-    if (key !== this.inventoryKey) {
+    if (key !== this.inventoryKey || this.catalogSource !== getCatalogSource()) {
       this.buildPools()
       this.pick()
     }
   },
 
+  refreshCatalogData() {
+    const current = this.data.recipe
+    this.buildPools()
+    if (current) this.setData({ recipe: getRecipe(current.id) })
+    else this.pick()
+  },
+
   buildPools() {
     const selected = readInventory()
     this.inventoryKey = selected.slice().sort().join(',')
+    this.catalogSource = getCatalogSource()
     const { ready, almost } = groupFridgeMatches(selected.length ? matchRecipes(selected) : [])
     const readyPool = ready
     const almostPool = almost

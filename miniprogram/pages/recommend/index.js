@@ -1,6 +1,7 @@
 const { readInventory, previewInventory } = require('../../inventory')
 const { recommendRecipes } = require('../../recipe-recommendations')
 const { applyTheme } = require('../../theme')
+const { getCatalogSource } = require('../../catalog')
 
 const modes = [
   { value: 'stock', label: '按食材', icon: 'fridge', hint: '优先推荐食材齐全、需要少补买的菜。' },
@@ -51,7 +52,15 @@ Page({
 
   onShow() {
     applyTheme(this)
+    this.refreshCatalogData()
+  },
+
+  refreshCatalogData() {
+    const source = getCatalogSource()
+    const rerun = this.data.hasRun && this.catalogSource !== source
     this.refreshKitchenData()
+    this.catalogSource = source
+    if (rerun && this.data.inventoryReady) this.runRecommendations()
   },
 
   refreshKitchenData() {

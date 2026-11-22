@@ -1,6 +1,7 @@
 const developmentImageBase = 'http://192.168.1.81:8088'
 const cloudImageEnv = 'recipe-dev-d9gsv38lz1ade2114'
-const cloudImageBase = 'cloud://' + cloudImageEnv + '.7265-recipe-dev-d9gsv38lz1ade2114-1404757921/recipe-covers/'
+const cloudStorageBase = 'cloud://' + cloudImageEnv + '.7265-recipe-dev-d9gsv38lz1ade2114-1404757921/'
+const cloudImageBase = cloudStorageBase + 'recipe-covers/'
 const useLocalImagesInDevelopment = false
 
 function isDevelopmentCoverUrl(url) {
@@ -22,4 +23,4 @@ function recipeImage(coverPath) {
   return getCoverUrl(coverPath, miniProgram && miniProgram.envVersion)
 }
 
-module.exports = { cloudImageEnv, getCoverUrl, recipeImage, isDevelopmentCoverUrl }
+module.exports = { cloudImageEnv, cloudStorageBase, getCoverUrl, recipeImage, isDevelopmentCoverUrl }

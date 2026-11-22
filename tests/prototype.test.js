@@ -202,6 +202,20 @@ test('菜谱库按菜品分组，早餐、半成品和厨具通过标签叠加�
   assert.equal(getRecipe('breakfast_zheng-shui-dan').category, '早餐')
 })
 
+test('菜谱搜索支持多个食材及别名，菜名精确命中优先', () => {
+  const find = (search, filters = {}) => matchRecipes([], { search, rankByStock: false, ...filters })
+  const stirFry = getRecipe('tomato-eggs')
+  const ids = cards => cards.map(card => card.id)
+  const results = ids(find('番茄 鸡蛋'))
+  assert.ok(results.includes(stirFry.id))
+  assert.deepEqual(new Set(ids(find('鸡蛋，西红柿'))), new Set(results))
+  assert.ok(!find('番茄、鸡蛋').some(recipe => recipe.name === '糖醋里脊'))
+  assert.ok(!find('番茄 未知食材').length)
+  assert.equal(find(stirFry.name)[0].id, stirFry.id)
+  const soups = find('番茄 鸡蛋', { category: '汤羹' })
+  assert.ok(soups.length && soups.every(recipe => recipe.libraryCategory === '汤羹'))
+})
+
 test('菜谱 ID 唯一，原有菜谱和新轻食的食材及做法完整', () => {
   assert.equal(recipes.filter(recipe => !recipe.light).length, 363)
   assert.equal(recipes.filter(recipe => recipe.light).length, 52)
@@ -746,6 +760,7 @@ test('菜谱页分页，采购保留原用量，旧收藏映射到新菜谱', ()
   failWrites = false
   shopping.markBought(event)
   assert.deepEqual(shopping.data.items, [])
+  shopping.onUnload()
   home.onShow()
   assert.deepEqual(home.data.selected, ['potato', 'tomato'])
   detail.startCooking()
@@ -1115,6 +1130,15 @@ test('收藏后爱心切换为实心图标', () => {
   assert.ok(wxml.includes("saved ? '/assets/icon-favorites-filled.svg' : '/assets/icon-favorites.svg'"))
   assert.ok(fs.existsSync(require.resolve('../miniprogram/assets/icon-favorites-filled.svg')))
   assert.ok(!wxss.includes('detail-saved image'))
+})
+
+test('我的页有意见反馈入口，走微信客服会话', () => {
+  const fs = require('node:fs')
+  const wxml = fs.readFileSync(require.resolve('../miniprogram/pages/home/index.wxml'), 'utf8')
+  assert.ok(wxml.includes('open-type="contact"'))
+  assert.ok(wxml.includes('意见反馈'))
+  assert.ok(wxml.includes('/assets/icon-feedback.svg'))
+  assert.ok(fs.existsSync(require.resolve('../miniprogram/assets/icon-feedback.svg')))
 })
 
 test('陈皮排骨汤去重，电器标签同时匹配菜名与做法步骤', () => {

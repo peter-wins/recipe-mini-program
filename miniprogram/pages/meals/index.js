@@ -11,7 +11,7 @@ Component({
 
   data: {
     goal: 'family', plans: [],
-    planPreviewLimit: 2, showAllPlans: false, purchasePicker: null
+    planPreviewLimit: 2, showAllPlans: false, purchasePicker: null, swapPlanId: ''
   },
 
   observers: {
@@ -33,20 +33,42 @@ Component({
 
     selectGoal(event) {
       const { goal } = event.currentTarget.dataset
-      if (goal !== this.data.goal) this.updateMeals({ goal, showAllPlans: false })
+      if (goal !== this.data.goal) this.updateMeals({ goal, showAllPlans: false, swapPlanId: '' })
     },
 
     togglePlans() {
-      this.setData({ showAllPlans: !this.data.showAllPlans })
+      this.setData({ showAllPlans: !this.data.showAllPlans, swapPlanId: '' })
     },
 
     updateMeals(update) {
       const { inventory, goal } = { ...this.data, ...update }
       try {
-        this.setData({ ...update, plans: getMealPlans(inventory, { goal }) })
+        this.setData({ ...update, plans: getMealPlans(inventory, { goal, useAdjustments: true }) })
       } catch {
         wx.showToast({ title: '暂时无法读取搭配', icon: 'none' })
       }
+    },
+
+    toggleDishSwap(event) {
+      const { id } = event.currentTarget.dataset
+      const plan = this.data.plans.find(item => item.id === id)
+      if (!plan) return
+      if (plan.dishes.length === 1) this.openDishReplacement(id, plan.dishes[0].id)
+      else this.setData({ swapPlanId: this.data.swapPlanId === id ? '' : id })
+    },
+
+    selectDishToSwap(event) {
+      const { dishId } = event.currentTarget.dataset
+      if (this.data.swapPlanId) this.openDishReplacement(this.data.swapPlanId, dishId)
+    },
+
+    openDishReplacement(planId, dishId) {
+      const url = '/pages/compose-meal/index?planId=' + encodeURIComponent(planId) + '&replace=' + encodeURIComponent(dishId)
+      wx.navigateTo({
+        url,
+        events: { mealDishChanged: () => this.updateMeals({ swapPlanId: '' }) },
+        fail: () => wx.showToast({ title: '暂时无法打开换菜页', icon: 'none' })
+      })
     },
 
     openMealMenu(event) {

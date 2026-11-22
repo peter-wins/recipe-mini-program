@@ -1,4 +1,4 @@
-const { getRecipe } = require('./catalog')
+const { getRecipe, resolveRecipeId } = require('./catalog')
 const { getMealPlans, getArchivedMealPlan } = require('./meal-plans')
 const { readPlanning, migrateLegacyCalendar, savePlanningChange } = require('./planning-sync')
 
@@ -116,6 +116,33 @@ function getCalendarDishes(entry) {
     .map(({ id, name, image, timeText }) => ({ id, name, image, timeText }))
 }
 
+function resolveCalendarMeal(entry, plansById) {
+  if (!entry) return null
+  if (entry.type === 'plan' && !entry.dishes) {
+    const plan = plansById ? plansById.get(entry.id) : getMealPlans([], { goal: 'all' }).find(item => item.id === entry.id)
+    return plan || getArchivedMealPlan(entry.id)
+  }
+  const dishes = getCalendarDishes(entry)
+  if (!dishes.length) return null
+  return { title: entry.title || (dishes.length === 1 ? dishes[0].name : dishes.length + ' 道菜'), dishes }
+}
+
+function appendCalendarRecipe(entry, recipe, legacyPlan) {
+  const { id, name } = recipe
+  if (!entry) return { type: 'recipe', id }
+
+  if (entry.type === 'plan') {
+    const plan = entry.dishes ? entry : legacyPlan && snapshotMealPlan(legacyPlan)
+    if (!plan) return null
+    if (plan.dishes.some(dish => resolveRecipeId(dish.id) === id)) return entry
+    return { ...plan, dishes: [...plan.dishes, { id, name }] }
+  }
+
+  const ids = entry.type === 'recipes' ? entry.ids : [entry.id]
+  if (ids.some(recipeId => resolveRecipeId(recipeId) === id)) return entry
+  return { type: 'recipes', ids: [...ids, id] }
+}
+
 function saveCalendarMeal(date, slot, entry, expected) {
   if (!parseDate(date) || !mealSlots.some(item => item.id === slot)) return false
   const schedule = readCalendar()
@@ -127,5 +154,5 @@ function saveCalendarMeal(date, slot, entry, expected) {
 
 module.exports = {
   dateKey, parseDate, changeMonth, calendarMonth, mealSlots, readCalendar, saveCalendarMeal, sameCalendarMeal, getCalendarDishes,
-  snapshotMealPlan, prepareCalendarSnapshots
+  snapshotMealPlan, prepareCalendarSnapshots, appendCalendarRecipe, resolveCalendarMeal
 }

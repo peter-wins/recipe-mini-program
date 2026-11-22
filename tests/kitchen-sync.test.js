@@ -3,7 +3,7 @@ const test = require('node:test')
 const fs = require('node:fs')
 const vm = require('node:vm')
 const { readKitchen, saveKitchen, saveInventory, syncInventory } = require('../miniprogram/inventory')
-const { removeShoppingItem } = require('../miniprogram/shopping')
+const { listShopping, removeShoppingItem, saveManualShopping, buyShoppingItems, undoShoppingPurchase } = require('../miniprogram/shopping')
 const { appid } = require('../project.config.json')
 
 function cloudFixture() {
@@ -82,6 +82,105 @@ test('云同步并发写入不会覆盖其他设备，重试不会恢复旧的�
   assert.deepEqual((await cloud.call('user-b', { ...first, seed: null, _openid: 'user-a' })).kitchen, empty)
   assert.equal((await cloud.call(null, first)).error, 'unauthorized')
   assert.equal((await cloud.call('user-a', first, 'some-other-app')).error, 'unauthorized')
+})
+
+test('手动采购可离线添加和修改，恢复网络后与菜谱采购一起同步', async t => {
+  const cloud = cloudFixture()
+  const recipeItem = { recipeId: 'tomato-eggs', id: 'tomato', quantity: '2 个' }
+  const deviceA = new Map([['recipe-kitchen-v1', { inventory: [], shopping: [recipeItem] }]])
+  const deviceB = new Map()
+  let storage = deviceA
+  let online = false
+  t.mock.method(console, 'warn', () => {})
+  global.wx = {
+    getStorageSync: key => structuredClone(storage.get(key)),
+    setStorageSync: (key, value) => storage.set(key, structuredClone(value)),
+    cloud: {
+      async callFunction({ data }) {
+        if (!online) throw new Error('offline')
+        return { result: await cloud.call('manual-list-user', data) }
+      }
+    }
+  }
+  t.after(() => { delete global.wx })
+
+  assert.equal(saveManualShopping('  ', ''), false)
+  assert.equal(saveManualShopping('西红柿', ''), true)
+  assert.equal(listShopping()[0].quantity, recipeItem.quantity)
+  assert.equal(saveManualShopping('番茄', '3 个'), true)
+  assert.equal(saveManualShopping('Kitchen  paper', '1 包'), true)
+  assert.equal(saveManualShopping(' kitchen paper ', '2 包'), true)
+  assert.equal(saveManualShopping('  散装燕麦脆饼  ', ''), true)
+  await syncInventory()
+
+  online = true
+  await syncInventory()
+  storage = deviceB
+  await syncInventory()
+  const items = listShopping()
+  const tomato = items.find(item => item.key === 'tomato')
+  const paper = items.find(item => item.name === 'Kitchen paper')
+  const unmeasured = items.find(item => item.name === '散装燕麦脆饼')
+  assert.equal(items.length, 3)
+  assert.equal(tomato.quantity, '5 个')
+  assert.equal(tomato.canRestock, true)
+  assert.deepEqual(tomato.details.map(({ title, quantity }) => [title, quantity]), [
+    ['西红柿炒鸡蛋', '2 个'], ['手动添加', '3 个']
+  ])
+  assert.equal(paper.quantity, '2 包')
+  assert.equal(paper.canRestock, false)
+  assert.equal(unmeasured.quantity, '用量待定')
+  assert.equal(removeShoppingItem(paper.key, true), true)
+  assert.deepEqual(readKitchen().inventory, [])
+  assert.equal(removeShoppingItem(tomato.key, true), true)
+  await syncInventory()
+  storage = deviceA
+  await syncInventory()
+  assert.deepEqual(readKitchen().inventory, ['tomato'])
+  assert.deepEqual(listShopping().map(item => item.name), ['散装燕麦脆饼'])
+})
+
+test('批量已买与撤销只更新本次采购，保留已有库存和其他清单改动', async t => {
+  const cloud = cloudFixture()
+  const tomato = { recipeId: 'tomato-eggs', id: 'tomato', quantity: '2 个' }
+  const egg = { recipeId: 'tomato-eggs', id: 'egg', quantity: '1 个' }
+  const first = new Map([['recipe-kitchen-v1', { inventory: ['egg'], shopping: [tomato, tomato, egg] }]])
+  const second = new Map()
+  let storage = first
+  global.wx = {
+    getStorageSync: key => structuredClone(storage.get(key)),
+    setStorageSync: (key, value) => storage.set(key, structuredClone(value)),
+    cloud: { async callFunction({ data }) { return { result: await cloud.call('batch-list-user', data) } } }
+  }
+  t.after(() => { delete global.wx })
+
+  saveManualShopping('厨房纸', '1 卷')
+  await syncInventory()
+  const keys = listShopping().map(item => item.key)
+  const purchase = buyShoppingItems(keys.concat(keys[0]))
+  assert.equal(purchase.count, 3)
+  assert.deepEqual(purchase.addedInventory, ['tomato'])
+  assert.deepEqual(readKitchen(), { inventory: ['egg', 'tomato'], shopping: [] })
+  await syncInventory()
+
+  storage = second
+  await syncInventory()
+  assert.deepEqual(readKitchen(), { inventory: ['egg', 'tomato'], shopping: [] })
+  saveManualShopping('牛奶', '2 盒')
+  saveManualShopping('厨房纸', '3 卷')
+  saveInventory(['egg', 'tomato', 'broccoli'])
+  await syncInventory()
+
+  storage = first
+  await syncInventory()
+  assert.equal(undoShoppingPurchase(purchase), 2)
+  await syncInventory()
+  storage = second
+  await syncInventory()
+  assert.deepEqual(readKitchen().inventory, ['egg', 'broccoli'])
+  assert.equal(readKitchen().shopping.filter(item => item.id === 'tomato').length, 2)
+  assert.equal(listShopping().find(item => item.name === '厨房纸').quantity, '3 卷')
+  assert.equal(listShopping().find(item => item.name === '牛奶').quantity, '2 盒')
 })
 
 test('旧数据首次迁移，离线入库在恢复连接后同步，等待期间的后续修改仍保留', async t => {

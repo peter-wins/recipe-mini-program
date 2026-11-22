@@ -1,6 +1,7 @@
 <view class="theme-page theme-{{themeId}}">
   <view class="screen compose-screen">
-    <input class="compose-input" value="{{title}}" bindinput="updateTitle" maxlength="24" placeholder="搭配名称（选填）" aria-label="搭配名称"/>
-    <recipe-picker initial="{{selected}}" confirm-text="保存搭配" busy="{{saving}}" bind:confirm="onPickerConfirm"/>
+    <view wx:if="{{replacement}}" class="compose-input compose-current-dish">{{dishName ? '换掉「' + dishName + '」' : '这道菜暂时无法替换'}}</view>
+    <input wx:else class="compose-input" value="{{title}}" bindinput="updateTitle" maxlength="24" placeholder="搭配名称（选填）" aria-label="搭配名称"/>
+    <recipe-picker wx:if="{{!replacement || dishName}}" id="recipe-picker" initial="{{selected}}" single="{{replacement}}" allowed-ids="{{allowedIds}}" confirm-text="{{replacement ? '确认替换' : '保存搭配'}}" busy="{{saving}}" bind:confirm="onPickerConfirm"/>
   </view>
 </view>

@@ -1,5 +1,5 @@
 const { readPlanning, savePlanningChange } = require('./planning-sync')
-const { getRecipe, getIngredientOptions, matchRecipes, availableIngredients } = require('./catalog')
+const { getRecipe, getIngredientName, matchRecipes, availableIngredients, resolveRecipeId } = require('./catalog')
 
 const legacyPlans = [
   { id: 'fish-rice', title: '蒸鱼青菜饭', recipes: ['other_qing-zheng-lu-yu', 'vegetable_dish_chao-qing-cai'], serveWithRice: true },
@@ -56,7 +56,6 @@ const soloMealRecipeIds = [
   'staple_zhao-shao-ji-tui-fan',
   'other_dou-jiao-men-mian'
 ]
-const names = new Map(getIngredientOptions().map(item => [item.id, item.name]))
 
 function summarizePlan(plan, available) {
   const dishes = plan.recipes.map(id => getRecipe(id))
@@ -80,7 +79,7 @@ function summarizePlan(plan, available) {
     servings: plan.servings,
     minutes: dishes.reduce((total, dish) => total + dish.minutes + (dish.waitMinutes || 0), 0),
     missingCount: missing.length,
-    missingText: missing.map(id => names.get(id)).join('、'),
+    missingText: missing.map(id => getIngredientName(id)).join('、'),
     ...(nutrition ? { nutrition } : {})
   }
 }
@@ -89,6 +88,13 @@ const lightPlans = lightPairings.concat(lightMealRecipeIds.map(id => ({ id, reci
 const soloPlans = soloMealRecipeIds.map(id => ({ id, recipes: [id], servings: 1 }))
 const plansByGoal = { family: familyPlans, light: lightPlans, solo: soloPlans }
 const currentPlans = familyPlans.concat(lightPlans, soloPlans)
+const sessionAdjustments = new Map()
+const familyDishCategories = new Set(['荤菜', '素菜', '海鲜', '蛋类'])
+
+function adjustedPlan(plan) {
+  const recipes = sessionAdjustments.get(plan.id)
+  return recipes ? { ...plan, recipes, title: '' } : plan
+}
 
 function readCustomMeals() {
   if (typeof wx === 'undefined' || typeof wx.getStorageSync !== 'function') return []
@@ -131,21 +137,63 @@ function archiveCustomMeal(id) {
   return true
 }
 
-function getMealPlans(selection, { maxMinutes, readyOnly, goal = 'family' } = {}) {
+function getMealPlans(selection, { maxMinutes, readyOnly, goal = 'family', useAdjustments = false } = {}) {
   const available = availableIngredients(selection)
   const customMeals = goal === 'all' || goal === 'custom' ? readCustomMeals().filter(meal => !meal.archived) : []
   const plans = goal === 'all' ? currentPlans.concat(customMeals)
     : goal === 'custom' ? customMeals : plansByGoal[goal] || []
-  return plans.map(plan => summarizePlan(plan, available))
-    .filter(plan => plan && (!maxMinutes || plan.minutes <= maxMinutes) && (!readyOnly || !plan.missingCount))
-    .sort((left, right) => {
+  return plans.map(plan => {
+    const original = summarizePlan(plan, available)
+    if (!original) return null
+    // Rank the preset before applying a swap, so editing a dish doesn't move its card.
+    const displayed = useAdjustments && sessionAdjustments.has(plan.id)
+      ? summarizePlan(adjustedPlan(plan), available) || original : original
+    return { original, displayed }
+  }).filter(entry => entry && (!maxMinutes || entry.displayed.minutes <= maxMinutes) &&
+    (!readyOnly || !entry.displayed.missingCount))
+    .sort(({ original: left }, { original: right }) => {
       if (goal === 'light') {
         const readiness = Number(left.missingCount > 0) - Number(right.missingCount > 0)
         const dishCount = right.dishes.length - left.dishes.length
         if (readiness || dishCount) return readiness || dishCount
       }
       return left.missingCount - right.missingCount || left.minutes - right.minutes
-    })
+    }).map(entry => entry.displayed)
+}
+
+function getAdjustedMealPlan(id) {
+  if (!sessionAdjustments.has(id)) return null
+  const plan = currentPlans.find(item => item.id === id)
+  return plan ? summarizePlan(adjustedPlan(plan), availableIngredients([])) : null
+}
+
+function getMealDishReplacement(id, dishId) {
+  const goal = Object.keys(plansByGoal).find(key => plansByGoal[key].some(plan => plan.id === id))
+  const original = goal && plansByGoal[goal].find(plan => plan.id === id)
+  const plan = original ? adjustedPlan(original) : getCustomMeal(id)
+  const dish = getRecipe(dishId)
+  if (!plan || !dish) return null
+  const recipeIds = plan.recipes.map(resolveRecipeId)
+  if (!recipeIds.includes(dish.id)) return null
+
+  const candidates = matchRecipes([], {
+    lightOnly: goal === 'light', servings: plan.servings, rankByStock: false,
+    category: goal === 'solo' ? dish.libraryCategory : null
+  }).filter(recipe => !recipeIds.includes(recipe.id) && (goal !== 'family' ||
+    (dish.libraryCategory === '汤羹' ? recipe.libraryCategory === '汤羹' : familyDishCategories.has(recipe.libraryCategory))))
+  return { dish, plan, original, recipeIds, candidateIds: candidates.map(recipe => recipe.id) }
+}
+
+function replaceMealDish(id, dishId, replacementId, expectedIds) {
+  const change = getMealDishReplacement(id, dishId)
+  if (!change || !Array.isArray(expectedIds) || !change.candidateIds.includes(replacementId) ||
+      change.recipeIds.length !== expectedIds.length || change.recipeIds.some((recipeId, index) => recipeId !== expectedIds[index])) return false
+
+  const recipes = change.recipeIds.map(recipeId => recipeId === change.dish.id ? replacementId : recipeId)
+  if (!change.original) return Boolean(saveCustomMeal(change.plan.title, recipes, id))
+  if (recipes.every((recipeId, index) => recipeId === change.original.recipes[index])) sessionAdjustments.delete(id)
+  else sessionAdjustments.set(id, recipes)
+  return true
 }
 
 function getArchivedMealPlan(id) {
@@ -177,5 +225,6 @@ function rotateLightInspiration(selection, previous, now = Date.now(), random = 
 }
 
 module.exports = {
-  getMealPlans, getArchivedMealPlan, getCustomMeal, saveCustomMeal, archiveCustomMeal, rotateLightInspiration
+  getMealPlans, getArchivedMealPlan, getCustomMeal, saveCustomMeal, archiveCustomMeal, rotateLightInspiration,
+  getAdjustedMealPlan, getMealDishReplacement, replaceMealDish
 }

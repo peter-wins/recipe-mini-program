@@ -19,6 +19,10 @@ Page({
     this.refreshRecipeRecords()
   },
 
+  refreshCatalogData() {
+    this.refreshRecipeRecords()
+  },
+
   refreshRecipeRecords() {
     try {
       const { type } = this.data

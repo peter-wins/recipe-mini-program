@@ -316,6 +316,111 @@ test('日历显示单道菜和整套餐的图片，独立选菜页可确认添�
   assert.equal(page.data.purchasePreview, null)
   page.openPurchasePreview()
   assert.deepEqual(page.data.purchasePreview.items, [])
+
+  require('../miniprogram/pages/recipe/index')
+  const detail = { ...definitions, data: { ...definitions.data }, setData(update) { Object.assign(this.data, update) } }
+  const recipeId = 'drink_suan-mei-tang-（-ban-cheng-pin-jia-gong-）'
+  detail.onLoad({ id: recipeId })
+  detail.scheduleRecipe()
+  assert.match(navigation, /^\/pages\/meal-calendar\/index\?recipeId=.*%EF%BC%88/)
+  const openFromRecipe = date => {
+    // The route may still be percent-encoded when the calendar receives it.
+    page.onLoad({ recipeId: navigation.split('=')[1] })
+    page.onShow()
+    page.refreshCalendar(date)
+    assert.equal(page.data.intent.entry.id, recipeId)
+  }
+  openFromRecipe(day)
+  page.tapMeal(tap({ slot: 'dinner' }))
+  assert.deepEqual(readCalendar()[day].dinner, { type: 'recipe', id: recipeId })
+  assert.equal(page.data.intent, null)
+  openFromRecipe(day)
+  page.tapMeal(tap({ slot: 'dinner' }))
+  assert.deepEqual(readCalendar()[day].dinner, { type: 'recipe', id: recipeId })
+  assert.ok(page.data.intent)
+  page.tapMeal(tap({ slot: 'breakfast' }))
+  assert.deepEqual(readCalendar()[day].breakfast, { type: 'recipes', ids: [egg.id, recipeId] })
+  openFromRecipe(upcomingDate(2))
+  page.tapMeal(tap({ slot: 'dinner' }))
+  const appended = readCalendar()[upcomingDate(2)].dinner
+  assert.equal(appended.title, family.title)
+  assert.deepEqual(appended.dishes.map(dish => dish.id), [...family.dishes.map(dish => dish.id), recipeId])
+  openFromRecipe(day)
+  page.replaceWithRecipe(tap({ slot: 'breakfast' }))
+  modal.success({ confirm: false })
+  assert.deepEqual(readCalendar()[day].breakfast.ids, [egg.id, recipeId])
+  page.replaceWithRecipe(tap({ slot: 'breakfast' }))
+  modal.success({ confirm: true })
+  assert.deepEqual(readCalendar()[day].breakfast, { type: 'recipe', id: recipeId })
+
+  // Replace only the soup in a built-in pairing, then schedule the adjusted
+  // pairing and verify home shows the stored dinner.
+  const { getMealPlans, getCustomMeal, getMealDishReplacement, replaceMealDish, saveCustomMeal } = require('../miniprogram/meal-plans')
+  component.updateMeals({ goal: 'family' })
+  const originalOrder = component.data.plans.map(plan => plan.id)
+  const familyBefore = component.data.plans[0]
+  assert.equal(familyBefore.id, family.id)
+  const oldSoup = familyBefore.dishes.find(dish => getRecipe(dish.id).libraryCategory === '汤羹')
+  component.toggleDishSwap(tap({ id: family.id }))
+  assert.equal(component.data.swapPlanId, family.id)
+  component.selectDishToSwap(tap({ dishId: oldSoup.id }))
+  const swapRoute = new URL(navigation, 'https://miniprogram.invalid')
+  assert.equal(swapRoute.pathname, '/pages/compose-meal/index')
+  const swap = { ...composer, data: { ...composer.data, saving: false } }
+  swap.onLoad(Object.fromEntries(swapRoute.searchParams))
+  assert.equal(swap.data.dishName, oldSoup.name)
+  assert.ok(swap.data.allowedIds.length)
+  assert.ok(swap.data.allowedIds.every(id => getRecipe(id).libraryCategory === '汤羹'))
+  assert.ok(familyBefore.dishes.every(dish => !swap.data.allowedIds.includes(dish.id)))
+  const swapPicker = makePicker(swap)
+  Object.assign(swapPicker.data, { single: true, allowedIds: swap.data.allowedIds })
+  swapPicker.updateChoices()
+  const [firstChoice] = swapPicker.data.choices
+  swapPicker.selectChoice(tap({ id: firstChoice.id }))
+  swapPicker.searchChoices({ detail: { value: '生汆丸子汤' } })
+  const [secondChoice] = swapPicker.data.choices
+  swapPicker.selectChoice(tap({ id: secondChoice.id }))
+  assert.deepEqual(swapPicker.data.selected.map(dish => dish.id), [secondChoice.id])
+  swapPicker.confirm()
+  component.refreshPlanningData()
+  assert.deepEqual(component.data.plans.map(plan => plan.id), originalOrder)
+  assert.equal(component.data.showAllPlans, false)
+  const adjusted = component.data.plans[0]
+  assert.ok(adjusted.missingCount > component.data.plans[1].missingCount)
+  assert.ok(adjusted.minutes > familyBefore.minutes)
+  const expectedDishes = familyBefore.dishes.map(dish => dish.id === oldSoup.id ? secondChoice.id : dish.id)
+  assert.deepEqual(adjusted.dishes.map(dish => dish.id), expectedDishes)
+  assert.deepEqual(getMealPlans([], { goal: 'family' }).find(plan => plan.id === family.id).dishes, familyBefore.dishes)
+
+  const calendar = { ...page, data: { ...page.data, intent: null, viewDate: '' } }
+  calendar.onLoad({ planId: family.id })
+  calendar.onShow()
+  assert.deepEqual(calendar.data.intent.entry.dishes.map(dish => dish.id), expectedDishes)
+  calendar.tapMeal(tap({ slot: 'dinner' }))
+  const dinnerEntry = readCalendar()[today].dinner
+  assert.deepEqual(dinnerEntry.dishes.map(dish => dish.id), expectedDishes)
+  home.showView('match')
+  assert.equal(home.data.tonightMeal.date, today)
+  assert.ok(home.data.tonightMeal.names.includes(secondChoice.title))
+  assert.ok(!home.data.tonightMeal.names.includes(oldSoup.name))
+  assert.equal(replaceMealDish(family.id, secondChoice.id, oldSoup.id, expectedDishes), true)
+  home.refreshPlanningData()
+  assert.ok(home.data.tonightMeal.names.includes(secondChoice.title))
+  assert.equal(saveCalendarMeal(today, 'dinner', null, dinnerEntry), true)
+  home.refreshPlanningData()
+  assert.equal(home.data.tonightMeal, null)
+
+  const light = getMealPlans([], { goal: 'light' })[0]
+  const lightChoices = getMealDishReplacement(light.id, light.dishes[0].id).candidateIds
+  assert.ok(lightChoices.length && lightChoices.every(id => getRecipe(id).light && getRecipe(id).servings === 1))
+  const solo = getMealPlans([], { goal: 'solo' })[0]
+  const soloChoices = getMealDishReplacement(solo.id, solo.dishes[0].id).candidateIds
+  assert.ok(soloChoices.length && soloChoices.every(id => getRecipe(id).servings === 1))
+  const own = saveCustomMeal('常做的搭配', [egg.id, soup.id])
+  assert.equal(replaceMealDish(own.id, soup.id, recipeId, [egg.id, soup.id]), true)
+  assert.equal(getCustomMeal(own.id).title, own.title)
+  assert.deepEqual(getCustomMeal(own.id).recipes, [egg.id, recipeId])
+  assert.equal(replaceMealDish(own.id, egg.id, soup.id, [egg.id, soup.id]), false)
 })
 
 test('搭配采购合并预览，只添加已确认且尚未入库或列入清单的食材', t => {

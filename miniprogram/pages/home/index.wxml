@@ -31,7 +31,20 @@
         <text>搜索菜谱、食材</text>
       </button>
     </view>
-    <template is="homeFeature" data="{{recipe: featured || quickRecipe, isRecommended: !!featured}}"/>
+    <navigator wx:if="{{tonightMeal}}" class="home-dinner-card" url="/pages/meal-calendar/index?date={{tonightMeal.date}}" hover-class="card-pressed" aria-label="今晚菜单，查看做饭日历">
+      <view class="row home-dinner-heading">
+        <text class="section">今晚菜单</text>
+        <text class="home-dinner-link">查看日历 ›</text>
+      </view>
+      <view class="home-dinner-body">
+        <recipe-cover wx:if="{{tonightMeal.image}}" class="home-dinner-cover" src="{{tonightMeal.image}}"/>
+        <view class="home-dinner-copy">
+          <view class="home-dinner-title">{{tonightMeal.title}}</view>
+          <view wx:if="{{tonightMeal.names}}" class="subtle home-dinner-dishes">{{tonightMeal.names}}</view>
+        </view>
+      </view>
+    </navigator>
+    <template wx:else is="homeFeature" data="{{recipe: featured || quickRecipe, isRecommended: !!featured}}"/>
     <view class="home-shortcuts">
       <button class="home-shortcut" bindtap="openFridge">
         <view class="shortcut-icon shortcut-fridge"><image src="/assets/icon-fridge.svg" aria-hidden="true"/></view>
@@ -145,6 +158,7 @@
     <view class="profile-links">
       <button class="profile-row" bindtap="openFridge"><image src="/assets/icon-fridge.svg" aria-hidden="true"/>冰箱食材<text class="profile-arrow">›</text></button>
       <navigator class="profile-row" url="/pages/shopping/index" hover-class="pressed"><image src="/assets/icon-cart.svg" aria-hidden="true"/>采购清单<text class="profile-arrow">›</text></navigator>
+      <button class="profile-row" open-type="contact"><image src="/assets/icon-feedback.svg" aria-hidden="true"/>意见反馈<text class="profile-arrow">›</text></button>
     </view>
     <view id="profile-themes" class="profile-themes">
       <view class="profile-themes-title">主题</view>

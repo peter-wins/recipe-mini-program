@@ -1,4 +1,4 @@
-const { getRecipeCategories, matchRecipes } = require('../../catalog')
+const { getCatalogSource, getRecipeCategories, matchRecipes } = require('../../catalog')
 
 const pageSize = 24
 const sceneTags = ['全部', '减脂', '早餐', '快手', '半成品']
@@ -14,7 +14,15 @@ Component({
       }
     },
     confirmText: { type: String, value: '确定' },
-    busy: { type: Boolean, value: false }
+    busy: { type: Boolean, value: false },
+    single: { type: Boolean, value: false },
+    allowedIds: {
+      type: Array,
+      value: [],
+      observer() {
+        if (this.catalogSource) this.updateChoices()
+      }
+    }
   },
   data: {
     categories: ['全部分类', ...getRecipeCategories()],
@@ -32,10 +40,23 @@ Component({
   },
   lifetimes: {
     ready() {
-      this.updateChoices()
+      this.refreshCatalogData()
+    }
+  },
+  pageLifetimes: {
+    show() {
+      if (this.catalogSource) this.refreshCatalogData()
     }
   },
   methods: {
+    refreshCatalogData() {
+      const source = getCatalogSource()
+      if (source === this.catalogSource) return
+      const categories = ['全部分类', ...getRecipeCategories()]
+      const categoryIndex = Math.max(0, categories.indexOf(this.data.categories[this.data.categoryIndex]))
+      this.updateChoices({ categories, categoryIndex })
+      this.catalogSource = source
+    },
     setSelection(items) {
       const selected = Array.isArray(items) ? items : []
       this.setData({ selected, checked: Object.fromEntries(selected.map(item => [item.id, true])) })
@@ -60,17 +81,15 @@ Component({
     },
     updateChoices(patch = {}) {
       const { categoryIndex, tagIndex, methodIndex, search, categories } = { ...this.data, ...patch }
-      const query = search.trim().toLowerCase()
       const activeTag = tagIndex ? sceneTags[tagIndex] : (methodIndex ? methodTags[methodIndex] : null)
       const recipes = matchRecipes([], {
-        search: query,
+        search,
         category: categoryIndex ? categories[categoryIndex] : null,
         tag: activeTag,
         rankByStock: false
       })
-      const byName = query ? recipes.filter(recipe => recipe.name.toLowerCase().includes(query)) : recipes
-      const byIngredient = query ? recipes.filter(recipe => !recipe.name.toLowerCase().includes(query)) : []
-      this.results = byName.concat(byIngredient).map(recipe => ({
+      const allowed = this.data.single ? new Set(this.data.allowedIds) : null
+      this.results = recipes.filter(recipe => !allowed || allowed.has(recipe.id)).map(recipe => ({
         id: recipe.id,
         title: recipe.name,
         image: recipe.image,
@@ -97,7 +116,10 @@ Component({
         return
       }
       const choice = choices.find(item => item.id === id)
-      if (choice) this.setSelection([...selected, { id: choice.id, title: choice.title }])
+      if (choice) {
+        const picked = { id: choice.id, title: choice.title }
+        this.setSelection(this.data.single ? [picked] : [...selected, picked])
+      }
     },
     confirm() {
       const { selected, busy } = this.data

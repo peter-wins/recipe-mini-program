@@ -5,10 +5,12 @@ const { readKitchen } = require('../../inventory')
 const { getPurchaseItems, hasRecipeShopping, saveRecipeShopping } = require('../../shopping')
 const { recordRecipe } = require('../../activity')
 const { formatClock } = require('../../step-timer')
+const { syncCatalog } = require('../../cloud-catalog')
 
 Page({
   data: {
     recipe: null,
+    recipeStatus: '',
     saved: false,
     cookingIndex: -1,
     showStepText: false,
@@ -24,13 +26,21 @@ Page({
     timerDone: false
   },
 
-  onLoad(options) {
+  onLoad({ id } = {}) {
     this.clearTimer()
-    const recipe = getRecipe(options.id)
+    this.unloaded = false
+    try {
+      this.recipeId = typeof id === 'string' ? decodeURIComponent(id) : ''
+    } catch {
+      this.recipeId = ''
+    }
+    const recipe = getRecipe(this.recipeId)
+    const canFetch = !recipe && /^[A-Za-z0-9_（）-]{1,200}$/.test(this.recipeId)
     this.selection = null
     this.purchaseOverrides = {}
     this.setData({
       recipe,
+      recipeStatus: recipe ? '' : (canFetch ? 'loading' : 'notFound'),
       cookingIndex: -1,
       showStepText: false,
       inventoryReady: false,
@@ -43,10 +53,24 @@ Page({
       timerRunning: false,
       timerDone: false
     })
-    if (!recipe) return
+    if (recipe) this.recordHistory(recipe.id)
+    else if (canFetch) return this.loadMissingRecipe()
+  },
 
+  async loadMissingRecipe() {
+    if (this.loadingRecipe || this.data.recipe) return
+    this.loadingRecipe = true
+    this.setData({ recipeStatus: 'loading' })
+    const checked = await syncCatalog({ force: true })
+    this.loadingRecipe = false
+    if (this.unloaded || this.data.recipe) return
+    this.refreshCatalogData()
+    if (!this.data.recipe) this.setData({ recipeStatus: checked ? 'notFound' : 'error' })
+  },
+
+  recordHistory(id) {
     try {
-      recordRecipe('history', recipe.id)
+      recordRecipe('history', id)
     } catch {
       wx.showToast({ title: '未能记录浏览历史', icon: 'none' })
     }
@@ -56,7 +80,7 @@ Page({
     const recipe = this.data.recipe
     const share = {
       title: recipe ? `这道${recipe.name}，分享给你` : '吃饭得有谱，今晚吃什么',
-      path: recipe ? `/pages/recipe/index?id=${recipe.id}` : '/pages/home/index'
+      path: recipe ? '/pages/recipe/index?id=' + encodeURIComponent(recipe.id) : '/pages/home/index'
     }
     const image = recipe && recipe.image
     if (image && /^https?:\/\//.test(image)) share.imageUrl = image
@@ -75,11 +99,26 @@ Page({
 
   onShow() {
     applyTheme(this)
+    if (this.data.recipe) {
+      this.refreshKitchenData()
+      this.refreshRecipeRecords()
+    } else this.refreshCatalogData()
+  },
+
+  refreshCatalogData() {
+    if (this.data.cookingIndex >= 0 && this.data.recipe) return
+    if (!this.data.recipe) {
+      const recipe = getRecipe(this.recipeId)
+      if (!recipe) return
+      this.setData({ recipe, recipeStatus: '' })
+      this.recordHistory(recipe.id)
+    }
     this.refreshKitchenData()
     this.refreshRecipeRecords()
   },
 
   onUnload() {
+    this.unloaded = true
     this.clearTimer()
   },
 
@@ -161,7 +200,10 @@ Page({
   },
 
   refreshPurchaseItems(update = {}) {
-    const recipe = getRecipe(this.data.recipe.id, this.selection)
+    const updatedRecipe = getRecipe(this.data.recipe.id, this.selection)
+    const recipe = this.data.cookingIndex >= 0
+      ? { ...updatedRecipe, steps: this.data.recipe.steps }
+      : updatedRecipe
     const purchaseItems = this.selection ? getPurchaseItems(recipe, this.selection, this.purchaseOverrides) : []
     this.setData({
       recipe,
@@ -191,6 +233,15 @@ Page({
     } catch {
       wx.showToast({ title: '收藏操作失败，请重试', icon: 'none' })
     }
+  },
+
+  scheduleRecipe() {
+    const { recipe } = this.data
+    if (!recipe) return
+    wx.navigateTo({
+      url: '/pages/meal-calendar/index?recipeId=' + encodeURIComponent(recipe.id),
+      fail: () => wx.showToast({ title: '暂时无法打开日历，请重试', icon: 'none' })
+    })
   },
 
   startCooking() {

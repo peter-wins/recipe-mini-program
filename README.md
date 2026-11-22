@@ -35,3 +35,14 @@ curl -I http://192.168.1.81:8088/ai-generated/aquatic_ga-li-chao-xie.jpg
 
 停止容器可运行 `docker compose -p recipe-local-images -f compose.images.yaml down`。
 
+## 菜谱发布
+
+菜谱正文、食材表、步骤和图片路径打成一份版本化文件，放在现有微信云开发的云存储。数据库集合 `recipe_catalog` 的 `published` 文档指向当前发布版本，普通用户可读，仅管理员可写。图片继续使用 `recipe-covers/`。
+
+接入这套流程的小程序会先读设备上的上次成功版本，首次安装则用随包菜谱。启动、回到前台或恢复联网时检查云端版本，检查间隔至少五分钟。新版整个下载并验证通过后才替换当前菜谱并保存到设备。
+
+发布新增或修改的菜谱时，保留已有的菜谱 ID 和食材 ID。新增或更换图片时，先把图片上传到菜谱所用的路径，再按以下顺序操作。
+
+1. 更新 `miniprogram/data.js` 或 `miniprogram/light-recipes.js` 后，运行 `node scripts/build-catalog-release.js /tmp/recipe-catalog-release`。
+2. 把命令返回的 `localPath` 上传到 `cloudPath`，上传完再更新发布清单。
+3. 在云数据库编辑 `recipe_catalog/published`，将 `schemaVersion`、`version` 和 `recipeCount` 更新为命令返回的 `manifest` 值。保留之前的文件和清单值，回退时可以把这三个字段改回去。

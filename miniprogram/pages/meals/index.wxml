@@ -1,5 +1,11 @@
 <import src="../../templates/recipe-card.wxml"/>
 
+<template name="mealDishContent">
+  <recipe-cover wx:if="{{dish.image}}" class="meal-dish-cover" src="{{dish.image}}" lazy="{{true}}"/>
+  <view wx:else class="meal-dish-cover meal-photo-empty"><image src="/assets/icon-cookbook.svg" aria-hidden="true"/></view>
+  <text class="meal-dish-name">{{dish.name}}</text>
+</template>
+
 <view class="meal-page">
   <view class="row meal-hero">
     <view class="meal-hero-copy">
@@ -37,14 +43,19 @@
             <template is="recipeStockStatus" data="{{missingCount: plan.missingCount, missingText: plan.missingCount + ' 样食材'}}"/>
           </view>
         </view>
+        <view wx:if="{{swapPlanId === plan.id}}" class="subtle meal-swap-hint">点选要换掉的菜</view>
         <view class="meal-dishes {{plan.dishes.length === 1 ? 'meal-dishes-single' : ''}}">
-          <navigator wx:for="{{plan.dishes}}" wx:key="id" class="meal-dish" url="/pages/recipe/index?id={{item.id}}" hover-class="pressed">
-            <recipe-cover wx:if="{{item.image}}" class="meal-dish-cover" src="{{item.image}}" lazy="{{true}}"/>
-            <view wx:else class="meal-dish-cover meal-photo-empty"><image src="/assets/icon-cookbook.svg" aria-hidden="true"/></view>
-            <text class="meal-dish-name">{{item.name}}</text>
-          </navigator>
+          <block wx:for="{{plan.dishes}}" wx:key="id">
+            <button wx:if="{{swapPlanId === plan.id}}" class="meal-dish meal-dish-swap" data-dish-id="{{item.id}}" bindtap="selectDishToSwap" aria-label="{{'换掉' + item.name}}">
+              <template is="mealDishContent" data="{{dish: item}}"/>
+            </button>
+            <navigator wx:else class="meal-dish" url="/pages/recipe/index?id={{item.id}}" hover-class="pressed">
+              <template is="mealDishContent" data="{{dish: item}}"/>
+            </navigator>
+          </block>
         </view>
         <view class="meal-card-actions">
+          <button class="link meal-swap" data-id="{{plan.id}}" bindtap="toggleDishSwap">{{swapPlanId === plan.id ? '取消换菜' : '换一道'}}</button>
           <button wx:if="{{inventoryReady && plan.missingCount}}" class="meal-buy" data-id="{{plan.id}}" bindtap="openMealShopping">补齐食材</button>
           <navigator class="meal-add" url="/pages/meal-calendar/index?planId={{plan.id}}{{calendarDate ? '&date=' + calendarDate + '&slot=' + calendarSlot : ''}}" hover-class="pressed">＋ 安排到日历</navigator>
         </view>

@@ -11,3 +11,4 @@
   background: var(--theme-surface, #fff);
   font-size: 28rpx;
 }
+.compose-current-dish { display: flex; align-items: center; height: auto; min-height: 88rpx; padding: 12rpx 24rpx; line-height: 1.4; }

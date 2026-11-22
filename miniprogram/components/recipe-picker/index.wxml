@@ -40,7 +40,7 @@
   <view class="picker-footer">
     <view class="picker-footer-inner">
       <view class="picker-summary">
-        <text class="subtle">{{selected.length ? '已选 ' + selected.length + ' 道菜' : '可以选择多道菜'}}</text>
+        <text class="subtle">{{selected.length ? '已选 ' + selected.length + ' 道菜' : (single ? '选一道替换菜谱' : '可以选择多道菜')}}</text>
         <scroll-view wx:if="{{selected.length}}" class="picker-selection" scroll-x="{{true}}">
           <view class="picker-selection-track">
             <button wx:for="{{selected}}" wx:key="id" class="picker-chip" data-id="{{item.id}}" bindtap="selectChoice" disabled="{{busy}}" aria-label="{{'取消选择' + item.title}}">

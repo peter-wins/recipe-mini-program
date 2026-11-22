@@ -1,5 +1,4 @@
-const { ingredients, recipes } = require('./data')
-const { ingredientIds, matchRecipes } = require('./catalog')
+const { getCatalogSource, ingredientIds, matchRecipes } = require('./catalog')
 
 const mainCategories = new Set(['水产', '荤菜', '素菜', '汤', '主食', '早餐', '其他'])
 const spicyName = /麻辣|香辣|酸辣|剁椒|泡椒|辣子|辣炒|水煮鱼|水煮肉/
@@ -7,20 +6,30 @@ const spicyIngredient = /辣椒|小米辣|小米椒|辣椒油|辣酱|辣豆瓣|�
 const lighterMethod = /清蒸|白灼|凉拌|清炒|清炖|水煮蛋|蒸水蛋|蒸南瓜/
 const heavierMethod = /油炸|干炸|酥炸|干锅|糖醋|拔丝|红烧肉/
 
-const recipeProfiles = new Map(recipes.map(recipe => {
-  const ingredientNames = recipe.required.concat(recipe.optional, recipe.pantry).flatMap(([id, , name]) => [
-    name, ...ingredients[id], ...ingredientIds(id).flatMap(canonical => ingredients[canonical] || [])
-  ])
-  return [recipe.id, {
-    terms: [recipe.name, recipe.category, ...ingredientNames].join(' ').toLowerCase(),
-    servings: recipe.servings,
-    spicy: spicyName.test(recipe.name) || ingredientNames.some(name => spicyIngredient.test(name)),
-    light: Number(lighterMethod.test(recipe.name)) * 2 + Number(['素菜', '汤', '水产'].includes(recipe.category)) -
-      Number(heavierMethod.test(recipe.name)) * 2
-  }]
-}))
+let currentSource
+let recipeProfiles
 
-function parseNotes(notes) {
+function getRecipeProfiles() {
+  const source = getCatalogSource()
+  if (currentSource === source) return recipeProfiles
+  const { ingredients, recipes } = source
+  recipeProfiles = new Map(recipes.map(recipe => {
+    const ingredientNames = recipe.required.concat(recipe.optional, recipe.pantry).flatMap(([id, , name]) => [
+      name, ...ingredients[id], ...ingredientIds(id).flatMap(canonical => ingredients[canonical] || [])
+    ])
+    return [recipe.id, {
+      terms: [recipe.name, recipe.category, ...ingredientNames].join(' ').toLowerCase(),
+      servings: recipe.servings,
+      spicy: spicyName.test(recipe.name) || ingredientNames.some(name => spicyIngredient.test(name)),
+      light: Number(lighterMethod.test(recipe.name)) * 2 + Number(['素菜', '汤', '水产'].includes(recipe.category)) -
+        Number(heavierMethod.test(recipe.name)) * 2
+    }]
+  }))
+  currentSource = source
+  return recipeProfiles
+}
+
+function parseNotes(notes, recipeProfiles) {
   const include = []
   const exclude = []
   const ignored = []
@@ -40,7 +49,8 @@ function parseNotes(notes) {
 }
 
 function recommendRecipes(selected, { mode, maxMinutes, people, taste, notes }, random = Math.random) {
-  const { include, exclude, ignored } = parseNotes(notes)
+  const recipeProfiles = getRecipeProfiles()
+  const { include, exclude, ignored } = parseNotes(notes, recipeProfiles)
   const matches = matchRecipes(selected, { maxMinutes, rankByStock: false }).filter(recipe => {
     const profile = recipeProfiles.get(recipe.id)
     if (!recipe.required.length || (!include.length && !mainCategories.has(recipe.category))) return false
@@ -76,7 +86,7 @@ function recommendRecipes(selected, { mode, maxMinutes, people, taste, notes }, 
 
 function matchesTaste(recipe, taste) {
   if (!taste || taste === 'any') return true
-  const profile = recipeProfiles.get(recipe.id)
+  const profile = getRecipeProfiles().get(recipe.id)
   if (!profile) return true
   return taste === 'mild' ? !profile.spicy : profile.spicy
 }

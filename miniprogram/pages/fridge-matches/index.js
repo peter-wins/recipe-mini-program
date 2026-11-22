@@ -1,4 +1,4 @@
-const { matchRecipes, groupFridgeMatches } = require('../../catalog')
+const { getCatalogSource, matchRecipes, groupFridgeMatches } = require('../../catalog')
 const { readInventory, previewInventory } = require('../../inventory')
 const { applyTheme } = require('../../theme')
 
@@ -20,7 +20,8 @@ Page({
     try {
       const selected = readInventory()
       const key = selected.slice().sort().join(',')
-      if (key === this.inventoryKey) return
+      const source = getCatalogSource()
+      if (key === this.inventoryKey && source === this.catalogSource) return
       const matches = groupFridgeMatches(selected.length ? matchRecipes(selected) : [])
       this.groups = {
         ready: matches.ready,
@@ -28,10 +29,15 @@ Page({
       }
       const groupId = this.data.groupId || (this.groups.ready.length || !this.groups.almost.length ? 'ready' : 'almost')
       this.inventoryKey = key
+      this.catalogSource = source
       this.showGroup(groupId, Math.max(pageSize, this.data.recipes.length), previewInventory(selected, 5))
     } catch {
       wx.showToast({ title: '暂时无法读取冰箱', icon: 'none' })
     }
+  },
+
+  refreshCatalogData() {
+    this.refreshKitchenData()
   },
 
   openFridge() {

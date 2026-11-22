@@ -1,7 +1,11 @@
-const { getIngredientOptions, getRecipe, resolveRecipeId, ingredientIds, availableIngredients } = require('./catalog')
+const { findIngredientId, getIngredientName, getRecipe, resolveRecipeId, ingredientIds, availableIngredients } = require('./catalog')
 const { readKitchen, saveKitchen } = require('./inventory')
 
-const names = new Map(getIngredientOptions().map(item => [item.id, item.name]))
+// The existing sync protocol groups entries by their source and ingredient.
+const manualSource = '@manual-shopping'
+const customPrefix = '@shopping:'
+const manualNameLimit = 48
+const manualQuantityLimit = 32
 const packageUnits = new Set(['包', '袋', '盒', '瓶', '罐', '桶'])
 const countUnits = new Set(['个', '根', '瓣', '片', '颗', '条', '块', '勺', '大勺', '小勺', '把', '棵', '只', '枚', '碗', '杯', '朵', '张', '节', '头', ...packageUnits])
 const packagedSeasonings = new Set([
@@ -14,8 +18,19 @@ const metricUnits = new Map([
 ])
 
 function shoppingIngredientId(id) {
+  if (id.startsWith(customPrefix)) {
+    const name = id.slice(customPrefix.length)
+    const knownId = findIngredientId(name)
+    if (!getIngredientName(knownId)) return customPrefix + name.toLowerCase()
+    id = knownId
+  }
   const ids = ingredientIds(id)
   return ids.length === 1 ? ids[0] : id
+}
+
+function displayQuantity(item) {
+  if (item.recipeId === manualSource) return item.quantity || '用量待定'
+  return item.quantity || item.amount + ' ' + item.unit
 }
 
 function exactQuantity(item) {
@@ -40,28 +55,50 @@ function groupShoppingItems(items) {
   const titles = new Map()
   return [...grouped].map(([key, entries]) => {
     const details = entries.map((item, index) => {
+      if (item.recipeId === manualSource) return { key: index, title: '手动添加', quantity: displayQuantity(item) }
       if (!titles.has(item.recipeId)) {
         const recipe = getRecipe(item.recipeId)
         titles.set(item.recipeId, recipe ? recipe.name : '旧菜谱')
       }
-      return { key: index, title: titles.get(item.recipeId), quantity: item.quantity || item.amount + ' ' + item.unit }
+      return { key: index, title: titles.get(item.recipeId), quantity: displayQuantity(item) }
     })
-    const amounts = entries.map(exactQuantity)
+    const measured = entries.filter(item => item.recipeId !== manualSource || item.quantity)
+    const amounts = measured.map(exactQuantity)
     const first = amounts[0]
     const total = first && amounts.every(item => item && item.unit === first.unit)
       ? { amount: Number(amounts.reduce((sum, item) => sum + item.amount, 0).toFixed(6)), unit: first.unit }
       : null
-    const name = names.get(key)
+    const ingredientName = getIngredientName(key)
+    const name = ingredientName || (key.startsWith(customPrefix) ? entries[0].id.slice(customPrefix.length) : '未识别食材')
     const hasPackageQuantity = amounts.some(item => item && packageUnits.has(item.unit))
-    let quantity = details[0].quantity
-    if (packagedSeasonings.has(name) && !hasPackageQuantity) quantity = '1 份'
-    else if (details.length > 1) quantity = total ? total.amount + ' ' + total.unit : '若干'
-    return { key, name, ...total, quantity, details }
+    const manualQuantity = measured.find(item => item.recipeId === manualSource)
+    let quantity = displayQuantity(measured[0] || entries[0])
+    if (measured.length && !manualQuantity && packagedSeasonings.has(name) && !hasPackageQuantity) quantity = '1 份'
+    else if (measured.length > 1) quantity = total ? total.amount + ' ' + total.unit : '若干'
+    return { key, name, ...total, quantity, details, canRestock: Boolean(ingredientName) }
   })
 }
 
 function listShopping() {
   return groupShoppingItems(readKitchen().shopping)
+}
+
+function saveManualShopping(name, quantity) {
+  const normalizedName = name.trim().replace(/\s+/g, ' ')
+  const normalizedQuantity = quantity.trim().replace(/\s+/g, ' ')
+  if (!normalizedName || normalizedName.length > manualNameLimit || normalizedQuantity.length > manualQuantityLimit) return false
+  const knownId = findIngredientId(normalizedName)
+  const id = getIngredientName(knownId) ? knownId : customPrefix + normalizedName
+  const key = shoppingIngredientId(id)
+  const kitchen = readKitchen()
+  const matches = item => item.recipeId === manualSource && shoppingIngredientId(item.id) === key
+  const previous = kitchen.shopping.find(matches)
+  const entry = {
+    recipeId: manualSource, id: previous ? previous.id : id,
+    quantity: normalizedQuantity || (previous && previous.quantity) || ''
+  }
+  saveKitchen({ ...kitchen, shopping: kitchen.shopping.filter(item => !matches(item)).concat(entry) })
+  return true
 }
 
 function shoppingSourceKey({ recipeId, id }) {
@@ -127,19 +164,56 @@ function saveRecipeShopping(recipe, overrides) {
   return true
 }
 
-function removeShoppingItem(key, bought) {
+function takeShoppingItems(keys, bought) {
   const kitchen = readKitchen()
-  const shopping = kitchen.shopping.filter(item => shoppingIngredientId(item.id) !== key)
-  if (shopping.length === kitchen.shopping.length) return false
+  const selected = new Set(keys)
+  const removedKeys = new Set()
+  const removed = []
+  const shopping = []
+  for (const item of kitchen.shopping) {
+    const key = shoppingIngredientId(item.id)
+    if (selected.has(key)) {
+      removed.push(item)
+      removedKeys.add(key)
+    } else shopping.push(item)
+  }
+  if (!removed.length) return null
 
+  const existing = new Set(kitchen.inventory)
+  const addedInventory = bought ? [...new Set([...removedKeys].filter(getIngredientName).flatMap(ingredientIds))]
+    .filter(id => !existing.has(id)) : []
+  saveKitchen({ inventory: [...kitchen.inventory, ...addedInventory], shopping })
+  return { removed, addedInventory, count: removedKeys.size }
+}
+
+function buyShoppingItems(keys) {
+  return takeShoppingItems(keys, true)
+}
+
+function undoShoppingPurchase({ removed, addedInventory }) {
+  const kitchen = readKitchen()
+  const currentSources = new Set(kitchen.shopping.map(shoppingSourceKey))
+  const restored = []
+  const changedIngredients = new Set()
+  for (const item of removed) {
+    if (currentSources.has(shoppingSourceKey(item))) {
+      for (const id of ingredientIds(shoppingIngredientId(item.id))) changedIngredients.add(id)
+    } else restored.push(item)
+  }
+  const added = new Set(addedInventory.filter(id => !changedIngredients.has(id)))
   saveKitchen({
-    inventory: bought ? [...new Set([...kitchen.inventory, ...ingredientIds(key)])] : kitchen.inventory,
-    shopping
+    inventory: kitchen.inventory.filter(id => !added.has(id)),
+    shopping: kitchen.shopping.concat(restored)
   })
-  return true
+  return new Set(restored.map(item => shoppingIngredientId(item.id))).size
+}
+
+function removeShoppingItem(key, bought) {
+  return Boolean(takeShoppingItems([key], bought))
 }
 
 module.exports = {
   listShopping, getPurchaseItems, hasRecipeShopping, saveRecipeShopping, removeShoppingItem,
-  getMealShoppingPreview, saveMealShopping
+  getMealShoppingPreview, saveMealShopping, saveManualShopping, manualNameLimit, manualQuantityLimit,
+  buyShoppingItems, undoShoppingPurchase
 }

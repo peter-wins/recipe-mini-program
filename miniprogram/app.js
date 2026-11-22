@@ -2,6 +2,7 @@ const { cloudImageEnv } = require('./recipe-image')
 const { syncInventory } = require('./inventory')
 const { prepareCalendarSnapshots } = require('./meal-calendar')
 const { syncPlanning } = require('./planning-sync')
+const { loadCachedCatalog, syncCatalog } = require('./cloud-catalog')
 
 function syncUserData() {
   syncInventory()
@@ -11,6 +12,7 @@ function syncUserData() {
 App({
   onLaunch() {
     if (wx.cloud) wx.cloud.init({ env: cloudImageEnv })
+    loadCachedCatalog()
     try {
       prepareCalendarSnapshots()
     } catch (error) {
@@ -18,12 +20,16 @@ App({
     }
     if (typeof wx.onNetworkStatusChange === 'function') {
       wx.onNetworkStatusChange(({ isConnected }) => {
-        if (isConnected) syncUserData()
+        if (isConnected) {
+          syncUserData()
+          syncCatalog()
+        }
       })
     }
   },
 
   onShow() {
     syncUserData()
+    syncCatalog()
   }
 })

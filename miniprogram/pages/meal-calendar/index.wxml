@@ -39,7 +39,11 @@
             <text class="calendar-meal-label">{{meal.label}}</text>
             <text wx:if="{{meal.entry && (meal.entry.type === 'plan' || meal.dishes.length !== 1)}}" class="subtle calendar-plan-name">{{meal.title}}</text>
           </view>
-          <button wx:if="{{intent || !meal.entry}}" class="link calendar-meal-action" bindtap="tapMeal" data-slot="{{meal.id}}">
+          <view wx:if="{{intent && intent.entry.type === 'recipe' && meal.entry}}" class="calendar-recipe-actions">
+            <button class="link calendar-meal-action" bindtap="tapMeal" data-slot="{{meal.id}}" aria-label="{{'将菜谱加到' + meal.label}}">加到这餐</button>
+            <button class="link calendar-meal-action calendar-replace-action" bindtap="replaceWithRecipe" data-slot="{{meal.id}}" aria-label="{{'替换' + meal.label + '的全部菜谱'}}">替换</button>
+          </view>
+          <button wx:elif="{{intent || !meal.entry}}" class="link calendar-meal-action" bindtap="tapMeal" data-slot="{{meal.id}}">
             {{intent ? '安排在这里' : '＋ 添加菜谱'}}
           </button>
           <button wx:else class="link calendar-meal-menu" bindtap="openMealMenu" data-slot="{{meal.id}}" aria-label="{{meal.label + '更多操作'}}">···</button>

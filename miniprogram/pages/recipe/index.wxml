@@ -99,6 +99,11 @@
       </block>
     </view>
   </block>
+  <view wx:elif="{{recipeStatus === 'loading'}}" class="empty" aria-live="polite">正在获取菜谱…</view>
+  <view wx:elif="{{recipeStatus === 'error'}}" class="empty recipe-load-error">
+    <text>暂时无法获取菜谱，请检查网络。</text>
+    <button class="link" bindtap="loadMissingRecipe">重试</button>
+  </view>
   <view wx:else class="empty">找不到这道菜谱。</view>
 </view>
 
@@ -116,6 +121,10 @@
     <button class="detail-save {{saved ? 'detail-saved' : ''}}" bindtap="toggleSaved">
       <image src="{{saved ? '/assets/icon-favorites-filled.svg' : '/assets/icon-favorites.svg'}}" aria-hidden="true"/>
       <text>{{saved ? '已收藏' : '收藏'}}</text>
+    </button>
+    <button class="detail-schedule" bindtap="scheduleRecipe">
+      <view class="meal-calendar-icon" aria-hidden="true"></view>
+      <text>安排到日历</text>
     </button>
     <button class="primary" bindtap="startCooking">开始烹饪</button>
   </block>
