@@ -1,3 +1,4 @@
+<wxs src="../../icons.wxs" module="icons" />
 <view class="theme-page theme-{{themeId}}">
 <view class="screen recipe-screen {{recipe ? 'has-nav' : ''}} {{timerStep > 0 ? 'timer-visible' : ''}}">
   <block wx:if="{{recipe}}">
@@ -12,19 +13,19 @@
     <view class="recipe-content {{recipe.image ? 'recipe-content-overlap' : ''}}">
       <view class="recipe-facts {{recipe.calories > 0 && !recipe.nutrition ? 'recipe-facts-with-energy' : ''}}">
         <view class="recipe-fact">
-          <image class="fact-icon" src="/assets/icon-recipe-clock.svg" aria-hidden="true"/>
+          <image class="fact-icon" src="{{icons.path('recipeClock')}}" aria-hidden="true"/>
           <text class="fact-label">{{recipe.durationLabel}}</text>
           <text class="fact-value">{{recipe.minutes}} 分钟</text>
           <text wx:if="{{recipe.waitText}}" class="fact-note">另需等待 {{recipe.waitText}}</text>
           <text wx:elif="{{recipe.durationNote}}" class="fact-note">{{recipe.durationNote}}</text>
         </view>
         <view class="recipe-fact">
-          <image class="fact-icon" src="/assets/icon-recipe-difficulty.svg" aria-hidden="true"/>
+          <image class="fact-icon" src="{{icons.path('recipeDifficulty')}}" aria-hidden="true"/>
           <text class="fact-label">难度</text>
           <text class="fact-value">{{recipe.difficulty}}</text>
         </view>
         <view class="recipe-fact">
-          <image class="fact-icon" src="/assets/icon-recipe-servings.svg" aria-hidden="true"/>
+          <image class="fact-icon" src="{{icons.path('recipeServings')}}" aria-hidden="true"/>
           <view class="fact-label">份量</view>
           <view class="fact-value">{{recipe.servings}} 人份</view>
         </view>
@@ -119,7 +120,7 @@
 <view wx:if="{{recipe}}" class="bottom-nav recipe-bar detail-bar">
   <block wx:if="{{cookingIndex < 0}}">
     <button class="detail-save {{saved ? 'detail-saved' : ''}}" bindtap="toggleSaved">
-      <image src="{{saved ? '/assets/icon-favorites-filled.svg' : '/assets/icon-favorites.svg'}}" aria-hidden="true"/>
+      <image src="{{icons.path(saved ? 'favoriteFilled' : 'favorite')}}" aria-hidden="true"/>
       <text>{{saved ? '已收藏' : '收藏'}}</text>
     </button>
     <button class="detail-schedule" bindtap="scheduleRecipe">

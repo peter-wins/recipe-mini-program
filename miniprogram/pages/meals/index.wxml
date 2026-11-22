@@ -1,8 +1,9 @@
+<wxs src="../../icons.wxs" module="icons" />
 <import src="../../templates/recipe-card.wxml"/>
 
 <template name="mealDishContent">
   <recipe-cover wx:if="{{dish.image}}" class="meal-dish-cover" src="{{dish.image}}" lazy="{{true}}"/>
-  <view wx:else class="meal-dish-cover meal-photo-empty"><image src="/assets/icon-cookbook.svg" aria-hidden="true"/></view>
+  <view wx:else class="meal-dish-cover meal-photo-empty"><image src="{{icons.path('cookbook')}}" aria-hidden="true"/></view>
   <text class="meal-dish-name">{{dish.name}}</text>
 </template>
 

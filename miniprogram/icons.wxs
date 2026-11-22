@@ -1,0 +1,48 @@
+/**
+ * 全局图标资源映射（规范第7条：统一资源映射，禁止页面重复定义）
+ * 所有图标路径的唯一数据源；页面通过 <wxs src="/icons.wxs" module="icons" /> 引用。
+ * 普通图标统一为中性色 #75665e / 24×24 / 描边 1.8；选中态由使用方套用主题色滤镜。
+ */
+var base = '/assets/'
+
+var ICONS = {
+  // 底部导航
+  home: 'icon-home.svg',
+  cookbook: 'icon-cookbook.svg',
+  lightMeal: 'icon-light-meal.svg',
+  profile: 'icon-profile.svg',
+  // 首页快捷入口
+  fridge: 'icon-fridge.svg',
+  shuffle: 'icon-shuffle.svg',
+  calendar: 'icon-calendar-line.svg',
+  cart: 'icon-cart.svg',
+  sparkles: 'icon-sparkles.svg',
+  // 我的页 / 通用功能
+  chef: 'icon-chef-line.svg',
+  theme: 'icon-theme.svg',
+  feedback: 'icon-feedback.svg',
+  info: 'icon-info.svg',
+  calendarLine: 'icon-calendar-line.svg',
+  plus: 'icon-plus.svg',
+  camera: 'icon-camera.svg',
+  categories: 'icon-categories.svg',
+  ingredients: 'icon-ingredients.svg',
+  history: 'icon-history.svg',
+  favorite: 'icon-favorites.svg',
+  favorites: 'icon-favorites.svg',
+  favoriteFilled: 'icon-favorites-filled.svg',
+  // 菜谱元信息
+  recipeClock: 'icon-recipe-clock.svg',
+  recipeDifficulty: 'icon-recipe-difficulty.svg',
+  recipeServings: 'icon-recipe-servings.svg'
+}
+
+// 按语义名取完整路径；未知名称回退到 cookbook，避免加载失败空白
+function path(name) {
+  return base + (ICONS[name] || ICONS.cookbook)
+}
+
+module.exports = {
+  icons: ICONS,
+  path: path
+}

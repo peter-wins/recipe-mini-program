@@ -1,3 +1,4 @@
+<wxs src="../../icons.wxs" module="icons" />
 <view class="theme-page theme-{{themeId}}">
   <view class="screen calendar-screen">
     <view class="calendar-panel">
@@ -67,7 +68,7 @@
 
     <button class="calendar-shopping-card" bindtap="openPurchasePreview">
       <view class="calendar-shopping-heading">
-        <image src="/assets/icon-cart.svg" aria-hidden="true"/>
+        <image src="{{icons.path('cart')}}" aria-hidden="true"/>
         <text>提前准备，做饭更轻松</text>
       </view>
       <view class="subtle calendar-shopping-note">查看今天起三天的用餐计划还缺哪些食材。</view>

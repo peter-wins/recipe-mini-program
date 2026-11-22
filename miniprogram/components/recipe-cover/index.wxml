@@ -1,5 +1,6 @@
+<wxs src="../../icons.wxs" module="icons" />
 <view class="cover-frame {{mode === 'widthFix' ? 'cover-frame-fluid' : ''}} {{reserveSquare && src && !loaded && !failed ? 'cover-frame-square' : ''}}">
-  <view wx:if="{{!textFallback}}" class="placeholder" aria-hidden="true"><image src="/assets/icon-cookbook.svg"/></view>
+  <view wx:if="{{!textFallback}}" class="placeholder" aria-hidden="true"><image src="{{icons.path('cookbook')}}"/></view>
   <view wx:elif="{{!loaded}}" class="cover-text"><slot/></view>
   <image wx:if="{{!failed && (downloadedSrc || (src && !cloudSource))}}" class="cover {{mode === 'widthFix' ? 'cover-fluid' : ''}} {{loaded ? 'cover-loaded' : 'cover-loading'}}" src="{{downloadedSrc || src}}" data-url="{{downloadedSrc || src}}" mode="{{mode}}" lazy-load="{{lazy}}" aria-label="{{label}}" aria-hidden="{{!loaded}}" bindload="imageLoaded" binderror="imageFailed"/>
 </view>

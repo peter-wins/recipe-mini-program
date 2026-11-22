@@ -14,7 +14,7 @@ test('我的页按我的厨房与偏好与设置分组，五个改动点到位',
   // 1. 顶部卡压缩、副标题改文案、线性头像
   assert.ok(wxml.includes('把每一餐，都过成喜欢的样子。'))
   assert.ok(!wxml.includes('会做饭的人'))
-  assert.ok(wxml.includes('/assets/icon-chef-line.svg'))
+  assert.ok(wxml.includes("icons.path('chef')"))
   assert.ok(exists('assets/icon-chef-line.svg'))
   assert.ok(wxss.includes('.profile-head'))
 
@@ -113,7 +113,7 @@ test('新入口图标文件齐备', () => {
   }
 })
 
-test('主题强调色图标变量在三套主题齐备，三处图标跟随', () => {
+test('主题图标滤镜变量三套齐备，仅选中态/主操作使用，普通图标中性色', () => {
   const app = read('app.wxss')
   assert.ok(app.includes('--theme-accent-icon: brightness'), '暖杏默认缺失')
   assert.ok(app.includes('.theme-green'))
@@ -121,13 +121,18 @@ test('主题强调色图标变量在三套主题齐备，三处图标跟随', ()
   assert.equal((app.match(/--theme-accent-icon:/g) || []).length, 3, '三套主题都应定义图标 filter')
 
   const homeWxss = read('pages/home/index.wxss')
-  assert.ok(homeWxss.includes('.library-ai image { width: 27rpx; height: 27rpx; filter: var(--theme-accent-icon); }'))
-  assert.ok(homeWxss.includes('.profile-avatar image { width: 46rpx; height: 46rpx; filter: var(--theme-accent-icon); }'))
+  // 规范第4条：选中态（导航当前项）用主题色
   assert.ok(homeWxss.includes('.main-nav .nav-current image { filter: var(--theme-accent-icon); }'))
+  // 规范第3条：普通图标固定中性色，不套主题滤镜
+  assert.ok(homeWxss.includes('.library-ai image { width: 27rpx; height: 27rpx; }'))
+  assert.ok(homeWxss.includes('.profile-avatar image { width: 46rpx; height: 46rpx; }'))
   assert.ok(!homeWxss.includes('--theme-nav-icon'), '旧变量名应清除')
 
   const aboutWxss = read('pages/about/index.wxss')
-  assert.ok(aboutWxss.includes('.about-logo image { width: 62rpx; height: 62rpx; filter: var(--theme-accent-icon); }'))
+  assert.ok(aboutWxss.includes('.about-logo image { width: 62rpx; height: 62rpx; }'))
+  // 主操作按钮（采购页手动添加）可用主题色
+  const shoppingWxss = read('pages/shopping/index.wxss')
+  assert.ok(shoppingWxss.includes('.shopping-add image { width: 27rpx; height: 27rpx; filter: var(--theme-accent-icon); }'))
 })
 
 test('关于页与外观页接入主题 class，颜色随主题变化', () => {
@@ -144,32 +149,74 @@ test('采购清单页头参考菜谱库：眉标＋大标题＋胶囊按钮', ()
   assert.ok(wxml.includes('一次买齐，心里有谱'))
   assert.ok(wxml.includes('shopping-title'))
   assert.ok(wxml.includes('class="shopping-add"'))
-  assert.ok(wxml.includes('/assets/icon-plus.svg'))
+  assert.ok(wxml.includes("icons.path('plus')"))
   assert.ok(wxss.includes('.shopping-title'))
   assert.ok(wxss.includes('filter: var(--theme-accent-icon)'))
   assert.ok(exists('assets/icon-plus.svg'))
 })
 
-test('首页四个快捷入口图标统一为 SVG 规格与主题色', () => {
+test('首页四个快捷入口图标统一为中性色 SVG，走映射且不用 CSS 图标', () => {
   const wxml = read('pages/home/index.wxml')
   const wxss = read('pages/home/index.wxss')
-  // 四个入口都用 image 加载 SVG，日历不再用 CSS 画的图标
+  // 四个入口都用映射加载 SVG，日历不再用 CSS 画的图标
   const shortcuts = wxml.match(/class="shortcut-icon[^>]*>[\s\S]*?<\/view>/g) || []
   assert.equal(shortcuts.length, 4, '应有四个快捷入口图标')
   for (const s of shortcuts) {
-    assert.ok(s.includes('<image src="/assets/'), '每个入口都应是 SVG image')
+    assert.ok(s.includes('<image src="{{icons.path('), '每个入口都应通过映射加载 SVG')
   }
   assert.ok(!wxml.includes('class="meal-calendar-icon"'), '日历不应再用 CSS 边框图标')
-  // 统一尺寸与主题滤镜，无单独放大覆盖
-  assert.ok(wxss.includes('.shortcut-icon image { width: 36rpx; height: 36rpx; filter: var(--theme-accent-icon); }'))
+  // 规范第3条：普通图标中性色，不随主题 → 快捷入口不套主题滤镜、无单独放大
+  assert.ok(wxss.includes('.shortcut-icon image { width: 36rpx; height: 36rpx; }'))
+  assert.ok(!wxss.includes('.shortcut-calendar image { filter'), '普通图标不应套主题滤镜')
   assert.ok(!wxss.includes('.shortcut-shopping image'), '不应有购物车单独放大覆盖')
-  assert.ok(exists('assets/icon-shortcut-calendar.svg'))
+  assert.ok(exists('assets/icon-calendar-line.svg'))
   assert.ok(exists('assets/icon-cart.svg'))
-  // 所有快捷图标 SVG 都是 24×24 画布、1.8 描边
-  for (const f of ['icon-fridge.svg', 'icon-shuffle.svg', 'icon-cart.svg', 'icon-shortcut-calendar.svg']) {
+  // 所有快捷图标 SVG 都是 24×24 画布、1.8 描边、中性色
+  for (const f of ['icon-fridge.svg', 'icon-shuffle.svg', 'icon-cart.svg', 'icon-calendar-line.svg']) {
     const svg = read(`assets/${f}`)
     assert.ok(svg.includes('viewBox="0 0 24 24"'), `${f} 画布不统一`)
     assert.ok(svg.includes('stroke-width="1.8"'), `${f} 描边粗细不统一`)
     assert.ok(svg.includes('stroke="#75665e"'), `${f} 描边颜色不统一`)
   }
+})
+
+test('图标映射模块是唯一数据源，所有页面引用都走映射', () => {
+  const wxs = read('icons.wxs')
+  assert.ok(wxs.includes("var base = '/assets/'"), '应有统一基础路径')
+  assert.ok(wxs.includes('function path(name)'), '应有路径解析函数')
+  assert.ok(wxs.includes('module.exports'), '应导出映射')
+  // 映射覆盖动态图标用到的全部语义名
+  for (const key of ['fridge', 'favorites', 'shuffle', 'chat']) {
+    if (key !== 'chat') assert.ok(wxs.includes(key + ':'), `映射缺少 ${key}`)
+  }
+  // 所有 WXML 图标都通过 icons.path 引用，无硬编码 /assets/icon-*.svg
+  const wxmlFiles = []
+  const scan = dir => {
+    for (const e of fs.readdirSync(path.join(root, dir), { withFileTypes: true })) {
+      const rel = `${dir}/${e.name}`
+      if (e.isDirectory()) scan(rel)
+      else if (e.name.endsWith('.wxml')) wxmlFiles.push(rel)
+    }
+  }
+  scan('pages'); scan('templates'); scan('components')
+  for (const rel of wxmlFiles) {
+    const s = read(rel)
+    assert.ok(!/\/assets\/icon-[a-z-]+\.svg/.test(s), `${rel} 仍硬编码图标路径`)
+  }
+  // 用到图标的文件都引入了映射
+  const iconUsers = wxmlFiles.filter(rel => /icons\.path/.test(read(rel)))
+  for (const rel of iconUsers) {
+    assert.ok(read(rel).includes('module="icons"'), `${rel} 使用图标但未引入映射`)
+  }
+  assert.ok(iconUsers.length >= 9, '映射应被多个页面复用')
+})
+
+test('同一功能复用同一图标：日历两个语义键指向同一 SVG 文件', () => {
+  const wxs = read('icons.wxs')
+  assert.ok(wxs.includes("calendar: 'icon-calendar-line.svg'"))
+  assert.ok(wxs.includes("calendarLine: 'icon-calendar-line.svg'"))
+  // 重复的 shortcut-calendar 文件已删除
+  assert.ok(!exists('assets/icon-shortcut-calendar.svg'), '不应保留重复日历图标')
+  // 唯一日历图标含日历轮廓
+  assert.ok(read('assets/icon-calendar-line.svg').includes('<rect'))
 })

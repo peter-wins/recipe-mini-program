@@ -1,3 +1,4 @@
+<wxs src="../../icons.wxs" module="icons" />
 <import src="../../templates/recipe-card.wxml"/>
 
 <template name="homeFeature">
@@ -47,20 +48,20 @@
     <template wx:else is="homeFeature" data="{{recipe: featured || quickRecipe, isRecommended: !!featured}}"/>
     <view class="home-shortcuts">
       <button class="home-shortcut" bindtap="openFridge">
-        <view class="shortcut-icon shortcut-fridge"><image src="/assets/icon-fridge.svg" aria-hidden="true"/></view>
+        <view class="shortcut-icon shortcut-fridge"><image src="{{icons.path('fridge')}}" aria-hidden="true"/></view>
         <text>我的冰箱</text>
       </button>
       <button class="home-shortcut" bindtap="openSurprise">
-        <view class="shortcut-icon shortcut-random"><image src="/assets/icon-shuffle.svg" aria-hidden="true"/></view>
+        <view class="shortcut-icon shortcut-random"><image src="{{icons.path('shuffle')}}" aria-hidden="true"/></view>
         <text>随机吃</text>
       </button>
       <navigator class="home-shortcut" url="/pages/meal-calendar/index" hover-class="pressed">
-        <view class="shortcut-icon shortcut-calendar"><image src="/assets/icon-shortcut-calendar.svg" aria-hidden="true"/></view>
+        <view class="shortcut-icon shortcut-calendar"><image src="{{icons.path('calendar')}}" aria-hidden="true"/></view>
         <text>做饭日历</text>
       </navigator>
       <navigator class="home-shortcut" url="/pages/shopping/index" hover-class="pressed" aria-label="{{shoppingCount ? '采购清单，待买' + shoppingCount + '项' : '采购清单'}}">
         <view class="shortcut-icon shortcut-shopping">
-          <image src="/assets/icon-cart.svg" aria-hidden="true"/>
+          <image src="{{icons.path('cart')}}" aria-hidden="true"/>
           <text wx:if="{{shoppingCount}}" class="shortcut-shopping-count" aria-hidden="true">{{shoppingCount > 99 ? '99+' : shoppingCount}}</text>
         </view>
         <text>采购清单</text>
@@ -113,7 +114,7 @@
         <view class="library-title">菜谱灵感</view>
       </view>
       <button class="link library-ai" bindtap="showAiDevelopment">
-        <image src="/assets/icon-sparkles.svg" aria-hidden="true"/>
+        <image src="{{icons.path('sparkles')}}" aria-hidden="true"/>
         <text>问问 AI</text>
       </button>
     </view>
@@ -153,7 +154,7 @@
 
   <block wx:elif="{{view === 'profile'}}">
     <view class="profile-head">
-      <view class="profile-avatar" aria-hidden="true"><image src="/assets/icon-chef-line.svg"/></view>
+      <view class="profile-avatar" aria-hidden="true"><image src="{{icons.path('chef')}}"/></view>
       <view class="profile-copy">
         <view class="profile-name">吃饭得有谱</view>
         <view class="profile-note">把每一餐，都过成喜欢的样子。</view>
@@ -168,17 +169,17 @@
     <view class="profile-group-title">我的厨房</view>
     <view class="profile-links">
       <button class="profile-row" bindtap="openFridge">
-        <image src="/assets/icon-fridge.svg" aria-hidden="true"/>
+        <image src="{{icons.path('fridge')}}" aria-hidden="true"/>
         <view class="profile-row-copy"><view class="profile-row-title">冰箱食材</view><view class="profile-row-desc">随手记下家里的食材</view></view>
         <text class="profile-arrow">›</text>
       </button>
       <navigator class="profile-row" url="/pages/shopping/index" hover-class="pressed">
-        <image src="/assets/icon-cart.svg" aria-hidden="true"/>
+        <image src="{{icons.path('cart')}}" aria-hidden="true"/>
         <view class="profile-row-copy"><view class="profile-row-title">采购清单</view><view class="profile-row-desc">买菜不遗漏<text wx:if="{{shoppingCount}}" class="profile-row-count">，待买 {{shoppingCount}} 项</text></view></view>
         <text class="profile-arrow">›</text>
       </navigator>
       <navigator class="profile-row" url="/pages/meal-calendar/index" hover-class="pressed">
-        <image src="/assets/icon-calendar-line.svg" aria-hidden="true"/>
+        <image src="{{icons.path('calendarLine')}}" aria-hidden="true"/>
         <view class="profile-row-copy"><view class="profile-row-title">做饭日历</view><view class="profile-row-desc">安排每天吃什么</view></view>
         <text class="profile-arrow">›</text>
       </navigator>
@@ -187,17 +188,17 @@
     <view class="profile-group-title">偏好与设置</view>
     <view class="profile-links">
       <navigator class="profile-row" url="/pages/appearance/index" hover-class="pressed">
-        <image src="/assets/icon-theme.svg" aria-hidden="true"/>
+        <image src="{{icons.path('theme')}}" aria-hidden="true"/>
         <view class="profile-row-copy"><view class="profile-row-title">主题外观</view></view>
         <text class="profile-hint">{{themeName}}</text><text class="profile-arrow">›</text>
       </navigator>
       <button class="profile-row" open-type="contact">
-        <image src="/assets/icon-feedback.svg" aria-hidden="true"/>
+        <image src="{{icons.path('feedback')}}" aria-hidden="true"/>
         <view class="profile-row-copy"><view class="profile-row-title">意见反馈</view></view>
         <text class="profile-arrow">›</text>
       </button>
       <navigator class="profile-row" url="/pages/about/index" hover-class="pressed">
-        <image src="/assets/icon-info.svg" aria-hidden="true"/>
+        <image src="{{icons.path('info')}}" aria-hidden="true"/>
         <view class="profile-row-copy"><view class="profile-row-title">关于</view></view>
         <text class="profile-hint">{{versionLabel}}</text><text class="profile-arrow">›</text>
       </navigator>
@@ -210,10 +211,10 @@
 
 <view class="bottom-nav main-nav">
   <view class="nav-inner">
-    <button class="nav-item {{view === 'match' ? 'nav-current' : ''}}" data-view="match" bindtap="switchView"><image src="/assets/icon-home.svg" aria-hidden="true"/>首页</button>
-    <button class="nav-item {{view === 'library' ? 'nav-current' : ''}}" data-view="library" bindtap="switchView"><image src="/assets/icon-cookbook.svg" aria-hidden="true"/>菜谱</button>
-    <button class="nav-item {{view === 'meals' ? 'nav-current' : ''}}" data-view="meals" bindtap="switchView"><image src="/assets/icon-light-meal.svg" aria-hidden="true"/>搭配</button>
-    <button class="nav-item {{view === 'profile' ? 'nav-current' : ''}}" data-view="profile" bindtap="switchView"><image src="/assets/icon-profile.svg" aria-hidden="true"/>我的</button>
+    <button class="nav-item {{view === 'match' ? 'nav-current' : ''}}" data-view="match" bindtap="switchView"><image src="{{icons.path('home')}}" aria-hidden="true"/>首页</button>
+    <button class="nav-item {{view === 'library' ? 'nav-current' : ''}}" data-view="library" bindtap="switchView"><image src="{{icons.path('cookbook')}}" aria-hidden="true"/>菜谱</button>
+    <button class="nav-item {{view === 'meals' ? 'nav-current' : ''}}" data-view="meals" bindtap="switchView"><image src="{{icons.path('lightMeal')}}" aria-hidden="true"/>搭配</button>
+    <button class="nav-item {{view === 'profile' ? 'nav-current' : ''}}" data-view="profile" bindtap="switchView"><image src="{{icons.path('profile')}}" aria-hidden="true"/>我的</button>
   </view>
 </view>
 </view>

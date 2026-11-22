@@ -1,9 +1,10 @@
+<wxs src="../icons.wxs" module="icons" />
 <template name="discoveryTile">
   <navigator class="discovery-tile" url="/pages/recipe/index?id={{recipe.id}}" hover-class="card-pressed">
     <view class="discovery-media">
       <recipe-cover wx:if="{{recipe.image}}" class="discovery-photo" src="{{recipe.image}}" lazy="{{true}}"/>
       <view wx:else class="discovery-photo discovery-no-photo">
-        <image src="/assets/icon-cookbook.svg" aria-hidden="true"/>
+        <image src="{{icons.path('cookbook')}}" aria-hidden="true"/>
         <text>{{recipe.libraryCategory || recipe.category}}</text>
       </view>
     </view>

@@ -42,7 +42,7 @@ button.home-search {
   line-height: 62rpx;
   white-space: nowrap;
 }
-.library-ai image { width: 27rpx; height: 27rpx; filter: var(--theme-accent-icon); }
+.library-ai image { width: 27rpx; height: 27rpx; }
 .library-eyebrow { color: var(--theme-muted, #75665e); font-size: 25rpx; }
 .library-title { margin-top: 8rpx; color: var(--theme-text, #4e342c); font-size: 50rpx; font-weight: 750; line-height: 1.2; }
 .recipe-search.library-search { border-radius: 26rpx; }
@@ -242,7 +242,7 @@ button.home-search {
   text-align: center;
 }
 .shortcut-icon { display: flex; align-items: center; justify-content: center; width: 94rpx; height: 94rpx; border-radius: 30rpx; }
-.shortcut-icon image { width: 36rpx; height: 36rpx; filter: var(--theme-accent-icon); }
+.shortcut-icon image { width: 36rpx; height: 36rpx; }
 .shortcut-shopping { position: relative; background: #f2e6d2; }
 .shortcut-shopping-count {
   position: absolute;
@@ -345,7 +345,7 @@ button.home-search {
   border-radius: 24rpx;
   background: var(--theme-soft, #fff8ef);
 }
-.profile-avatar image { width: 46rpx; height: 46rpx; filter: var(--theme-accent-icon); }
+.profile-avatar image { width: 46rpx; height: 46rpx; }
 .profile-copy { flex: 1; min-width: 0; }
 .profile-name { color: var(--theme-text, #4e342c); font-size: 32rpx; font-weight: 700; line-height: 1.3; }
 .profile-note { margin-top: 6rpx; color: var(--theme-muted, #75665e); font-size: 23rpx; }

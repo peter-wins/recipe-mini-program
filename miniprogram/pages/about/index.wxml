@@ -1,7 +1,8 @@
+<wxs src="../../icons.wxs" module="icons" />
 <view class="about-page theme-page theme-{{themeId}}">
   <view class="about-hero">
     <view class="about-logo" aria-hidden="true">
-      <image src="/assets/icon-chef-line.svg"/>
+      <image src="{{icons.path('chef')}}"/>
     </view>
     <view class="about-name">{{appName}}</view>
     <view class="about-slogan">{{slogan}}</view>

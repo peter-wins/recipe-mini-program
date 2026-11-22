@@ -1132,7 +1132,7 @@ test('收藏后爱心切换为实心图标', () => {
   const fs = require('node:fs')
   const wxml = fs.readFileSync(require.resolve('../miniprogram/pages/recipe/index.wxml'), 'utf8')
   const wxss = fs.readFileSync(require.resolve('../miniprogram/pages/recipe/index.wxss'), 'utf8')
-  assert.ok(wxml.includes("saved ? '/assets/icon-favorites-filled.svg' : '/assets/icon-favorites.svg'"))
+  assert.ok(wxml.includes("icons.path(saved ? 'favoriteFilled' : 'favorite')"))
   assert.ok(fs.existsSync(require.resolve('../miniprogram/assets/icon-favorites-filled.svg')))
   // 规范第4条：选中态图标用主题强调色（普通图标保持中性色）
   assert.ok(wxss.includes('detail-saved image { filter: var(--theme-accent-icon); }'))
@@ -1143,7 +1143,7 @@ test('我的页有意见反馈入口，走微信客服会话', () => {
   const wxml = fs.readFileSync(require.resolve('../miniprogram/pages/home/index.wxml'), 'utf8')
   assert.ok(wxml.includes('open-type="contact"'))
   assert.ok(wxml.includes('意见反馈'))
-  assert.ok(wxml.includes('/assets/icon-feedback.svg'))
+  assert.ok(wxml.includes("icons.path('feedback')"))
   assert.ok(fs.existsSync(require.resolve('../miniprogram/assets/icon-feedback.svg')))
 })
 

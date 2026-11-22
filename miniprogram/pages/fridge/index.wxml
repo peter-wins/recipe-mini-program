@@ -1,3 +1,4 @@
+<wxs src="../../icons.wxs" module="icons" />
 <view class="theme-page theme-{{themeId}} fridge-fill">
   <view class="screen">
     <view class="fridge-card">
@@ -6,7 +7,7 @@
           <view class="section">手边有 {{fridgeSummary.count}} 种食材</view>
           <view class="subtle">{{fridgeSummary.staples ? '另有 ' + fridgeSummary.staples + ' 样常备调料' : '点选食材即可登记'}}</view>
         </view>
-        <navigator class="fridge-icon" url="/pages/shopping/index" aria-label="采购清单" hover-class="card-pressed"><image src="/assets/icon-cart.svg" aria-hidden="true"/></navigator>
+        <navigator class="fridge-icon" url="/pages/shopping/index" aria-label="采购清单" hover-class="card-pressed"><image src="{{icons.path('cart')}}" aria-hidden="true"/></navigator>
       </view>
       <view wx:if="{{selected.length}}" class="fridge-picked">
         <block wx:for="{{selectedItems}}" wx:key="id">

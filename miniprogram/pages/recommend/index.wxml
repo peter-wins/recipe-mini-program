@@ -1,3 +1,4 @@
+<wxs src="../../icons.wxs" module="icons" />
 <import src="../../templates/fridge-preview.wxml"/>
 <import src="../../templates/recipe-card.wxml"/>
 
@@ -7,7 +8,7 @@
       <button class="recommend-nav-back" bindtap="goBack" aria-label="返回">
         <view class="recommend-nav-chevron" aria-hidden="true"></view>
       </button>
-      <image class="recommend-nav-icon" src="/assets/icon-sparkles.svg" aria-hidden="true"/>
+      <image class="recommend-nav-icon" src="{{icons.path('sparkles')}}" aria-hidden="true"/>
       <text class="recommend-nav-title">AI 智能推荐</text>
     </view>
   </view>
@@ -20,7 +21,7 @@
     <view class="recommend-modes">
       <button wx:for="{{modes}}" wx:key="value" class="recommend-mode {{mode === item.value ? 'recommend-mode-selected' : ''}}" data-key="mode" data-value="{{item.value}}" bindtap="setPreference" aria-pressed="{{mode === item.value}}">
         <view wx:if="{{item.icon === 'chat'}}" class="recommend-chat-icon" aria-hidden="true"></view>
-        <image wx:else class="recommend-icon" src="/assets/icon-{{item.icon}}.svg" aria-hidden="true"/>
+        <image wx:else class="recommend-icon" src="{{icons.path(item.icon)}}" aria-hidden="true"/>
         <text>{{item.label}}</text>
       </button>
     </view>
@@ -53,7 +54,7 @@
     </view>
 
     <button class="primary recommend-submit" bindtap="runRecommendations">
-      <image class="recommend-icon" src="/assets/icon-sparkles.svg" aria-hidden="true"/>
+      <image class="recommend-icon" src="{{icons.path('sparkles')}}" aria-hidden="true"/>
       <text>{{hasRun && mode === 'pick' ? '再帮我选一次' : '开始智能推荐'}}</text>
     </button>
 
