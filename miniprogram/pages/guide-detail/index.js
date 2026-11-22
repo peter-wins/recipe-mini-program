@@ -1,18 +1,41 @@
 const { applyTheme } = require('../../theme')
 const { getIngredient } = require('../../guide-data')
+const { syncGuide } = require('../../cloud-guide')
 
 Page({
   data: { item: null },
 
   onLoad({ id } = {}) {
-    this.detailId = id
-    const item = getIngredient(id)
-    if (!item) {
-      wx.showToast({ title: '食材不存在', icon: 'none' })
-      return
+    this.unloaded = false
+    try {
+      this.detailId = typeof id === 'string' ? decodeURIComponent(id) : id
+    } catch {
+      this.detailId = id
     }
+    const item = getIngredient(this.detailId)
+    if (item) this.applyItem(item)
+    else return this.loadMissingGuide()
+  },
+
+  // 分享进来的食材可能只存在于云端新版、随包尚无，强制同步一次再查。
+  async loadMissingGuide() {
+    if (this.loadingGuide) return
+    this.loadingGuide = true
+    await syncGuide({ force: true })
+    this.loadingGuide = false
+    if (this.unloaded || this.data.item) return
+    const item = getIngredient(this.detailId)
+    if (item) this.applyItem(item)
+    else wx.showToast({ title: '食材不存在', icon: 'none' })
+  },
+
+  applyItem(item) {
     wx.setNavigationBarTitle({ title: item.name })
     this.setData({ item })
+  },
+
+  onUnload() {
+    this.unloaded = true
   },
 
   onShow() {
@@ -26,6 +49,16 @@ Page({
     if (!this.detailId) return
     const item = getIngredient(this.detailId)
     if (item) this.setData({ item })
+  },
+
+  onShareAppMessage() {
+    const item = this.data.item
+    return {
+      title: item ? `这份「${item.name}」的食材指南，分享给你` : '家常食材指南，认识食材做对菜',
+      path: item
+        ? '/pages/guide-detail/index?id=' + encodeURIComponent(item.id)
+        : '/pages/guide/index'
+    }
   },
 
   openRecipe(e) {
