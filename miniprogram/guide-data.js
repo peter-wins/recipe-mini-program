@@ -42,10 +42,18 @@ const placeholders = [
   ['egg', '鸡蛋', '蛋豆', '#FAEEDA', '#EF9F27'],
   ['tofu', '豆腐', '蛋豆', '#F1EFE8', '#888780']
 ]
+// 已配矢量插画的占位条目：图存云存储 guide-covers/<id>.png，介绍文字待补录。
+const placeholderImages = {
+  cabbage: 'cabbage.png',
+  celery: 'celery.png',
+  carrot: 'carrot.png',
+  potato: 'potato.png'
+}
+
 for (const [id, name, group, tint, accent] of placeholders) {
   bundled.push({
     id, name, group,
-    image: '/assets/guide-spinach.svg',
+    image: placeholderImages[id] || '/assets/guide-spinach.svg',
     tint, accent,
     season: '',
     therapy: '',

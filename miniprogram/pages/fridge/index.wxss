@@ -27,9 +27,8 @@
 .theme-green .fridge-banner-slide, .theme-blue .fridge-banner-slide { background: var(--theme-selected); }
 .fridge-banner-pressed { opacity: .8; }
 .fridge-banner-image { position: absolute; inset: 0; width: 100%; height: 100%; }
-.fridge-banner-copy { position: absolute; left: 28rpx; top: 32rpx; max-width: 62%; }
-.fridge-banner-eyebrow { font-size: 22rpx; }
-.fridge-banner-title { margin-top: 4rpx; font-size: 32rpx; font-weight: 750; line-height: 1.3; }
+.fridge-banner-copy { position: absolute; left: 28rpx; top: 56rpx; max-width: 62%; }
+.fridge-banner-title { font-size: 32rpx; font-weight: 750; line-height: 1.3; }
 .fridge-banner-action { position: absolute; left: 28rpx; bottom: 24rpx; font-size: 23rpx; font-weight: 650; }
 
 .fridge-search-row { display: flex; align-items: center; gap: 16rpx; }

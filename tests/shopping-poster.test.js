@@ -3,6 +3,35 @@ const test = require('node:test')
 
 const { posterWidth, buildLayout, buildText, draw, shortText } = require('../miniprogram/shopping-poster')
 
+test('采购页顶部插画：引用包内新图，CSS 拼的旧插画零件已清除', () => {
+  const fs = require('node:fs')
+  const path = require('node:path')
+  const root = path.resolve(__dirname, '..', 'miniprogram')
+  const wxml = fs.readFileSync(path.join(root, 'pages/shopping/index.wxml'), 'utf8')
+  const wxss = fs.readFileSync(path.join(root, 'pages/shopping/index.wxss'), 'utf8')
+
+  assert.ok(wxml.includes('src="/assets/shopping-hero.png"'), '顶部插画引用新的包内图片')
+  assert.ok(!/shopping-hero-leaf|shopping-hero-tomato|shopping-hero-basket/.test(wxml + wxss), '旧的 CSS 插画零件应删除')
+  const png = fs.readFileSync(path.join(root, 'assets/shopping-hero.png'))
+  assert.equal(png.toString('ascii', 1, 4), 'PNG', '插画文件是 PNG')
+  const imgW = png.readUInt32BE(16)
+  const imgH = png.readUInt32BE(20)
+  const ratio = imgW / imgH
+  assert.ok(ratio > 1.55 && ratio < 1.7, '插画为约 1.64:1 的横版')
+
+  assert.ok(/\.shopping-hero-art \{[^}]*position: absolute/.test(wxss), '插画改为绝对定位，脱离页头行')
+  assert.match(wxss, /\.shopping-hero-art \{[^}]*bottom: 100%/, '插画底边紧贴卡片上边线，不重叠')
+  assert.match(wxss, /\.shopping-add-actions \{\s*position: relative/, '卡片为插画提供定位基准')
+  const width = Number((wxss.match(/\.shopping-hero-art \{[^}]*width: (\d+)rpx/) || [])[1])
+  const height = Number((wxss.match(/\.shopping-hero-art \{[^}]*height: (\d+)rpx/) || [])[1])
+  assert.ok(width >= 240, '插画尺寸放大（宽度至少 240rpx）')
+  assert.ok(Math.abs(width / height - ratio) < 0.04, '容器比例与图片一致，aspectFit 不留白产生空隙')
+  assert.ok(wxml.indexOf('shopping-hero-art') > wxml.indexOf('shopping-add-actions'), '插画节点移入添加卡片内')
+  const btnHeight = Number((wxss.match(/\.shopping-add \{[^}]*min-height: (\d+)rpx/) || [])[1])
+  assert.ok(btnHeight > 0 && btnHeight <= 76, '两个按钮卡片高度缩小（不超过 76rpx）')
+  assert.match(wxss, /\.shopping-add-actions \{[^}]*margin-top: 4rpx/, '卡片连同插画一起上移')
+})
+
 test('清单图布局：宽度固定，高度随条目数增长不被截断', () => {
   const empty = buildLayout([])
   const three = buildLayout([
@@ -19,7 +48,7 @@ test('清单图布局：宽度固定，高度随条目数增长不被截断', ()
   assert.equal(three.title, '采购清单')
   assert.match(three.subtitle, /11 月 22 日/)
   assert.equal(three.footer, undefined, '图上不再有「共 N 项 · 吃饭得有谱」')
-  assert.match(three.note, /用量.*实际用途为准/)
+  assert.match(three.note, /用量按菜谱计算.*实际需求购买/)
   assert.equal(three.note, require('../miniprogram/shopping-poster').usageNote)
 })
 
@@ -30,7 +59,7 @@ test('清单图只写菜名与用量，不含操作按钮文案', () => {
   ])
   const text = [layout.title, layout.subtitle, layout.note,
     ...layout.rows.flatMap(row => [row.name, row.quantity])].join(' ')
-  for (const word of ['已买', '移除', '多选', '复制缺料', '手动添加', '吃饭得有谱']) {
+  for (const word of ['已买', '移除', '多选', '复制缺料', '手动添加', '吃饭得有谱', '一次买齐']) {
     assert.ok(!text.includes(word), `图上不应出现「${word}」`)
   }
   assert.equal(layout.rows[0].name, '菠菜')
@@ -88,7 +117,7 @@ test('绘制指令写入每一行且不重复叠加', () => {
   assert.ok(texts.includes('200 克') && texts.includes('2 个'))
   assert.ok(texts.includes('采购清单'))
   assert.ok(!texts.some(text => /吃饭得有谱|共 \d+ 项/.test(text)), '图上不画「共 N 项 · 吃饭得有谱」')
-  const noteCall = calls.find(call => call[0] === 'fillText' && /用量.*实际用途为准/.test(call[1]))
+  const noteCall = calls.find(call => call[0] === 'fillText' && /用量按菜谱计算.*实际需求购买/.test(call[1]))
   assert.ok(noteCall, '图上应画出用量提示')
   assert.ok(noteCall[3] < 564, '提示画在画布底部区域')
   assert.ok(texts.includes('i'), '提示前应有图标字符')

@@ -6,7 +6,7 @@ const headerHeight = 190
 const rowHeight = 76
 const footerHeight = 110
 const bottomPadding = 36
-const usageNote = '用量根据菜谱计算，购买请以实际用途为准'
+const usageNote = '用量按菜谱计算，可根据实际需求购买'
 
 function dateLabel(date) {
   const value = date instanceof Date ? date : new Date()
@@ -27,7 +27,7 @@ function buildLayout(items, date) {
     width: posterWidth,
     height: headerHeight + rows.length * rowHeight + footerHeight + bottomPadding,
     title: '采购清单',
-    subtitle: `${dateLabel(date)} · 一次买齐，心里有谱`,
+    subtitle: dateLabel(date),
     rows,
     note: usageNote
   }

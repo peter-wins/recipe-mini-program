@@ -34,9 +34,8 @@ Page({
     fridgeGroupIndex: 0,
     ingredientLimit: inventoryPageSize,
     banners: [{
-      eyebrow: '今日灵感',
       title: '用现有食材做道好菜',
-      image: '/assets/banner-cook.svg'
+      image: '/assets/banner-cook.png'
     }],
     ...ingredientView([], '', 0, inventoryPageSize)
   },

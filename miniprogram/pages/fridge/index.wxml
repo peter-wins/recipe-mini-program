@@ -6,7 +6,6 @@
         <button class="fridge-banner-slide" bindtap="openFridgeMatches" hover-class="fridge-banner-pressed" aria-label="用现有食材做道好菜，查看匹配菜谱">
           <image class="fridge-banner-image" src="{{item.image}}" aria-hidden="true"/>
           <view class="fridge-banner-copy">
-            <view class="fridge-banner-eyebrow">{{item.eyebrow}}</view>
             <view class="fridge-banner-title">{{item.title}}</view>
           </view>
           <text class="fridge-banner-action">看看能做什么 ›</text>

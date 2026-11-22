@@ -65,6 +65,10 @@ Page({
   },
 
   onLoad({ view, date, slot } = {}) {
+    if (view === 'library') {
+      this.openAllRecipes()
+      return
+    }
     if (view !== 'meals') return
     const calendarDate = parseDate(date) ? date : ''
     const calendarSlot = mealSlots.some(meal => meal.id === slot) ? slot : ''

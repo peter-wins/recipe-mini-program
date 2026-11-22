@@ -184,7 +184,7 @@
         <text class="profile-arrow">›</text>
       </navigator>
       <navigator class="profile-row" url="/pages/guide/index" hover-class="pressed">
-        <image src="{{icons.path('cookbook')}}" aria-hidden="true"/>
+        <image src="{{icons.path('guideSpinach')}}" aria-hidden="true"/>
         <view class="profile-row-copy"><view class="profile-row-title">食材指南</view><view class="profile-row-desc">认识食材，做对菜</view></view>
         <text class="profile-arrow">›</text>
       </navigator>

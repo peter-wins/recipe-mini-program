@@ -30,6 +30,7 @@ test('我的页按我的厨房与偏好与设置分组，五个改动点到位',
   }
   assert.ok(wxml.includes('/pages/meal-calendar/index'))
   assert.ok(wxml.includes('/pages/guide/index'))
+  assert.ok(/url="\/pages\/guide\/index"[\s\S]*?icons\.path\('guideSpinach'\)/.test(wxml), '食材指南入口用独立菠菜图标，不与菜谱库重复')
   assert.ok(wxml.includes('open-type="contact"'))
 
   // 入口两行结构与副标题文案
@@ -133,7 +134,7 @@ test('主题图标滤镜变量三套齐备，仅选中态/主操作使用，普�
   assert.ok(aboutWxss.includes('.about-logo image { width: 62rpx; height: 62rpx; }'))
   // 主操作按钮（采购页手动添加）可用主题色
   const shoppingWxss = read('pages/shopping/index.wxss')
-  assert.ok(shoppingWxss.includes('.shopping-add image { width: 27rpx; height: 27rpx; filter: var(--theme-accent-icon); }'))
+  assert.match(shoppingWxss, /\.shopping-add image[^\{]*\{[^}]*filter: var\(--theme-accent-icon\)/)
 })
 
 test('关于页与外观页接入主题 class，颜色随主题变化', () => {
@@ -146,7 +147,8 @@ test('关于页与外观页接入主题 class，颜色随主题变化', () => {
 test('采购清单页头统一搭配页：大标题在上＋副标题在下＋胶囊按钮', () => {
   const wxml = read('pages/shopping/index.wxml')
   const wxss = read('pages/shopping/index.wxss')
-  assert.ok(wxml.includes('一次买齐，心里有谱'))
+  assert.ok(wxml.includes('class="shopping-subtitle">{{usageNote}}'), '副标题复用用量提示文案')
+  assert.ok(!wxml.includes('shopping-usage-note'), '页面底部旧提示行已移除')
   assert.ok(wxml.includes('shopping-title'))
   assert.ok(wxml.includes('shopping-subtitle'))
   // 标题在副标题之前（与搭配页一致）
@@ -267,11 +269,10 @@ test('菜谱库标题区与搭配页统一：大标题在上＋副标题在下',
   assert.ok(titleRule && !titleRule[0].includes('margin-top'), '标题不应再有上边距')
 })
 
-test('三个页头胶囊按钮强化明显度：加深描边＋加粗文字（三主题联动）', () => {
+test('菜谱库与搭配页的页头按钮使用主题描边和较粗文字', () => {
   const sources = [
     ['问问 AI', read('pages/home/index.wxss'), 'library-ai'],
     ['做饭日历', read('pages/meals/index.wxss'), 'meal-calendar-link'],
-    ['手动添加', read('pages/shopping/index.wxss'), 'shopping-add'],
   ]
   for (const [name, wxss, cls] of sources) {
     const block = wxss.match(new RegExp('\\.' + cls + ' \\{[\\s\\S]*?\\}'))
@@ -282,7 +283,7 @@ test('三个页头胶囊按钮强化明显度：加深描边＋加粗文字（�
   }
 })
 
-test('四个页头统一搭配页布局：标题在上副标题在下、右侧元素顶部对齐', () => {
+test('首页、菜谱库与搭配页保留顶部对齐的页头元素', () => {
   // 首页：标题在副标题之上，炒锅保留且顶部对齐
   const homeWxml = read('pages/home/index.wxml')
   const homeWxss = read('pages/home/index.wxss')
@@ -290,27 +291,20 @@ test('四个页头统一搭配页布局：标题在上副标题在下、右侧�
   assert.ok(homeWxml.includes('home-wok'), '首页应保留炒锅动画')
   assert.ok(/\.home-wok \{[^}]*align-self: flex-start/.test(homeWxss), '炒锅应顶部对齐')
   assert.ok(/\.home-title-row \{[^}]*align-items: flex-start/.test(homeWxss), '首页标题行应顶部对齐')
-  // 菜谱库、采购页：右侧按钮顶部对齐（搭配页 align-self: flex-start）
+  // 菜谱库：右侧按钮顶部对齐
   assert.ok(/\.library-ai \{[\s\S]*?align-self: flex-start/.test(homeWxss), '问问AI按钮应顶部对齐')
-  const shoppingWxss = read('pages/shopping/index.wxss')
-  assert.ok(/\.shopping-add \{[\s\S]*?align-self: flex-start/.test(shoppingWxss), '手动添加按钮应顶部对齐')
   // 搭配页基准本身也是顶部对齐
   assert.ok(/\.meal-calendar-link \{[\s\S]*?align-self: flex-start/.test(read('pages/meals/index.wxss')))
 })
 
-test('三个页头胶囊按钮尺寸统一：button 覆盖全局 min-height 与日历入口齐高', () => {
-  // 问问 AI 与手动添加是 button，需覆盖全局 button 的 min-height: 88rpx
+test('问问 AI 和日历入口的页头按钮尺寸一致', () => {
   const homeWxss = read('pages/home/index.wxss')
-  const shoppingWxss = read('pages/shopping/index.wxss')
   const mealsWxss = read('pages/meals/index.wxss')
-  for (const [wxss, cls] of [[homeWxss, 'library-ai'], [shoppingWxss, 'shopping-add']]) {
-    const block = wxss.match(new RegExp('\\.' + cls + ' \\{[\\s\\S]*?\\}'))
-    assert.ok(block, `缺少 .${cls} 样式`)
-    assert.ok(block[0].includes('min-height: 0'), `.${cls} 未覆盖全局最小高度，会被撑高`)
-    assert.ok(block[0].includes('line-height: 62rpx'), `.${cls} 行高应与日历入口一致`)
-    assert.ok(block[0].includes('border-radius: 20rpx'), `.${cls} 圆角应与日历入口一致`)
-    assert.ok(block[0].includes('padding: 0 18rpx'), `.${cls} 内边距应与日历入口一致`)
-  }
+  const aiBlock = homeWxss.match(/\.library-ai \{[^}]*\}/)
+  assert.ok(aiBlock[0].includes('min-height: 0'))
+  assert.ok(aiBlock[0].includes('line-height: 62rpx'))
+  assert.ok(aiBlock[0].includes('border-radius: 20rpx'))
+  assert.ok(aiBlock[0].includes('padding: 0 18rpx'))
   // 日历入口是 navigator，同样 62rpx 行高、20rpx 圆角
   const calBlock = mealsWxss.match(/\.meal-calendar-link \{[\s\S]*?\}/)
   assert.ok(calBlock[0].includes('line-height: 62rpx'))
@@ -367,7 +361,9 @@ test('冰箱页改版：轮播置顶、已有食材置顶分组、采购图标�
   // 1. 顶部轮播：swiper + indicator + banner 资源，且位于搜索栏之前
   assert.ok(/<swiper[\s\S]*?indicator-dots[\s\S]*?fridge-banner/.test(wxml) || wxml.includes('<swiper class="fridge-banner"'), '顶部应有轮播图')
   assert.ok(wxml.indexOf('fridge-banner') < wxml.indexOf('fridge-search-row'), '轮播应在搜索栏之上')
-  assert.ok(exists('assets/banner-cook.svg'), '缺少轮播占位图')
+  assert.ok(exists('assets/banner-cook.png'), '缺少轮播插画')
+  assert.ok(read('pages/fridge/index.js').includes("image: '/assets/banner-cook.png'"), '轮播引用新锅图')
+  assert.ok(!wxml.includes('fridge-banner-eyebrow') && !read('pages/fridge/index.js').includes('今日灵感'), 'banner 已移除「今日灵感」眉题')
   assert.ok(wxss.includes('.fridge-banner {'), '缺少轮播样式')
 
   // 2. 「已有食材」放在横滑分类首位
@@ -504,7 +500,8 @@ test('食材指南两个页面结构完整且走主题', () => {
   }
   assert.ok((listWxml.match(/<recipe-cover/g) || []).length >= 1, '列表页应用封面组件渲染食材图')
   assert.ok((detailWxml.match(/<recipe-cover/g) || []).length >= 2, '详情页食材图与关联菜谱图都应走封面组件')
-  assert.ok(guideData.getIngredient('cabbage').image === '/assets/guide-spinach.svg', '未做图的占位食材仍用旧图')
+  assert.equal(guideData.getIngredient('cabbage').image, cloudStorageBase + 'guide-covers/cabbage.png', '已配图的占位食材从云端加载')
+  assert.equal(guideData.getIngredient('egg').image, '/assets/guide-spinach.svg', '未配图的占位食材仍用旧图')
   const fs = require('fs')
   const png = fs.readFileSync('guide-covers/spinach.png')
   assert.equal(png.readUInt32BE(16), 1200, '宽度应为 1200')
@@ -542,7 +539,7 @@ test('食材指南云同步接入启动流程，两个页面可刷新', () => {
   assert.ok(listJs.includes('getGuideGroups'), '列表分组应跟随云端数据')
 })
 
-test('菜谱页去掉复制缺料，采购清单页提供生成清单图', () => {
+test('菜谱页可打开采购清单，清单末尾提供图文两种导出', () => {
   const recipeWxml = read('pages/recipe/index.wxml')
   const recipeJs = read('pages/recipe/index.js')
   const shoppingWxml = read('pages/shopping/index.wxml')
@@ -552,28 +549,30 @@ test('菜谱页去掉复制缺料，采购清单页提供生成清单图', () =>
   assert.ok(!recipeJs.includes('copyMissing'), '复制缺料方法已移除')
   assert.ok(recipeWxml.includes('看清单'), '看清单仍保留')
 
-  assert.ok(shoppingWxml.includes('生成清单图'), '采购清单页应有生成清单图按钮')
+  assert.ok(/bindtap="exportPoster"[\s\S]*?icons\.path\('image'\)[\s\S]*?保存图片/.test(shoppingWxml), '保存图片按钮带图片图标')
   assert.ok(shoppingWxml.includes('id="shopping-poster"'), '应有离屏 canvas 节点')
   assert.ok(shoppingJs.includes('canvasToTempFilePath') && shoppingJs.includes('saveImageToPhotosAlbum'), '应导出图片并保存相册')
   assert.ok(/auth|deny/.test(shoppingJs), '应识别相册权限被拒')
 
   const shoppingWxss = read('pages/shopping/index.wxss')
-  assert.ok(/\.shopping-export \.primary \{[^}]*line-height: 88rpx/.test(shoppingWxss), '导出按钮行高应与胶囊高度一致，文字垂直居中')
-  assert.ok(/\.shopping-export \.primary \{[^}]*min-height: 88rpx/.test(shoppingWxss), '导出按钮高度显式锁定 88rpx')
+  assert.match(shoppingWxss, /\.shopping-export \{[^}]*display: flex/, '图文导出应并排')
+  assert.match(shoppingWxml, /<view wx:if="{{!selecting}}" class="shopping-export">/)
 
   assert.ok(/\.shopping-item-copy \{[^}]*display: flex/.test(shoppingWxss), '食材名与用量容器应横排')
   assert.ok(/\.shopping-item-name \{[^}]*display: inline/.test(shoppingWxss), '食材名不应独占一行')
-  assert.ok(/\.shopping-row-main \{[^}]*min-height: 64rpx/.test(shoppingWxss), '列表行高应收紧')
-  assert.ok(/\.shopping-bought \{[^}]*min-height: 64rpx/.test(shoppingWxss), '已买按钮局部降高，避免撑高整行')
-  assert.ok(/\.shopping-remove \{[^}]*min-height: 64rpx/.test(shoppingWxss), '移除按钮局部降高，避免撑高整行')
-  assert.ok(shoppingWxml.includes('shopping-remove-icon'), '移除按钮使用图标而非文字')
-  assert.ok(/\.shopping-remove-icon \{[^}]*border-radius: 50%/.test(shoppingWxss), '移除图标为圆形描边减号')
+  assert.match(shoppingWxml, /class="shopping-select" bindtap="toggleSelection"/)
+  assert.match(shoppingWxml, /class="shopping-item-toggle" bindtap="toggleDetails"/)
+  assert.match(shoppingWxml, /class="shopping-details">[\s\S]*?bindtap="removeItem"/)
   assert.ok(shoppingWxml.includes("icons.path('copy')"), '复制按钮图标走统一映射')
   assert.ok(exists('assets/icon-copy.svg'), '复制图标文件存在')
   assert.ok(read('icons.wxs').includes('copy: \'icon-copy.svg\''), '映射注册了复制图标')
+  assert.ok(exists('assets/icon-image.svg'), '图片图标文件存在')
+  assert.ok(read('icons.wxs').includes('image: \'icon-image.svg\''), '映射注册了图片图标')
+  assert.ok(exists('assets/icon-spinach.svg'), '菠菜图标文件存在')
+  assert.ok(read('icons.wxs').includes('guideSpinach: \'icon-spinach.svg\''), '映射注册了食材指南菠菜图标')
   assert.ok(shoppingWxml.includes('bindtap="copyTextList"'), '复制按钮绑定复制方法')
   assert.ok(shoppingJs.includes('setClipboardData'), '复制方法写入剪贴板')
-  assert.ok(shoppingWxml.includes('图发微信或打印'), '提示文案覆盖图文两种用途')
+  assert.match(shoppingWxml, /url="\/pages\/home\/index\?view=library"/)
   assert.ok(shoppingWxml.includes('{{usageNote}}'), '清单页应显示用量提示')
   assert.ok(shoppingJs.includes('usageNote'), '页面从绘图模块复用同一句提示文案')
   assert.ok(/button \{[^}]*min-height: 88rpx/.test(read('app.wxss')), '全局最小点击区规范保持不变')

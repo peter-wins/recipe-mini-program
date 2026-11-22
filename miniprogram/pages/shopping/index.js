@@ -53,7 +53,7 @@ Page({
 
   toggleSelection(event) {
     const { key } = event.currentTarget.dataset
-    this.setItems(this.data.items.map(item => item.key === key ? { ...item, selected: !item.selected } : item))
+    this.setItems(this.data.items.map(item => item.key === key ? { ...item, selected: !item.selected } : item), true)
   },
 
   toggleAll() {
@@ -96,10 +96,6 @@ Page({
   toggleDetails(event) {
     const { key } = event.currentTarget.dataset
     this.setData({ items: this.data.items.map(item => item.key === key ? { ...item, expanded: !item.expanded } : item) })
-  },
-
-  markBought(event) {
-    this.buyItems([event.currentTarget.dataset.key])
   },
 
   markSelectedBought() {
