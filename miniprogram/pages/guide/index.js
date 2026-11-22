@@ -1,9 +1,9 @@
 const { applyTheme } = require('../../theme')
-const { groups, listIngredients } = require('../../guide-data')
+const { listIngredients, getGuideGroups } = require('../../guide-data')
 
 Page({
   data: {
-    groups,
+    groups: [],
     groupIndex: 0,
     search: '',
     searching: false,
@@ -11,15 +11,31 @@ Page({
   },
 
   onLoad() {
-    this.setData({ visibleIngredients: listIngredients().filter(item => item.group === groups[0]) })
+    this.refreshGuideData()
   },
 
   onShow() {
     applyTheme(this)
+    // 云端可能在后台切换了版本，回到前台时按当前数据重绘。
+    this.refreshGuideData()
+  },
+
+  // 按当前分组与搜索条件重绘列表，云端整版替换后由 cloud-guide 调用。
+  refreshGuideData() {
+    const groups = getGuideGroups()
+    const all = listIngredients()
+    const query = this.data.search.trim()
+    let groupIndex = this.data.groupIndex
+    if (groupIndex >= groups.length) groupIndex = 0
+    const visibleIngredients = query
+      ? all.filter(item => item.name.includes(query))
+      : all.filter(item => item.group === groups[groupIndex])
+    this.setData({ groups, groupIndex, searching: Boolean(query), visibleIngredients })
   },
 
   selectGroup(e) {
     const groupIndex = Number(e.currentTarget.dataset.index)
+    const groups = getGuideGroups()
     this.setData({
       groupIndex,
       visibleIngredients: listIngredients().filter(item => item.group === groups[groupIndex])
@@ -30,6 +46,7 @@ Page({
     const search = e.detail.value
     const query = search.trim()
     const all = listIngredients()
+    const groups = getGuideGroups()
     const visibleIngredients = query
       ? all.filter(item => item.name.includes(query))
       : all.filter(item => item.group === groups[this.data.groupIndex])
@@ -37,6 +54,7 @@ Page({
   },
 
   clearSearch() {
+    const groups = getGuideGroups()
     this.setData({
       search: '',
       searching: false,

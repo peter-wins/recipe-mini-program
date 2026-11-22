@@ -1,12 +1,13 @@
-// 家常食材指南数据：每种食材一张介绍卡，关联现有菜谱库。
-// 试点阶段先做菠菜，后续按书逐页补录。
+// 家常食材指南数据。bundled 为随包兜底数据；云端发布后可整版替换 current。
+// 关联菜谱仍从 catalog 按食材 id 反查，图片分本地资源与云存储两种来源。
 const { getCatalogSource } = require('./catalog')
-const { recipeImage } = require('./recipe-image')
+const { recipeImage, cloudStorageBase } = require('./recipe-image')
 
 const groups = ['叶菜', '根茎', '瓜果', '菌菇', '蛋豆', '肉水产']
 
-// 食材条目：id 对应 catalog 的食材 id；recipes 为书里菜名，现阶段用 ingredientId 自动关联库内菜谱。
-const ingredients = [
+// 食材条目：id 对应 catalog 的食材 id；image 以 /assets/ 开头为包内图，
+// 否则视为云存储 guide-covers/ 下的相对文件名。
+const bundled = [
   {
     id: 'spinach',
     name: '菠菜',
@@ -42,7 +43,7 @@ const placeholders = [
   ['tofu', '豆腐', '蛋豆', '#F1EFE8', '#888780']
 ]
 for (const [id, name, group, tint, accent] of placeholders) {
-  ingredients.push({
+  bundled.push({
     id, name, group,
     image: '/assets/guide-spinach.svg',
     tint, accent,
@@ -55,12 +56,32 @@ for (const [id, name, group, tint, accent] of placeholders) {
   })
 }
 
+let current = { groups: groups.slice(), ingredients: bundled }
+
+function replaceGuide(source) {
+  current = {
+    groups: Array.isArray(source.groups) ? source.groups.slice() : groups.slice(),
+    ingredients: source.ingredients.map(item => ({
+      ...item,
+      storage: (item.storage || []).slice(),
+      tips: (item.tips || []).slice()
+    }))
+  }
+}
+
+// 图片来源：包内 /assets/ 与完整云地址原样返回；相对文件名拼到 guide-covers/。
+function guideImage(image) {
+  if (!image) return ''
+  if (image.indexOf('/assets/') === 0 || image.indexOf('cloud://') === 0 || image.indexOf('http') === 0) return image
+  return cloudStorageBase + 'guide-covers/' + image
+}
+
 function recipeImageUrl(recipe) {
   return recipe ? recipeImage(recipe.coverPath) : ''
 }
 
 function listIngredients() {
-  return ingredients.map(item => {
+  return current.ingredients.map(item => {
     const related = getCatalogSource().recipes.filter(recipe =>
       recipe.required.some(([id]) => id === item.id)
     )
@@ -68,7 +89,7 @@ function listIngredients() {
       id: item.id,
       name: item.name,
       group: item.group,
-      image: item.image,
+      image: guideImage(item.image),
       tint: item.tint,
       season: item.season,
       recipeCount: related.length
@@ -77,7 +98,7 @@ function listIngredients() {
 }
 
 function getIngredient(id) {
-  const item = ingredients.find(entry => entry.id === id)
+  const item = current.ingredients.find(entry => entry.id === id)
   if (!item) return null
   const related = getCatalogSource().recipes.filter(recipe =>
     recipe.required.some(([id]) => id === item.id)
@@ -86,7 +107,7 @@ function getIngredient(id) {
     id: item.id,
     name: item.name,
     group: item.group,
-    image: item.image,
+    image: guideImage(item.image),
     tint: item.tint,
     season: item.season,
     therapy: item.therapy,
@@ -103,4 +124,9 @@ function getIngredient(id) {
   }
 }
 
-module.exports = { groups, ingredients, listIngredients, getIngredient }
+module.exports = {
+  groups, bundled, replaceGuide, guideImage, listIngredients, getIngredient,
+  getGuideGroups: () => current.groups.slice(),
+  // ingredients 保留为当前数据的只读别名，兼容旧引用。
+  get ingredients() { return current.ingredients }
+}

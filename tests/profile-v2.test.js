@@ -516,3 +516,37 @@ test('采购清单「加入清单」按钮局部降到 76rpx，不动全局最�
   // 全局最小点击区规范保持不变（0,2,0 的局部选择器可覆盖全局 button 的 0,0,1）
   assert.ok(/button \{[^}]*min-height: 88rpx/.test(appWxss), '全局 button 最小点击区应保持 88rpx')
 })
+
+test('食材指南云同步接入启动流程，两个页面可刷新', () => {
+  const app = read('app.js')
+  const listJs = read('pages/guide/index.js')
+  const detailJs = read('pages/guide-detail/index.js')
+
+  assert.ok(app.includes("require('./cloud-guide')"), 'app 应引入云指南模块')
+  assert.ok(app.includes('loadCachedGuide()'), '启动应加载本地指南缓存')
+  assert.ok(app.includes('syncGuide()'), '应在同步流程调用 syncGuide')
+  assert.ok(/function syncCloudContent\(\)[\s\S]*syncCatalog\(\)[\s\S]*syncGuide\(\)/.test(app), '云内容同步应同时含菜谱与指南')
+
+  for (const [name, source] of [['列表页', listJs], ['详情页', detailJs]]) {
+    assert.ok(source.includes('refreshGuideData'), `${name}应实现 refreshGuideData`)
+    assert.ok(/onShow\(\)[\s\S]*refreshGuideData\(\)/.test(source), `${name}回到前台应刷新`)
+  }
+  assert.ok(listJs.includes('getGuideGroups'), '列表分组应跟随云端数据')
+})
+
+test('食材指南发布校验：版本号、数量与已有 ID 保护', () => {
+  const { bundled } = require('../miniprogram/guide-data')
+  const { validRelease, validateGuide, parseRelease } = require('../miniprogram/guide-release')
+  const groups = ['叶菜', '根茎', '瓜果', '菌菇', '蛋豆', '肉水产']
+  const source = { groups, ingredients: bundled }
+
+  assert.ok(validRelease({ schemaVersion: 1, version: 'c'.repeat(32), ingredientCount: bundled.length }))
+  assert.ok(!validRelease({ schemaVersion: 2, version: 'c'.repeat(32), ingredientCount: bundled.length }))
+  assert.ok(!validRelease({ schemaVersion: 1, version: 'bad', ingredientCount: bundled.length }))
+  assert.ok(!validRelease({ schemaVersion: 1, version: 'c'.repeat(32), ingredientCount: bundled.length - 1 }))
+
+  assert.doesNotThrow(() => validateGuide(source))
+  assert.throws(() => validateGuide({ groups, ingredients: bundled.slice(1) }), /缺少已有食材 ID/)
+  assert.throws(() => validateGuide({ groups: [], ingredients: bundled }), /分组格式/)
+  assert.throws(() => parseRelease(JSON.stringify({ schemaVersion: 2, version: 'c'.repeat(32), ingredientCount: bundled.length, ...source })), /发布版本/)
+})
