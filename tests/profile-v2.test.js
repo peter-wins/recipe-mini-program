@@ -109,6 +109,23 @@ test('主题切换后同步主题名，供我的页入口展示', () => {
   }
 })
 
+test('冰箱页采购图标背景在三个主题下都与页面底色有明显差异', () => {
+  const app = read('app.wxss')
+  const fridgeWxss = read('pages/fridge/index.wxss')
+  // 图标背景必须用主题选中色，而不是与页面底色几乎同色的 soft
+  assert.match(fridgeWxss, /\.fridge-cart \{[^}]*background: var\(--theme-selected/, '采购图标背景应走 --theme-selected')
+
+  const rgb = hex => [1, 3, 5].map(i => parseInt(hex.slice(i, i + 2), 16))
+  const dist = (a, b) => Math.sqrt(a.reduce((sum, v, i) => sum + (v - b[i]) ** 2, 0))
+
+  for (const name of ['theme-page', 'theme-green', 'theme-blue']) {
+    const block = app.match(new RegExp(`^\\.${name} \\{([^}]*)\\}`, 'm'))[1]
+    const pageBg = rgb(block.match(/--theme-page-bg:\s*(#[0-9a-f]{6})/i)[1])
+    const selected = rgb(block.match(/--theme-selected:\s*(#[0-9a-f]{6})/i)[1])
+    assert.ok(dist(pageBg, selected) > 15, `${name} 下图标背景与页面底色太接近（色差 ${dist(pageBg, selected).toFixed(1)}）`)
+  }
+})
+
 test('新入口图标文件齐备', () => {
   for (const icon of ['icon-chef-line.svg', 'icon-calendar-line.svg', 'icon-theme.svg', 'icon-info.svg']) {
     assert.ok(exists(`assets/${icon}`), `缺少 ${icon}`)
@@ -379,6 +396,8 @@ test('冰箱页改版：轮播置顶、已有食材置顶分组、采购图标�
   assert.ok(wxml.includes("icons.path('cart')"), '采购图标应走映射')
   assert.ok(!wxml.includes('fridge-icon'), '旧图标类应移除')
   assert.ok(wxss.includes('.fridge-cart {'), '缺少独立采购图标样式')
+  // 采购图标背景用对比更强的选中色，保证三个主题下都能与页面底色区分
+  assert.match(wxss, /\.fridge-cart \{[^}]*background: var\(--theme-selected, #fbecdc\)/, '采购图标背景应为主题选中色')
 
   // 4. 已有食材标题下显示总数与移除提示，清空直达二次确认
   assert.match(wxml, /共 {{selected.length}} 种食材/)

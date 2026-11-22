@@ -41,7 +41,7 @@
   flex: 0 0 86rpx;
   height: 86rpx;
   border-radius: 22rpx;
-  background: var(--theme-soft, #fff2e8);
+  background: var(--theme-selected, #fbecdc);
 }
 .fridge-cart image { width: 40rpx; height: 40rpx; }
 .fridge-cart-count {
