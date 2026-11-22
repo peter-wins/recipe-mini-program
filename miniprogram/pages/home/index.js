@@ -1,4 +1,4 @@
-const { themes, saveTheme, applyTheme } = require('../../theme')
+const { applyTheme } = require('../../theme')
 const { getCatalogSource, getRecipeCategories, fatLossTag, getRecipe, matchRecipes, groupFridgeMatches } = require('../../catalog')
 const { readFavorites } = require('../../favorites')
 const { readKitchen, summarizeInventory } = require('../../inventory')
@@ -40,7 +40,7 @@ const viewTitles = {
 Page({
   data: {
     view: 'match',
-    themeOptions: themes,
+    themeName: '暖杏',
     selected: [],
     greeting: greetingInfo(new Date(), 0),
     inventoryReady: false, calendarDate: '', calendarSlot: '',
@@ -184,17 +184,6 @@ Page({
       Number(preferred.has(right.category)) - Number(preferred.has(left.category))
     ).slice(0, 2)
     this.setData({ suggestedRecipes })
-  },
-
-  changeTheme(event) {
-    const { id } = event.currentTarget.dataset
-    if (id === this.data.themeId) return
-    try {
-      const theme = saveTheme(id)
-      if (theme) applyTheme(this, theme)
-    } catch {
-      wx.showToast({ title: '主题未保存，请重试', icon: 'none' })
-    }
   },
 
   switchView(event) {

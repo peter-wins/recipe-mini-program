@@ -1,0 +1,44 @@
+.about-page { min-height: 100vh; padding: 0 28rpx 60rpx; box-sizing: border-box; }
+.about-hero { display: flex; flex-direction: column; align-items: center; padding: 72rpx 0 56rpx; }
+.about-logo {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 132rpx;
+  height: 132rpx;
+  border-radius: 36rpx;
+  background: var(--theme-neutral, #f1e6d9);
+}
+.about-logo image { width: 62rpx; height: 62rpx; }
+.about-name { margin-top: 26rpx; color: var(--theme-text, #4e342c); font-size: 40rpx; font-weight: 750; }
+.about-slogan { margin-top: 10rpx; color: var(--theme-muted, #75665e); font-size: 25rpx; }
+.about-card { padding: 12rpx 28rpx 28rpx; border-radius: 30rpx; background: #fff; }
+.about-row { display: flex; align-items: center; justify-content: space-between; padding: 22rpx 0; }
+.about-row-label { color: var(--theme-muted, #75665e); font-size: 27rpx; }
+.about-row-value { color: var(--theme-text, #4e342c); font-size: 28rpx; font-weight: 700; }
+.about-section-title {
+  margin-top: 8rpx;
+  padding-top: 24rpx;
+  border-top: 1rpx solid var(--theme-border, #f0e4d8);
+  color: var(--theme-text, #4e342c);
+  font-size: 28rpx;
+  font-weight: 700;
+}
+.about-note {
+  position: relative;
+  padding: 12rpx 0 0 24rpx;
+  color: var(--theme-muted, #75665e);
+  font-size: 25rpx;
+  line-height: 1.7;
+}
+.about-note::before {
+  content: '';
+  position: absolute;
+  top: 26rpx;
+  left: 4rpx;
+  width: 8rpx;
+  height: 8rpx;
+  border-radius: 50%;
+  background: var(--theme-accent-text, #994017);
+}
+.about-footer { margin-top: 48rpx; color: var(--theme-muted, #75665e); font-size: 23rpx; text-align: center; }

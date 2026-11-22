@@ -1,0 +1,20 @@
+<view class="about-page">
+  <view class="about-hero">
+    <view class="about-logo" aria-hidden="true">
+      <image src="/assets/icon-chef-line.svg"/>
+    </view>
+    <view class="about-name">{{appName}}</view>
+    <view class="about-slogan">{{slogan}}</view>
+  </view>
+
+  <view class="about-card">
+    <view class="about-row">
+      <text class="about-row-label">当前版本</text>
+      <text class="about-row-value">{{versionLabel}}</text>
+    </view>
+    <view class="about-section-title">本次更新</view>
+    <view wx:for="{{releaseNotes}}" wx:key="*this" class="about-note">{{item}}</view>
+  </view>
+
+  <view class="about-footer">让每一餐都有好心情</view>
+</view>

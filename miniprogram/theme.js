@@ -23,8 +23,8 @@ function saveTheme(id) {
 }
 
 function applyTheme(page, theme = readTheme()) {
-  if (page.data.themeId === theme.id) return
-  page.setData({ themeId: theme.id })
+  if (page.data.themeId === theme.id && page.data.themeName === theme.name) return
+  page.setData({ themeId: theme.id, themeName: theme.name })
   if (typeof wx.setNavigationBarColor === 'function') {
     wx.setNavigationBarColor({ frontColor: '#000000', backgroundColor: theme.background })
   }

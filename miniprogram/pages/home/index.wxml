@@ -153,10 +153,10 @@
 
   <block wx:elif="{{view === 'profile'}}">
     <view class="profile-head">
-      <view class="profile-avatar" aria-hidden="true">👩🏻‍🍳</view>
+      <view class="profile-avatar" aria-hidden="true"><image src="/assets/icon-chef-line.svg"/></view>
       <view class="profile-copy">
         <view class="profile-name">吃饭得有谱</view>
-        <view class="profile-note">会做饭的人「最帅」</view>
+        <view class="profile-note">把每一餐，都过成喜欢的样子。</view>
       </view>
     </view>
     <view class="profile-stats">
@@ -164,29 +164,19 @@
       <navigator class="profile-stat" url="/pages/records/index?type=history" hover-class="card-pressed"><text class="stat-count">{{history.length}}</text>浏览历史</navigator>
       <navigator class="profile-stat" url="/pages/records/index?type=cooked" hover-class="card-pressed"><text class="stat-count">{{cooked.length}}</text>做过的菜</navigator>
     </view>
+
+    <view class="profile-group-title">我的厨房</view>
     <view class="profile-links">
       <button class="profile-row" bindtap="openFridge"><image src="/assets/icon-fridge.svg" aria-hidden="true"/>冰箱食材<text class="profile-arrow">›</text></button>
-      <navigator class="profile-row" url="/pages/shopping/index" hover-class="pressed"><image src="/assets/icon-cart.svg" aria-hidden="true"/>采购清单<text class="profile-arrow">›</text></navigator>
+      <navigator class="profile-row" url="/pages/shopping/index" hover-class="pressed"><image src="/assets/icon-cart.svg" aria-hidden="true"/>采购清单<text class="profile-hint" wx:if="{{shoppingCount}}">待买 {{shoppingCount}} 项</text><text class="profile-arrow">›</text></navigator>
+      <navigator class="profile-row" url="/pages/meal-calendar/index" hover-class="pressed"><image src="/assets/icon-calendar-line.svg" aria-hidden="true"/>做饭日历<text class="profile-arrow">›</text></navigator>
+    </view>
+
+    <view class="profile-group-title">偏好与设置</view>
+    <view class="profile-links">
+      <navigator class="profile-row" url="/pages/appearance/index" hover-class="pressed"><image src="/assets/icon-theme.svg" aria-hidden="true"/>主题外观<text class="profile-hint">{{themeName}}</text><text class="profile-arrow">›</text></navigator>
       <button class="profile-row" open-type="contact"><image src="/assets/icon-feedback.svg" aria-hidden="true"/>意见反馈<text class="profile-arrow">›</text></button>
-    </view>
-    <view id="profile-themes" class="profile-themes">
-      <view class="profile-themes-title">主题</view>
-      <view class="theme-options">
-        <button wx:for="{{themeOptions}}" wx:key="id" class="theme-option {{themeId === item.id ? 'theme-option-selected' : ''}}" data-id="{{item.id}}" bindtap="changeTheme" aria-pressed="{{themeId === item.id}}">
-          <view class="theme-swatch" style="background: {{item.background}}" aria-hidden="true">
-            <view class="theme-swatch-dot" style="background: {{item.accent}}"></view>
-          </view>
-          <text>{{item.name}}</text>
-          <text wx:if="{{themeId === item.id}}" class="theme-option-check" aria-hidden="true">✓</text>
-        </button>
-      </view>
-    </view>
-    <view class="profile-version">
-      <view class="profile-version-head">
-        <text class="profile-version-badge">{{versionLabel}}</text>
-        <text class="profile-version-title">本次更新</text>
-      </view>
-      <view wx:for="{{releaseNotes}}" wx:key="*this" class="profile-version-note">{{item}}</view>
+      <navigator class="profile-row" url="/pages/about/index" hover-class="pressed"><image src="/assets/icon-info.svg" aria-hidden="true"/>关于<text class="profile-hint">吃饭得有谱 {{versionLabel}}</text><text class="profile-arrow">›</text></navigator>
     </view>
   </block>
 

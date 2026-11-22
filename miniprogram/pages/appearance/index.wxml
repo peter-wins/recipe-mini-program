@@ -1,0 +1,16 @@
+<view class="appearance-page">
+  <view class="appearance-intro">选一个顺眼的颜色，做饭的心情也会不一样。</view>
+  <view class="appearance-options">
+    <button wx:for="{{themeOptions}}" wx:key="id" class="appearance-option {{themeId === item.id ? 'appearance-option-selected' : ''}}" data-id="{{item.id}}" bindtap="changeTheme" aria-pressed="{{themeId === item.id}}">
+      <view class="appearance-preview" style="background: {{item.background}}" aria-hidden="true">
+        <view class="appearance-preview-bar" style="background: {{item.accent}}"></view>
+        <view class="appearance-preview-card"></view>
+        <view class="appearance-preview-card"></view>
+      </view>
+      <view class="appearance-option-copy">
+        <text class="appearance-option-name">{{item.name}}</text>
+        <text wx:if="{{themeId === item.id}}" class="appearance-option-check" aria-hidden="true">✓ 使用中</text>
+      </view>
+    </button>
+  </view>
+</view>
