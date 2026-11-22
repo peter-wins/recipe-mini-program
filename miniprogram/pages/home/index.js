@@ -1,7 +1,8 @@
 const { themes, saveTheme, applyTheme } = require('../../theme')
 const { getCatalogSource, getRecipeCategories, fatLossTag, getRecipe, matchRecipes, groupFridgeMatches } = require('../../catalog')
 const { readFavorites } = require('../../favorites')
-const { readInventory, summarizeInventory } = require('../../inventory')
+const { readKitchen, summarizeInventory } = require('../../inventory')
+const { countShoppingItems } = require('../../shopping')
 const { readActivity } = require('../../activity')
 const { localRecipeDay, dailyRecipe, previewRecipes, festivalRecipe } = require('../../daily-recipe')
 const { festivalOf } = require('../../festival')
@@ -43,6 +44,7 @@ Page({
     greeting: greetingInfo(new Date(), 0),
     inventoryReady: false, calendarDate: '', calendarSlot: '',
     fridgeSummary: summarizeInventory([]),
+    shoppingCount: 0,
     ...defaultLibraryFilters,
     results: initialRecipes,
     libraryCards: initialRecipes.slice(0, libraryPageSize),
@@ -134,8 +136,8 @@ Page({
     const catalogChanged = this.catalogSource !== source
     if (catalogChanged) this.allRecipes = matchRecipes([])
     try {
-      const selected = readInventory()
-      this.setData({ inventoryReady: true })
+      const { inventory: selected, shopping } = readKitchen()
+      this.setData({ inventoryReady: true, shoppingCount: countShoppingItems(shopping) })
       if (catalogChanged) {
         const categories = libraryCategories()
         const categoryIndex = Math.max(0, categories.indexOf(this.data.categories[this.data.categoryIndex]))
@@ -143,7 +145,7 @@ Page({
         this.catalogSource = source
       } else this.updateHomeMeal(selected)
     } catch {
-      this.setData({ inventoryReady: false })
+      this.setData({ inventoryReady: false, shoppingCount: 0 })
       wx.showToast({ title: '暂时无法读取冰箱', icon: 'none' })
     }
     if (this.data.view === 'match') this.refreshLightInspiration(catalogChanged)
@@ -228,11 +230,8 @@ Page({
     })
   },
 
-  openRecommendations() {
-    wx.navigateTo({
-      url: '/pages/recommend/index',
-      fail: () => wx.showToast({ title: '暂时无法打开推荐页，请重试', icon: 'none' })
-    })
+  showAiDevelopment() {
+    wx.showToast({ title: '功能正在开发中', icon: 'none' })
   },
 
   openSurprise() {

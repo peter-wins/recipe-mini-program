@@ -58,10 +58,13 @@
         <view class="shortcut-icon shortcut-calendar"><view class="meal-calendar-icon" aria-hidden="true"></view></view>
         <text>做饭日历</text>
       </navigator>
-      <button class="home-shortcut" bindtap="openRecommendations">
-        <view class="shortcut-icon shortcut-ai"><image src="/assets/icon-sparkles.svg" aria-hidden="true"/></view>
-        <text>问问 AI</text>
-      </button>
+      <navigator class="home-shortcut" url="/pages/shopping/index" hover-class="pressed" aria-label="{{shoppingCount ? '采购清单，待买' + shoppingCount + '项' : '采购清单'}}">
+        <view class="shortcut-icon shortcut-shopping">
+          <image src="/assets/icon-cart.svg" aria-hidden="true"/>
+          <text wx:if="{{shoppingCount}}" class="shortcut-shopping-count" aria-hidden="true">{{shoppingCount > 99 ? '99+' : shoppingCount}}</text>
+        </view>
+        <text>采购清单</text>
+      </navigator>
     </view>
 
     <view class="home-fridge">
@@ -104,9 +107,15 @@
   </block>
 
   <block wx:elif="{{view === 'library'}}">
-    <view class="library-header">
-      <view class="library-eyebrow">好味道，慢慢发现</view>
-      <view class="library-title">菜谱灵感</view>
+    <view class="row library-header">
+      <view class="library-header-copy">
+        <view class="library-eyebrow">好味道，慢慢发现</view>
+        <view class="library-title">菜谱灵感</view>
+      </view>
+      <button class="link library-ai" bindtap="showAiDevelopment">
+        <image src="/assets/icon-sparkles.svg" aria-hidden="true"/>
+        <text>问问 AI</text>
+      </button>
     </view>
     <view class="recipe-search library-search">
       <view class="search-mark" aria-hidden="true"></view>

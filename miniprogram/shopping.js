@@ -83,6 +83,10 @@ function listShopping() {
   return groupShoppingItems(readKitchen().shopping)
 }
 
+function countShoppingItems(shopping) {
+  return new Set(shopping.map(item => shoppingIngredientId(item.id))).size
+}
+
 function saveManualShopping(name, quantity) {
   const normalizedName = name.trim().replace(/\s+/g, ' ')
   const normalizedQuantity = quantity.trim().replace(/\s+/g, ' ')
@@ -213,7 +217,7 @@ function removeShoppingItem(key, bought) {
 }
 
 module.exports = {
-  listShopping, getPurchaseItems, hasRecipeShopping, saveRecipeShopping, removeShoppingItem,
+  listShopping, countShoppingItems, getPurchaseItems, hasRecipeShopping, saveRecipeShopping, removeShoppingItem,
   getMealShoppingPreview, saveMealShopping, saveManualShopping, manualNameLimit, manualQuantityLimit,
   buyShoppingItems, undoShoppingPurchase
 }

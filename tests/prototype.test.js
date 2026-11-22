@@ -459,6 +459,7 @@ test('菜谱页分页，采购保留原用量，旧收藏映射到新菜谱', ()
   let clipboard
   let navigationTitle
   let navigationUrl
+  let toast
   let navigationBackCount = 0
   let pageStack = [{ route: 'pages/home/index' }, { route: 'pages/fridge-matches/index' }]
   let pendingModal
@@ -470,7 +471,7 @@ test('菜谱页分页，采购保留原用量，旧收藏映射到新菜谱', ()
       storage.set(key, value)
     },
     setClipboardData: ({ data }) => { clipboard = data },
-    showToast: () => {},
+    showToast: options => { toast = options },
     showModal: options => { pendingModal = options },
     navigateTo: ({ url }) => { navigationUrl = url },
     navigateBack: () => { navigationBackCount++ },
@@ -495,8 +496,9 @@ test('菜谱页分页，采购保留原用量，旧收藏映射到新菜谱', ()
   const home = createPage(registered)
   require('../miniprogram/pages/recommend/index')
   const recommend = createPage(registered)
-  home.openRecommendations()
-  assert.equal(navigationUrl, '/pages/recommend/index')
+  home.showAiDevelopment()
+  assert.equal(toast.title, '功能正在开发中')
+  assert.equal(navigationUrl, undefined)
   recommend.onShow()
   assert.deepEqual(recommend.data.inventoryPreview.map(item => item.id), ['potato'])
   recommend.openFridge()
@@ -731,6 +733,8 @@ test('菜谱页分页，采购保留原用量，旧收藏映射到新菜谱', ()
   detail.savePurchaseItems()
   shopping.onShow()
   assert.equal(shopping.data.items.length, 1)
+  home.refreshKitchenData()
+  assert.equal(home.data.shoppingCount, 1)
   assert.equal(shopping.data.items[0].quantity, '1个(约180g)')
   assert.equal(shopping.data.items[0].expanded, false)
   shopping.toggleDetails({ currentTarget: { dataset: { key: shopping.data.items[0].key } } })
@@ -763,6 +767,7 @@ test('菜谱页分页，采购保留原用量，旧收藏映射到新菜谱', ()
   shopping.onUnload()
   home.onShow()
   assert.deepEqual(home.data.selected, ['potato', 'tomato'])
+  assert.equal(home.data.shoppingCount, 0)
   detail.startCooking()
   for (const step of detail.data.recipe.steps) detail.nextStep()
   records.onLoad({ type: 'cooked' })

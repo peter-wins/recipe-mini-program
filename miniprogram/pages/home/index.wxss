@@ -29,6 +29,20 @@ button.home-search {
 }
 .more-recipes-arrow { font-size: 27rpx; line-height: 1; }
 .library-header { margin: 12rpx 0 28rpx; }
+.library-header-copy { min-width: 0; }
+.library-ai {
+  display: flex;
+  align-items: center;
+  gap: 8rpx;
+  padding: 0 18rpx;
+  background: var(--theme-soft, #fff0e5);
+  border: 1rpx solid var(--theme-border, #eadfd4);
+  border-radius: 20rpx;
+  font-size: 24rpx;
+  line-height: 62rpx;
+  white-space: nowrap;
+}
+.library-ai image { width: 27rpx; height: 27rpx; }
 .library-eyebrow { color: var(--theme-muted, #75665e); font-size: 25rpx; }
 .library-title { margin-top: 8rpx; color: var(--theme-text, #4e342c); font-size: 50rpx; font-weight: 750; line-height: 1.2; }
 .recipe-search.library-search { border-radius: 26rpx; }
@@ -229,7 +243,25 @@ button.home-search {
 }
 .shortcut-icon { display: flex; align-items: center; justify-content: center; width: 94rpx; height: 94rpx; border-radius: 30rpx; }
 .shortcut-icon image { width: 36rpx; height: 36rpx; }
-.shortcut-ai { background: #f2e6d2; }
+.shortcut-shopping { position: relative; background: #f2e6d2; }
+.shortcut-shopping-count {
+  position: absolute;
+  top: -6rpx;
+  right: -8rpx;
+  box-sizing: border-box;
+  min-width: 34rpx;
+  height: 34rpx;
+  padding: 0 7rpx;
+  border: 2rpx solid var(--theme-page-bg, #fff8f0);
+  border-radius: 999rpx;
+  background: var(--theme-accent-text, #994017);
+  color: #fff;
+  font-size: 20rpx;
+  font-weight: 700;
+  line-height: 30rpx;
+  text-align: center;
+  white-space: nowrap;
+}
 .shortcut-fridge { background: #e4ecdf; }
 .shortcut-calendar { background: #f2e6dd; color: var(--theme-accent-text, #994017); }
 .shortcut-calendar .meal-calendar-icon { flex-basis: 36rpx; height: 33rpx; }
