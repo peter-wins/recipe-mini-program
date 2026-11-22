@@ -44,8 +44,8 @@ button.home-search {
   white-space: nowrap;
 }
 .library-ai image { width: 27rpx; height: 27rpx; }
-.library-eyebrow { color: var(--theme-muted, #75665e); font-size: 25rpx; }
-.library-title { margin-top: 8rpx; color: var(--theme-text, #4e342c); font-size: 50rpx; font-weight: 750; line-height: 1.2; }
+.library-title { color: var(--theme-text, #4e342c); font-size: 50rpx; font-weight: 750; line-height: 1.2; }
+.library-subtitle { margin-top: 7rpx; color: var(--theme-muted, #75665e); font-size: 23rpx; }
 .recipe-search.library-search { border-radius: 26rpx; }
 .library-scenes {
   display: flex;

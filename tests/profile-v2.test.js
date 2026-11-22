@@ -142,15 +142,18 @@ test('关于页与外观页接入主题 class，颜色随主题变化', () => {
   }
 })
 
-test('采购清单页头参考菜谱库：眉标＋大标题＋胶囊按钮', () => {
+test('采购清单页头统一搭配页：大标题在上＋副标题在下＋胶囊按钮', () => {
   const wxml = read('pages/shopping/index.wxml')
   const wxss = read('pages/shopping/index.wxss')
-  assert.ok(wxml.includes('shopping-eyebrow'))
   assert.ok(wxml.includes('一次买齐，心里有谱'))
   assert.ok(wxml.includes('shopping-title'))
+  assert.ok(wxml.includes('shopping-subtitle'))
+  // 标题在副标题之前（与搭配页一致）
+  assert.ok(wxml.indexOf('shopping-title') < wxml.indexOf('shopping-subtitle'), '标题应在副标题上方')
   assert.ok(wxml.includes('class="shopping-add"'))
   assert.ok(wxml.includes("icons.path('plus')"))
   assert.ok(wxss.includes('.shopping-title'))
+  assert.ok(wxss.includes('.shopping-subtitle'))
   assert.ok(wxss.includes('filter: var(--theme-accent-icon)'))
   assert.ok(exists('assets/icon-plus.svg'))
 })
@@ -237,6 +240,18 @@ test('同一功能复用同一图标：所有页面日历都走唯一 SVG 映射
   assert.ok(/meal-calendar-link[\s\S]*?<image class="meal-calendar-icon"[\s\S]*?<text>做饭日历<\/text>[\s\S]*?<\/navigator>/.test(mealsWxml), '搭配页日历入口应带「做饭日历」文字')
   const mealsWxss = read('pages/meals/index.wxss')
   assert.ok(/\.meal-calendar-link \{[\s\S]*?border-radius: 20rpx;[\s\S]*?font-size: 24rpx;/.test(mealsWxss), '日历入口应为胶囊样式')
+})
+
+test('菜谱库标题区与搭配页统一：大标题在上＋副标题在下', () => {
+  const homeWxml = read('pages/home/index.wxml')
+  const homeWxss = read('pages/home/index.wxss')
+  assert.ok(homeWxml.includes('library-title'))
+  assert.ok(homeWxml.includes('library-subtitle'))
+  assert.ok(homeWxml.indexOf('library-title') < homeWxml.indexOf('library-subtitle'), '标题应在副标题上方')
+  assert.ok(homeWxss.includes('.library-subtitle'))
+  // 标题不再有上边距（原先眉标在上时才需要）
+  const titleRule = homeWxss.match(/\.library-title \{[^}]*\}/)
+  assert.ok(titleRule && !titleRule[0].includes('margin-top'), '标题不应再有上边距')
 })
 
 test('三个页头胶囊按钮尺寸统一：button 覆盖全局 min-height 与日历入口齐高', () => {

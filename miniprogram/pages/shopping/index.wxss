@@ -1,8 +1,8 @@
 .shopping-head { padding: 22rpx 0 24rpx; }
 .shopping-head-row { gap: 16rpx; align-items: center; }
 .shopping-head-copy { flex: 1; min-width: 0; }
-.shopping-eyebrow { color: var(--theme-muted, #75665e); font-size: 25rpx; }
-.shopping-title { margin-top: 8rpx; color: var(--theme-text, #4e342c); font-size: 50rpx; font-weight: 750; line-height: 1.2; }
+.shopping-title { color: var(--theme-text, #4e342c); font-size: 50rpx; font-weight: 750; line-height: 1.2; }
+.shopping-subtitle { margin-top: 7rpx; color: var(--theme-muted, #75665e); font-size: 23rpx; }
 .shopping-add {
   display: flex;
   flex-shrink: 0;

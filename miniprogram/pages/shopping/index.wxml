@@ -4,8 +4,8 @@
     <view class="page-head shopping-head">
       <view class="row shopping-head-row">
         <view class="shopping-head-copy">
-          <view class="shopping-eyebrow">一次买齐，心里有谱</view>
           <view class="shopping-title">采购清单</view>
+          <view class="shopping-subtitle">一次买齐，心里有谱</view>
         </view>
         <button wx:if="{{!manualOpen}}" class="shopping-add" bindtap="openManualEntry"><image src="{{icons.path('plus')}}" aria-hidden="true"/>手动添加</button>
       </view>
