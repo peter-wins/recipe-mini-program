@@ -491,9 +491,9 @@ test('食材指南两个页面结构完整且走主题', () => {
   assert.ok(app.pages.includes('pages/guide/index'))
   assert.ok(app.pages.includes('pages/guide-detail/index'))
   assert.ok(exists('assets/guide-spinach.svg')) // 其它占位食材仍共用
-  assert.ok(exists('assets/guide-spinach.png'), '菠菜应用真实插画 PNG')
+  assert.ok(!exists('assets/guide-spinach.png'), '菠菜大图不打包进小程序，走云端')
 
-  // 菠菜插画：透明底 PNG、2:1 横版；源图留在包内，展示走云端 guide-covers/
+  // 菠菜插画：透明底 PNG、2:1 横版；本地源图放项目根目录 guide-covers/，展示走云端
   const guideData = require('../miniprogram/guide-data')
   const { cloudStorageBase } = require('../miniprogram/recipe-image')
   assert.equal(guideData.getIngredient('spinach').image, cloudStorageBase + 'guide-covers/spinach.png', '菠菜图应从云端加载')
@@ -506,7 +506,7 @@ test('食材指南两个页面结构完整且走主题', () => {
   assert.ok((detailWxml.match(/<recipe-cover/g) || []).length >= 2, '详情页食材图与关联菜谱图都应走封面组件')
   assert.ok(guideData.getIngredient('cabbage').image === '/assets/guide-spinach.svg', '未做图的占位食材仍用旧图')
   const fs = require('fs')
-  const png = fs.readFileSync('miniprogram/assets/guide-spinach.png')
+  const png = fs.readFileSync('guide-covers/spinach.png')
   assert.equal(png.readUInt32BE(16), 1200, '宽度应为 1200')
   assert.equal(png.readUInt32BE(20), 600, '高度应为 600')
   assert.equal(png[25], 6, '应为 RGBA 透明 PNG（颜色类型 6）')
