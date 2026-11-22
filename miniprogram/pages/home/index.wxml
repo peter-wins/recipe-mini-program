@@ -55,7 +55,7 @@
         <text>随机吃</text>
       </button>
       <navigator class="home-shortcut" url="/pages/meal-calendar/index" hover-class="pressed">
-        <view class="shortcut-icon shortcut-calendar"><view class="meal-calendar-icon" aria-hidden="true"></view></view>
+        <view class="shortcut-icon shortcut-calendar"><image src="/assets/icon-shortcut-calendar.svg" aria-hidden="true"/></view>
         <text>做饭日历</text>
       </navigator>
       <navigator class="home-shortcut" url="/pages/shopping/index" hover-class="pressed" aria-label="{{shoppingCount ? '采购清单，待买' + shoppingCount + '项' : '采购清单'}}">

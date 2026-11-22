@@ -242,9 +242,7 @@ button.home-search {
   text-align: center;
 }
 .shortcut-icon { display: flex; align-items: center; justify-content: center; width: 94rpx; height: 94rpx; border-radius: 30rpx; }
-.shortcut-icon image { width: 36rpx; height: 36rpx; }
-/* 购物车线稿图形占比小，单独放大以匹配其余三个实心图标的视觉重量 */
-.shortcut-shopping image { width: 44rpx; height: 44rpx; }
+.shortcut-icon image { width: 36rpx; height: 36rpx; filter: var(--theme-accent-icon); }
 .shortcut-shopping { position: relative; background: #f2e6d2; }
 .shortcut-shopping-count {
   position: absolute;
@@ -265,8 +263,7 @@ button.home-search {
   white-space: nowrap;
 }
 .shortcut-fridge { background: #e4ecdf; }
-.shortcut-calendar { background: #f2e6dd; color: var(--theme-accent-text, #994017); }
-.shortcut-calendar .meal-calendar-icon { flex-basis: 36rpx; height: 33rpx; }
+.shortcut-calendar { background: #f2e6dd; }
 .shortcut-random { background: #eee6ec; }
 .home-fridge { padding-top: 36rpx; border-top: 1rpx solid var(--theme-border, #e8d8cb); }
 .home-fridge-heading { min-height: 58rpx; }

@@ -150,8 +150,26 @@ test('采购清单页头参考菜谱库：眉标＋大标题＋胶囊按钮', ()
   assert.ok(exists('assets/icon-plus.svg'))
 })
 
-test('首页快捷入口购物车图标单独放大，与其余三个视觉平衡', () => {
+test('首页四个快捷入口图标统一为 SVG 规格与主题色', () => {
+  const wxml = read('pages/home/index.wxml')
   const wxss = read('pages/home/index.wxss')
-  assert.ok(wxss.includes('.shortcut-icon image { width: 36rpx; height: 36rpx; }'), '基准图标尺寸缺失')
-  assert.ok(wxss.includes('.shortcut-shopping image { width: 44rpx; height: 44rpx; }'), '购物车图标未单独放大')
+  // 四个入口都用 image 加载 SVG，日历不再用 CSS 画的图标
+  const shortcuts = wxml.match(/class="shortcut-icon[^>]*>[\s\S]*?<\/view>/g) || []
+  assert.equal(shortcuts.length, 4, '应有四个快捷入口图标')
+  for (const s of shortcuts) {
+    assert.ok(s.includes('<image src="/assets/'), '每个入口都应是 SVG image')
+  }
+  assert.ok(!wxml.includes('class="meal-calendar-icon"'), '日历不应再用 CSS 边框图标')
+  // 统一尺寸与主题滤镜，无单独放大覆盖
+  assert.ok(wxss.includes('.shortcut-icon image { width: 36rpx; height: 36rpx; filter: var(--theme-accent-icon); }'))
+  assert.ok(!wxss.includes('.shortcut-shopping image'), '不应有购物车单独放大覆盖')
+  assert.ok(exists('assets/icon-shortcut-calendar.svg'))
+  assert.ok(exists('assets/icon-cart.svg'))
+  // 所有快捷图标 SVG 都是 24×24 画布、1.8 描边
+  for (const f of ['icon-fridge.svg', 'icon-shuffle.svg', 'icon-cart.svg', 'icon-shortcut-calendar.svg']) {
+    const svg = read(`assets/${f}`)
+    assert.ok(svg.includes('viewBox="0 0 24 24"'), `${f} 画布不统一`)
+    assert.ok(svg.includes('stroke-width="1.8"'), `${f} 描边粗细不统一`)
+    assert.ok(svg.includes('stroke="#75665e"'), `${f} 描边颜色不统一`)
+  }
 })
