@@ -456,7 +456,14 @@ test('食材指南：分组、菠菜介绍原文与菜谱关联', () => {
   assert.ok(spinach.audience.includes('高血压'))
   assert.equal(spinach.storage.length, 3)
   assert.equal(spinach.tips.length, 2)
-  assert.ok(spinach.tips.some(tip => tip.includes('草酸')))
+  // 选购与保存、烹饪技巧按书页原文录入（含关键信息与错字修正）
+  assert.ok(spinach.storage[0].includes('根部呈鲜艳的深粉红色'))
+  assert.ok(spinach.storage[0].includes('不带黄、烂叶者'))
+  assert.ok(spinach.storage[1].includes('可保存5天左右'))
+  assert.ok(spinach.storage[2].includes('再置冰箱内冷冻'))
+  assert.ok(!spinach.storage.join('').includes('冰籍') && !spinach.tips.join('').includes('菠莱'), '错字应已修正')
+  assert.ok(spinach.tips[0].includes('草酸钙') && spinach.tips[0].includes('海带、紫菜'))
+  assert.ok(spinach.tips[1].includes('以除去大部分草酸'))
   assert.ok(spinach.recipes.length > 0, '菠菜应关联到现有菜谱')
   assert.ok(spinach.recipes.every(r => r.id && r.name))
 
