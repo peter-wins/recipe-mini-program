@@ -132,8 +132,17 @@ function getIngredient(id) {
   }
 }
 
+// 按食材 id 取可展示的插画：只有云端真图（cloud://）才算，包内占位 SVG 返回空。
+// 供冰箱页、采购清单页复用，避免把占位图当成真实食材图显示。
+function guideCover(id) {
+  if (!id) return ''
+  const item = getIngredient(id)
+  if (!item || !item.image || item.image.indexOf('cloud://') !== 0) return ''
+  return item.image
+}
+
 module.exports = {
-  groups, bundled, replaceGuide, guideImage, listIngredients, getIngredient,
+  groups, bundled, replaceGuide, guideImage, guideCover, listIngredients, getIngredient,
   getGuideGroups: () => current.groups.slice(),
   // ingredients 保留为当前数据的只读别名，兼容旧引用。
   get ingredients() { return current.ingredients }

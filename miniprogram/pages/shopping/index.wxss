@@ -61,6 +61,8 @@
 .shopping-select, .shopping-item-toggle { display: flex; align-items: center; background: transparent; line-height: 1.35; }
 .shopping-select { flex: 0 0 72rpx; justify-content: center; padding: 0; }
 .shopping-item-toggle { flex: 1; min-width: 0; gap: 16rpx; padding: 10rpx 4rpx 10rpx 0; text-align: left; white-space: normal; }
+/* 有插画的食材在名称左侧显示缩略图，尺寸跟内容高度走，不撑高行 */
+.shopping-item-cover { flex: 0 0 64rpx; width: 64rpx; height: 64rpx; border-radius: 10rpx; overflow: hidden; }
 .shopping-item-copy { flex: 1; min-width: 0; display: flex; align-items: baseline; flex-wrap: wrap; column-gap: 12rpx; }
 .shopping-check { display: flex; width: 34rpx; height: 34rpx; align-items: center; justify-content: center; box-sizing: border-box; border: 2rpx solid var(--theme-muted, #75665e); border-radius: 50%; font-size: 23rpx; }
 .shopping-row-selected .shopping-check { border-color: var(--theme-accent-text, #994017); background: var(--theme-accent-text, #994017); color: #fff; }

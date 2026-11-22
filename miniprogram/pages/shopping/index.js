@@ -2,6 +2,7 @@ const { applyTheme } = require('../../theme')
 const { listShopping, removeShoppingItem, saveManualShopping, manualNameLimit, manualQuantityLimit,
   buyShoppingItems, undoShoppingPurchase } = require('../../shopping')
 const { buildLayout, buildText, draw, usageNote } = require('../../shopping-poster')
+const { guideCover } = require('../../guide-data')
 
 const undoWindow = 10000
 
@@ -37,7 +38,7 @@ Page({
     const previous = new Map(this.data.items.map(item => [item.key, item]))
     const items = listShopping().map(item => {
       const current = previous.get(item.key)
-      return { ...item, expanded: Boolean(current && current.expanded), selected: Boolean(this.data.selecting && current && current.selected) }
+      return { ...item, coverUrl: guideCover(item.key), expanded: Boolean(current && current.expanded), selected: Boolean(this.data.selecting && current && current.selected) }
     })
     this.setItems(items, this.data.selecting && items.length > 0)
   },

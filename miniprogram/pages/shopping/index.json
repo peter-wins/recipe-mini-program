@@ -1,3 +1,6 @@
 {
+  "usingComponents": {
+    "recipe-cover": "/components/recipe-cover/index"
+  },
   "navigationBarTitleText": "采购清单"
 }

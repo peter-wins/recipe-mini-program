@@ -301,12 +301,12 @@ test('菜谱库与搭配页的页头按钮使用主题描边和较粗文字', ()
 })
 
 test('首页、菜谱库与搭配页保留顶部对齐的页头元素', () => {
-  // 首页：标题在副标题之上，炒锅保留且顶部对齐
+  // 首页：标题在副标题之上，炒锅装饰已移除，标题行仍顶部对齐
   const homeWxml = read('pages/home/index.wxml')
   const homeWxss = read('pages/home/index.wxss')
   assert.ok(homeWxml.indexOf('home-title') < homeWxml.indexOf('greeting-quote'), '首页标题应在副标题上方')
-  assert.ok(homeWxml.includes('home-wok'), '首页应保留炒锅动画')
-  assert.ok(/\.home-wok \{[^}]*align-self: flex-start/.test(homeWxss), '炒锅应顶部对齐')
+  assert.ok(!homeWxml.includes('home-wok'), '首页炒锅装饰应已移除')
+  assert.ok(!/wok-(pan|tilt|toss|steam)/.test(homeWxss), '炒锅相关样式与动画应清除')
   assert.ok(/\.home-title-row \{[^}]*align-items: flex-start/.test(homeWxss), '首页标题行应顶部对齐')
   // 菜谱库：右侧按钮顶部对齐
   assert.ok(/\.library-ai \{[\s\S]*?align-self: flex-start/.test(homeWxss), '问问AI按钮应顶部对齐')
@@ -526,6 +526,42 @@ test('食材指南两个页面结构完整且走主题', () => {
   assert.equal(png.readUInt32BE(16), 1200, '宽度应为 1200')
   assert.equal(png.readUInt32BE(20), 600, '高度应为 600')
   assert.equal(png[25], 6, '应为 RGBA 透明 PNG（颜色类型 6）')
+})
+
+test('食材插画按 id 复用：只返回云端真图，占位与未知食材返回空', () => {
+  const { guideCover } = require('../miniprogram/guide-data')
+  assert.match(guideCover('spinach'), /^cloud:\/\/.*guide-covers\/spinach\.png$/, '菠菜有云端真图')
+  assert.match(guideCover('cabbage'), /^cloud:\/\//, '已配图占位食材返回云端图')
+  assert.equal(guideCover('egg'), '', '未配图占位食材不返回占位 SVG')
+  assert.equal(guideCover('unknown-id'), '', '未知食材返回空')
+  assert.equal(guideCover(''), '', '空 id 返回空')
+})
+
+test('冰箱页与采购清单页在有图食材名称左侧显示缩略图，不改变行高', () => {
+  const fridgeWxml = read('pages/fridge/index.wxml')
+  const fridgeWxss = read('pages/fridge/index.wxss')
+  const fridgeJs = read('pages/fridge/index.js')
+  const fridgeJson = JSON.parse(read('pages/fridge/index.json'))
+  const shoppingWxml = read('pages/shopping/index.wxml')
+  const shoppingWxss = read('pages/shopping/index.wxss')
+  const shoppingJs = read('pages/shopping/index.js')
+  const shoppingJson = JSON.parse(read('pages/shopping/index.json'))
+
+  // 两页都注册封面组件，并从指南数据按 id 挂 coverUrl
+  assert.equal(fridgeJson.usingComponents['recipe-cover'], '/components/recipe-cover/index')
+  assert.equal(shoppingJson.usingComponents['recipe-cover'], '/components/recipe-cover/index')
+  assert.ok(fridgeJs.includes('coverUrl: guideCover(id)'), '冰箱页按 id 取图')
+  assert.ok(shoppingJs.includes('coverUrl: guideCover(item.key)'), '采购页按食材 id 取图')
+
+  // 缩略图仅在有图时渲染，且放在名称之前（左侧）
+  assert.match(fridgeWxml, /<recipe-cover wx:if="\{\{item\.coverUrl\}\}"[^>]*class="fridge-option-cover"[^>]*mode="aspectFill"[\s\S]*?fridge-option-name/, '冰箱页缩略图在有图时显示于名称左侧，且裁切填满格子')
+  assert.match(shoppingWxml, /<recipe-cover wx:if="\{\{item\.coverUrl\}\}"[^>]*class="shopping-item-cover"[^>]*mode="aspectFill"[\s\S]*?shopping-item-name/, '采购页缩略图在有图时显示于名称左侧，且裁切填满格子')
+
+  // 缩略图固定 64rpx 正方，不参与撑高：父容器最小高度仍是 88rpx
+  assert.ok(/\.fridge-option-cover \{[^}]*flex: 0 0 64rpx[^}]*height: 64rpx/.test(fridgeWxss), '冰箱缩略图固定尺寸且不可伸缩')
+  assert.ok(/\.shopping-item-cover \{[^}]*flex: 0 0 64rpx[^}]*height: 64rpx/.test(shoppingWxss), '采购缩略图固定尺寸且不可伸缩')
+  assert.ok(/\.fridge-option \{[^}]*min-height: 88rpx/.test(fridgeWxss), '冰箱行高不变')
+  assert.ok(/\.shopping-row-main \{[^}]*min-height: 88rpx/.test(shoppingWxss), '采购行高不变')
 })
 
 test('采购清单「加入清单」按钮局部降到 76rpx，不动全局最小点击区', () => {

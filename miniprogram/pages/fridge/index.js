@@ -1,6 +1,7 @@
 const { getCatalogSource, getIngredientOptions, getIngredientGroups, searchIngredientOptions } = require('../../catalog')
 const { readKitchen, saveInventory } = require('../../inventory')
 const { countShoppingItems } = require('../../shopping')
+const { guideCover } = require('../../guide-data')
 const { applyTheme } = require('../../theme')
 
 const fridgeGroups = getIngredientGroups()
@@ -20,7 +21,7 @@ function ingredientView(selected, search, groupIndex, limit) {
     searching,
     showingInventory,
     ingredientListAnchor: searching ? 'fridge-search-results' : `fridge-group-${groupIndex}`,
-    visibleIngredients: items.slice(0, limit).map(({ id, name }) => ({ id, name, checked: selected.includes(id) })),
+    visibleIngredients: items.slice(0, limit).map(({ id, name }) => ({ id, name, coverUrl: guideCover(id), checked: selected.includes(id) })),
     hasMoreIngredients: items.length > limit
   }
 }

@@ -106,6 +106,8 @@
   line-height: 1.35;
   text-align: left;
 }
+/* 有插画的食材在名称左侧显示缩略图，尺寸跟行内容高度（64rpx）一致，不撑高行 */
+.fridge-option-cover { flex: 0 0 64rpx; width: 64rpx; height: 64rpx; border-radius: 10rpx; overflow: hidden; }
 .fridge-option-name { min-width: 0; overflow-wrap: anywhere; }
 .fridge-option-mark { flex-shrink: 0; color: var(--theme-accent-text, #994017); font-weight: 700; }
 .fridge-option-remove {

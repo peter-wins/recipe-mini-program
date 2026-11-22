@@ -21,11 +21,6 @@
           <view class="home-title">今天想吃点什么？</view>
           <view class="greeting-quote">{{greeting.quoteText}}</view>
         </view>
-        <view class="home-wok" aria-hidden="true">
-          <view class="wok-steam"></view>
-          <view class="wok-vegetables"><view></view><view></view><view></view></view>
-          <view class="wok-pan"></view>
-        </view>
       </view>
       <button class="recipe-search home-search" bindtap="openRecipeSearch">
         <view class="search-mark" aria-hidden="true"></view>

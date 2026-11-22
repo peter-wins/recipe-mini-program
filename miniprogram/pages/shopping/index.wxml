@@ -50,6 +50,7 @@
               <text class="shopping-check" aria-hidden="true">{{item.selected ? '✓' : ''}}</text>
             </button>
             <button class="shopping-item-toggle" bindtap="toggleDetails" hover-class="shopping-action-pressed" data-key="{{item.key}}" aria-expanded="{{item.expanded}}" aria-label="{{item.name + '，' + item.quantity + '，' + (item.expanded ? '收起明细' : '查看明细')}}">
+              <recipe-cover wx:if="{{item.coverUrl}}" class="shopping-item-cover" src="{{item.coverUrl}}" mode="aspectFill" lazy="{{true}}" textFallback="{{true}}"/>
               <view class="shopping-item-copy">
                 <text class="shopping-item-name">{{item.name}}</text>
                 <text class="shopping-quantity">{{item.quantity}}</text>

@@ -46,6 +46,7 @@
           <view wx:if="{{!visibleIngredients.length}}" class="empty fridge-empty">{{searching ? '没找到这个食材，试试其他叫法。' : (showingInventory ? '还没登记食材，可以搜索或从分类里添加' : '这个分组暂时没有食材')}}</view>
           <view wx:else class="fridge-options">
             <button wx:for="{{visibleIngredients}}" wx:key="id" class="fridge-option {{showingInventory ? '' : (item.checked ? 'fridge-option-checked' : '')}}" data-id="{{item.id}}" bindtap="toggleIngredient" aria-label="{{(item.checked ? '移除' : '登记') + item.name}}">
+              <recipe-cover wx:if="{{item.coverUrl}}" class="fridge-option-cover" src="{{item.coverUrl}}" mode="aspectFill" lazy="{{true}}" textFallback="{{true}}"/>
               <text class="fridge-option-name">{{item.name}}</text>
               <text class="fridge-option-mark {{showingInventory ? 'fridge-option-remove' : ''}}" aria-hidden="true">{{showingInventory ? '−' : (item.checked ? '✓' : '+')}}</text>
             </button>
