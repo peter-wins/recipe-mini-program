@@ -7,4 +7,6 @@
 .records-actions .link {
   margin: 0;
   line-height: 64rpx;
+  /* 规范第5条：清空历史是危险操作，用独立语义色 */
+  color: var(--state-danger, #c04040);
 }

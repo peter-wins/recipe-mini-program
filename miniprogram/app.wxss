@@ -39,7 +39,18 @@ page {
 }
 .row, .list-heading { justify-content: space-between; }
 
-/* ---------- 按钮 ---------- */
+/* ---------- 按钮（规范第8条：主要/次要/文字/图标/危险 五类） ---------- */
+/* 语义状态色（规范第5条：警告/删除/成功/禁用独立变量，不套主题色） */
+page, .theme-page {
+  --state-danger: #c04040;
+  --state-danger-soft: #fbeaea;
+  --state-warning: #b5741a;
+  --state-warning-soft: #fdf1dc;
+  --state-success: #397454;
+  --state-success-soft: #e7f2ea;
+  --state-disabled: #b9aca2;
+}
+
 button {
   box-sizing: border-box;
   margin: 0;
@@ -47,22 +58,56 @@ button {
   color: inherit;
   font-size: 28rpx;
   line-height: 76rpx;
+  min-height: 88rpx; /* 统一最小点击区 */
 }
 button::after { border: 0; }
-.primary, .link, .chip { border-radius: 999rpx; }
+button[disabled] { opacity: .55; color: var(--state-disabled, #b9aca2); }
+
+.primary, .secondary, .text-btn, .icon-btn, .danger-btn, .link, .chip {
+  border-radius: 999rpx;
+  transition: opacity .15s, transform .15s;
+}
+.primary, .secondary, .danger-btn { padding: 0 32rpx; font-weight: 650; }
+
+/* 主要操作：主题主色 */
 .primary {
   background: var(--theme-accent, #FF8A3D);
   color: var(--theme-text, #43251b);
-  font-weight: 650;
 }
-.link {
+/* 次要操作：主题浅底 + 主题文字 */
+.secondary {
+  background: var(--theme-soft, #fff0e5);
+  color: var(--theme-accent-text, #994017);
+  border: 1rpx solid var(--theme-selected-border, #d9b59a);
+}
+/* 文字操作：透明底，主题文字（兼容既有 .link） */
+.text-btn, .link {
   background: transparent;
   color: var(--theme-accent-text, #994017);
   padding: 0 16rpx;
-  line-height: 76rpx;
   flex-shrink: 0;
   font-weight: 600;
 }
+.link { line-height: 76rpx; }
+/* 图标按钮：正方形点击区 */
+.icon-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 88rpx;
+  height: 88rpx;
+  padding: 0;
+  background: transparent;
+}
+.icon-btn image { width: 36rpx; height: 36rpx; }
+/* 危险操作：独立语义色，不随主题 */
+.danger-btn {
+  background: var(--state-danger-soft, #fbeaea);
+  color: var(--state-danger, #c04040);
+}
+/* 统一点击反馈 */
+.primary.hover, .secondary.hover, .danger-btn.hover, .icon-btn.hover { opacity: .75; transform: scale(.98); }
+.text-btn.hover, .link.hover { opacity: .6; }
 
 .meal-calendar-icon {
   position: relative;

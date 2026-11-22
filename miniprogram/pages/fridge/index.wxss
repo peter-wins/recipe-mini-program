@@ -37,7 +37,8 @@
 }
 .fridge-picked-chip text { margin-left: 4rpx; }
 .fridge-expand { background: var(--theme-neutral, #f7f3ee); color: var(--theme-muted, #67554c); }
-.fridge-clear { background: transparent; color: var(--theme-muted, #75665e); }
+/* 规范第5条：危险操作用独立语义色，不随主题 */
+.fridge-clear { background: transparent; color: var(--state-danger, #c04040); }
 .fridge-edit { flex: 1; display: flex; flex-direction: column; min-height: 0; margin-top: 20rpx; }
 .recipe-search.fridge-search { margin-bottom: 16rpx; border-radius: 26rpx; }
 .fridge-picker-head { margin-bottom: 12rpx; }

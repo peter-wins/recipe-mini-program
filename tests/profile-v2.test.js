@@ -220,3 +220,22 @@ test('同一功能复用同一图标：日历两个语义键指向同一 SVG 文
   // 唯一日历图标含日历轮廓
   assert.ok(read('assets/icon-calendar-line.svg').includes('<rect'))
 })
+
+test('按钮五类体系与语义状态色变量齐备（规范第5/8条）', () => {
+  const app = read('app.wxss')
+  // 五类按钮
+  for (const cls of ['.primary', '.secondary', '.text-btn', '.icon-btn', '.danger-btn']) {
+    assert.ok(app.includes(cls), `缺少按钮类型 ${cls}`)
+  }
+  // 语义状态色：独立变量，不套主题
+  for (const v of ['--state-danger', '--state-warning', '--state-success', '--state-disabled']) {
+    assert.ok(app.includes(v + ':'), `缺少语义变量 ${v}`)
+  }
+  // 统一点击区与反馈态
+  assert.ok(app.includes('min-height: 88rpx'), '缺少统一最小点击区')
+  assert.ok(app.includes('button[disabled]'), '缺少禁用态')
+  assert.ok(app.includes('.hover'), '缺少点击反馈态')
+  // 危险操作接入语义色
+  assert.ok(read('pages/fridge/index.wxss').includes('var(--state-danger,')
+    || read('pages/shopping/index.wxss').includes('var(--state-danger,'))
+})
