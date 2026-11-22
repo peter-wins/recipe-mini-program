@@ -32,6 +32,7 @@ button.home-search {
 .library-header-copy { min-width: 0; }
 .library-ai {
   display: flex;
+  align-self: flex-start;
   align-items: center;
   gap: 8rpx;
   min-height: 0;
@@ -95,17 +96,16 @@ button.home-search {
 .library-load-more { display: block; margin: 18rpx auto 0; }
 /* ---------- 问候区 ---------- */
 .home-greeting { margin: 12rpx 0 38rpx; }
-.greeting-quote { color: var(--theme-muted, #75665e); font-size: 25rpx; line-height: 1.4; }
-.home-title-row { display: flex; align-items: center; justify-content: space-between; gap: 16rpx; }
+.home-title-row { display: flex; align-items: flex-start; justify-content: space-between; gap: 16rpx; }
 .home-heading-copy { flex: 1; min-width: 0; }
 .home-title {
-  margin-top: 12rpx;
   color: var(--theme-text, #43251b);
   font-size: 51rpx;
   font-weight: 800;
   line-height: 1.2;
 }
-.home-wok { position: relative; flex: 0 0 116rpx; height: 72rpx; }
+.greeting-quote { margin-top: 7rpx; color: var(--theme-muted, #75665e); font-size: 23rpx; line-height: 1.4; }
+.home-wok { position: relative; flex: 0 0 116rpx; height: 72rpx; align-self: flex-start; }
 .wok-pan {
   position: absolute;
   left: 4rpx;

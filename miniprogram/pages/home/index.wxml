@@ -18,8 +18,8 @@
     <view class="home-greeting">
       <view class="home-title-row">
         <view class="home-heading-copy">
-          <view class="greeting-quote">{{greeting.quoteText}}</view>
           <view class="home-title">今天想吃点什么？</view>
+          <view class="greeting-quote">{{greeting.quoteText}}</view>
         </view>
         <view class="home-wok" aria-hidden="true">
           <view class="wok-steam"></view>

@@ -6,6 +6,7 @@
 .shopping-add {
   display: flex;
   flex-shrink: 0;
+  align-self: flex-start;
   align-items: center;
   gap: 8rpx;
   min-height: 0;

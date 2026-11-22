@@ -254,6 +254,22 @@ test('菜谱库标题区与搭配页统一：大标题在上＋副标题在下',
   assert.ok(titleRule && !titleRule[0].includes('margin-top'), '标题不应再有上边距')
 })
 
+test('四个页头统一搭配页布局：标题在上副标题在下、右侧元素顶部对齐', () => {
+  // 首页：标题在副标题之上，炒锅保留且顶部对齐
+  const homeWxml = read('pages/home/index.wxml')
+  const homeWxss = read('pages/home/index.wxss')
+  assert.ok(homeWxml.indexOf('home-title') < homeWxml.indexOf('greeting-quote'), '首页标题应在副标题上方')
+  assert.ok(homeWxml.includes('home-wok'), '首页应保留炒锅动画')
+  assert.ok(/\.home-wok \{[^}]*align-self: flex-start/.test(homeWxss), '炒锅应顶部对齐')
+  assert.ok(/\.home-title-row \{[^}]*align-items: flex-start/.test(homeWxss), '首页标题行应顶部对齐')
+  // 菜谱库、采购页：右侧按钮顶部对齐（搭配页 align-self: flex-start）
+  assert.ok(/\.library-ai \{[\s\S]*?align-self: flex-start/.test(homeWxss), '问问AI按钮应顶部对齐')
+  const shoppingWxss = read('pages/shopping/index.wxss')
+  assert.ok(/\.shopping-add \{[\s\S]*?align-self: flex-start/.test(shoppingWxss), '手动添加按钮应顶部对齐')
+  // 搭配页基准本身也是顶部对齐
+  assert.ok(/\.meal-calendar-link \{[\s\S]*?align-self: flex-start/.test(read('pages/meals/index.wxss')))
+})
+
 test('三个页头胶囊按钮尺寸统一：button 覆盖全局 min-height 与日历入口齐高', () => {
   // 问问 AI 与手动添加是 button，需覆盖全局 button 的 min-height: 88rpx
   const homeWxss = read('pages/home/index.wxss')
