@@ -1,6 +1,5 @@
 .shopping-head-row { gap: 16rpx; }
 .shopping-add { flex-shrink: 0; padding: 0 18rpx; background: var(--theme-selected, #fbecdc); border-radius: 16rpx; white-space: nowrap; }
-.shopping-head > .subtle { margin-top: 7rpx; }
 .shopping-screen-with-bar { padding-bottom: calc(204rpx + env(safe-area-inset-bottom)); }
 .shopping-list-head { margin-top: 22rpx; }
 .shopping-list-head .section { font-size: 28rpx; }

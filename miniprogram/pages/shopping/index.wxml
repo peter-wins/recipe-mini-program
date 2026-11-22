@@ -5,7 +5,6 @@
         <view class="headline">采购清单</view>
         <button wx:if="{{!manualOpen}}" class="link shopping-add" bindtap="openManualEntry">＋ 手动添加</button>
       </view>
-      <view wx:if="{{items.length}}" class="subtle">待买 {{items.length}} 项</view>
     </view>
     <form wx:if="{{manualOpen}}" class="purchase-row shopping-entry" bindsubmit="addManualItem">
       <view class="shopping-entry-fields">
@@ -26,7 +25,7 @@
     <view wx:if="{{!items.length && !manualOpen}}" class="empty">目前没有待买的东西。</view>
     <block wx:if="{{items.length}}">
       <view class="row shopping-list-head">
-        <text class="section">{{selecting ? '已选 ' + selectedCount + ' 项' : '待买清单'}}</text>
+        <text class="section">{{selecting ? '已选 ' + selectedCount + ' 项' : '待买 ' + items.length + ' 项'}}</text>
         <button class="link shopping-multi" bindtap="toggleBatchMode" aria-pressed="{{selecting}}">{{selecting ? '取消多选' : '多选'}}</button>
       </view>
       <view class="shopping-list">
