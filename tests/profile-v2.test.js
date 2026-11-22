@@ -472,3 +472,16 @@ test('食材指南两个页面结构完整且走主题', () => {
   assert.ok(app.pages.includes('pages/guide-detail/index'))
   assert.ok(exists('assets/guide-spinach.svg'))
 })
+
+test('采购清单「加入清单」按钮局部降到 76rpx，不动全局最小点击区', () => {
+  const shoppingWxss = read('pages/shopping/index.wxss')
+  const appWxss = read('app.wxss')
+
+  // 局部覆盖：只针对手动添加弹层里的 primary，降到与「取消」齐平
+  assert.ok(shoppingWxss.includes('.shopping-entry-actions .primary'), '应有针对加入清单按钮的局部覆盖')
+  assert.ok(/\.shopping-entry-actions \.primary \{[^}]*min-height: 76rpx/.test(shoppingWxss), '局部应降到 76rpx')
+  assert.ok(/\.shopping-entry-actions \.primary \{[^}]*line-height: 76rpx/.test(shoppingWxss), '行高同步 76rpx')
+
+  // 全局最小点击区规范保持不变（0,2,0 的局部选择器可覆盖全局 button 的 0,0,1）
+  assert.ok(/button \{[^}]*min-height: 88rpx/.test(appWxss), '全局 button 最小点击区应保持 88rpx')
+})

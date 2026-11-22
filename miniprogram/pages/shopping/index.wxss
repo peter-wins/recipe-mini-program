@@ -56,6 +56,8 @@
   font-size: 26rpx;
 }
 .shopping-entry-actions { display: flex; justify-content: flex-end; align-items: center; gap: 12rpx; margin-top: 14rpx; }
+/* 「加入清单」与文字「取消」视觉齐平：局部降到 76rpx，不改全局最小点击区规范 */
+.shopping-entry-actions .primary { min-height: 76rpx; line-height: 76rpx; }
 .shopping-item-name { display: block; min-width: 0; font-size: 29rpx; font-weight: 650; line-height: 1.35; overflow-wrap: anywhere; }
 .shopping-quantity {
   display: flex;
