@@ -108,10 +108,6 @@
         <view class="library-title">菜谱灵感</view>
         <view class="library-subtitle">好味道，慢慢发现</view>
       </view>
-      <button class="link library-ai" bindtap="showAiDevelopment">
-        <image src="{{icons.path('sparkles')}}" aria-hidden="true"/>
-        <text>问问 AI</text>
-      </button>
     </view>
     <view class="recipe-search library-search">
       <view class="search-mark" aria-hidden="true"></view>

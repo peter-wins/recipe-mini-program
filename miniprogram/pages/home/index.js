@@ -225,10 +225,6 @@ Page({
     })
   },
 
-  showAiDevelopment() {
-    wx.showToast({ title: '功能正在开发中', icon: 'none' })
-  },
-
   openSurprise() {
     wx.navigateTo({
       url: '/pages/surprise/index',

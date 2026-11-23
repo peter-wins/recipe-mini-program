@@ -30,23 +30,6 @@ button.home-search {
 .more-recipes-arrow { font-size: 27rpx; line-height: 1; }
 .library-header { margin: 12rpx 0 28rpx; }
 .library-header-copy { min-width: 0; }
-.library-ai {
-  display: flex;
-  align-self: flex-start;
-  align-items: center;
-  gap: 8rpx;
-  min-height: 0;
-  padding: 0 18rpx;
-  background: var(--theme-soft, #fff0e5);
-  border: 1rpx solid var(--theme-selected-border, #d9b59a);
-  border-radius: 20rpx;
-  color: var(--theme-accent-text, #994017);
-  font-size: 24rpx;
-  font-weight: 600;
-  line-height: 62rpx;
-  white-space: nowrap;
-}
-.library-ai image { width: 27rpx; height: 27rpx; }
 .library-title { color: var(--theme-text, #4e342c); font-size: 50rpx; font-weight: 750; line-height: 1.2; }
 .library-subtitle { margin-top: 7rpx; color: var(--theme-muted, #75665e); font-size: 23rpx; }
 .recipe-search.library-search { border-radius: 26rpx; }

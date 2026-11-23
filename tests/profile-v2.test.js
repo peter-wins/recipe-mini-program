@@ -143,7 +143,6 @@ test('主题图标滤镜变量三套齐备，仅选中态/主操作使用，普�
   // 规范第4条：选中态（导航当前项）用主题色
   assert.ok(homeWxss.includes('.main-nav .nav-current image { filter: var(--theme-accent-icon); }'))
   // 规范第3条：普通图标固定中性色，不套主题滤镜
-  assert.ok(homeWxss.includes('.library-ai image { width: 27rpx; height: 27rpx; }'))
   assert.ok(homeWxss.includes('.profile-avatar image { width: 46rpx; height: 46rpx; }'))
   assert.ok(!homeWxss.includes('--theme-nav-icon'), '旧变量名应清除')
 
@@ -255,7 +254,7 @@ test('同一功能复用同一图标：所有页面日历都走唯一 SVG 映射
     assert.ok(!/<view class="meal-calendar-icon"/.test(wxml), `${page} 仍用 view 当 CSS 日历图标`)
     assert.ok(/<image class="meal-calendar-icon" src="\{\{icons\.path\('calendar'\)\}\}"/.test(wxml), `${page} 日历图标未换成 SVG image`)
   }
-  // 搭配页日历入口是图标+文字胶囊（与菜谱库「问问 AI」一致）
+  // 搭配页日历入口是图标+文字胶囊
   const mealsWxml = read('pages/meals/index.wxml')
   assert.ok(/meal-calendar-link[\s\S]*?<image class="meal-calendar-icon"[\s\S]*?<text>做饭日历<\/text>[\s\S]*?<\/navigator>/.test(mealsWxml), '搭配页日历入口应带「做饭日历」文字')
   const mealsWxss = read('pages/meals/index.wxss')
@@ -286,9 +285,8 @@ test('菜谱库标题区与搭配页统一：大标题在上＋副标题在下',
   assert.ok(titleRule && !titleRule[0].includes('margin-top'), '标题不应再有上边距')
 })
 
-test('菜谱库与搭配页的页头按钮使用主题描边和较粗文字', () => {
+test('搭配页的页头按钮使用主题描边和较粗文字', () => {
   const sources = [
-    ['问问 AI', read('pages/home/index.wxss'), 'library-ai'],
     ['做饭日历', read('pages/meals/index.wxss'), 'meal-calendar-link'],
   ]
   for (const [name, wxss, cls] of sources) {
@@ -308,25 +306,45 @@ test('首页、菜谱库与搭配页保留顶部对齐的页头元素', () => {
   assert.ok(!homeWxml.includes('home-wok'), '首页炒锅装饰应已移除')
   assert.ok(!/wok-(pan|tilt|toss|steam)/.test(homeWxss), '炒锅相关样式与动画应清除')
   assert.ok(/\.home-title-row \{[^}]*align-items: flex-start/.test(homeWxss), '首页标题行应顶部对齐')
-  // 菜谱库：右侧按钮顶部对齐
-  assert.ok(/\.library-ai \{[\s\S]*?align-self: flex-start/.test(homeWxss), '问问AI按钮应顶部对齐')
+  // 「问问 AI」入口已移除，菜谱库页头不再有右侧按钮
+  assert.ok(!homeWxml.includes('library-ai'), '问问AI按钮应已移除')
   // 搭配页基准本身也是顶部对齐
   assert.ok(/\.meal-calendar-link \{[\s\S]*?align-self: flex-start/.test(read('pages/meals/index.wxss')))
 })
 
-test('问问 AI 和日历入口的页头按钮尺寸一致', () => {
-  const homeWxss = read('pages/home/index.wxss')
+test('全小程序无深度合成/AI 相关字样，符合个人主体类目', () => {
+  const fs = require('fs')
+  const path = require('path')
+  const dir = path.join(__dirname, '..', 'miniprogram')
+  const banned = /问问\s*AI|AI\s*智能|人工智能|深度合成|AI问答|AI\s*问答|AI绘画|AI换脸|deepseek|大模型/i
+  const hits = []
+  const walk = d => {
+    for (const name of fs.readdirSync(d)) {
+      const full = path.join(d, name)
+      if (fs.statSync(full).isDirectory()) walk(full)
+      else if (/\.(js|wxml|wxss|json)$/.test(name)) {
+        const text = fs.readFileSync(full, 'utf8')
+        if (banned.test(text)) hits.push(path.relative(dir, full))
+      }
+    }
+  }
+  walk(dir)
+  assert.deepEqual(hits, [], '以下文件仍含 AI/深度合成字样：' + hits.join(', '))
+})
+
+test('日历入口页头按钮尺寸规范，且 AI 相关功能已移除', () => {
   const mealsWxss = read('pages/meals/index.wxss')
-  const aiBlock = homeWxss.match(/\.library-ai \{[^}]*\}/)
-  assert.ok(aiBlock[0].includes('min-height: 0'))
-  assert.ok(aiBlock[0].includes('line-height: 62rpx'))
-  assert.ok(aiBlock[0].includes('border-radius: 20rpx'))
-  assert.ok(aiBlock[0].includes('padding: 0 18rpx'))
-  // 日历入口是 navigator，同样 62rpx 行高、20rpx 圆角
   const calBlock = mealsWxss.match(/\.meal-calendar-link \{[\s\S]*?\}/)
   assert.ok(calBlock[0].includes('line-height: 62rpx'))
   assert.ok(calBlock[0].includes('border-radius: 20rpx'))
   assert.ok(calBlock[0].includes('padding: 0 18rpx'))
+  // 个人主体小程序未开放深度合成类目，AI 入口与页面必须彻底移除
+  const homeWxml = read('pages/home/index.wxml')
+  const homeJs = read('pages/home/index.js')
+  const homeWxss = read('pages/home/index.wxss')
+  const app = JSON.parse(read('app.json'))
+  assert.ok(!/问问\s*AI|library-ai|showAiDevelopment/.test(homeWxml + homeJs + homeWxss), '首页不应残留问问AI入口')
+  assert.ok(!app.pages.includes('pages/recommend/index'), 'recommend 页应从注册中移除')
 })
 
 test('按钮五类体系与语义状态色变量齐备（规范第5/8条）', () => {
@@ -483,7 +501,7 @@ test('食材指南：分组、菠菜介绍原文与菜谱关联', () => {
   assert.ok(spinach.recipes.every(r => r.id && r.name))
 
   assert.equal(guide.getIngredient('not-exist'), null)
-  assert.ok(guide.getIngredient('cabbage').pending, '占位条目应标记待补录')
+  assert.ok(guide.getIngredient('radish').pending, '占位条目应标记待补录')
 })
 
 test('食材指南两个页面结构完整且走主题', () => {
