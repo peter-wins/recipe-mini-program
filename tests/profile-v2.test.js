@@ -312,6 +312,22 @@ test('首页、菜谱库与搭配页保留顶部对齐的页头元素', () => {
   assert.ok(/\.meal-calendar-link \{[\s\S]*?align-self: flex-start/.test(read('pages/meals/index.wxss')))
 })
 
+test('包内图片音频资源总量不超过 200K（微信代码质量硬指标）', () => {
+  const fs = require('fs')
+  const path = require('path')
+  const dir = path.join(__dirname, '..', 'miniprogram')
+  let total = 0
+  const walk = d => {
+    for (const name of fs.readdirSync(d)) {
+      const full = path.join(d, name)
+      if (fs.statSync(full).isDirectory()) walk(full)
+      else if (/\.(png|jpe?g|gif|webp|svg|mp3|wav|m4a|aac)$/i.test(name)) total += fs.statSync(full).size
+    }
+  }
+  walk(dir)
+  assert.ok(total <= 200 * 1024, `包内图片音频共 ${(total / 1024).toFixed(0)}K，超过 200K；大图应改走云存储 pageImage`)
+})
+
 test('全小程序无深度合成/AI 相关字样，符合个人主体类目', () => {
   const fs = require('fs')
   const path = require('path')
@@ -396,8 +412,11 @@ test('冰箱页改版：轮播置顶、已有食材置顶分组、采购图标�
   // 1. 顶部轮播：swiper + indicator + banner 资源，且位于搜索栏之前
   assert.ok(/<swiper[\s\S]*?indicator-dots[\s\S]*?fridge-banner/.test(wxml) || wxml.includes('<swiper class="fridge-banner"'), '顶部应有轮播图')
   assert.ok(wxml.indexOf('fridge-banner') < wxml.indexOf('fridge-search-row'), '轮播应在搜索栏之上')
-  assert.ok(exists('assets/banner-cook.png'), '缺少轮播插画')
-  assert.ok(read('pages/fridge/index.js').includes("image: '/assets/banner-cook.png'"), '轮播引用新锅图')
+  // 轮播插画走云存储 CDN，不再打包进代码包
+  assert.ok(!exists('assets/banner-cook.png'), '轮播插画不应再打包进代码包')
+  const fridgeJs = read('pages/fridge/index.js')
+  assert.ok(fridgeJs.includes("pageImage('banner-cook.png')"), '轮播引用云端锅图')
+  assert.ok(fridgeJs.includes("require('../../recipe-image')"), '冰箱页应引入云图地址工具')
   assert.ok(!wxml.includes('fridge-banner-eyebrow') && !read('pages/fridge/index.js').includes('今日灵感'), 'banner 已移除「今日灵感」眉题')
   assert.ok(wxss.includes('.fridge-banner {'), '缺少轮播样式')
 
@@ -501,7 +520,11 @@ test('食材指南：分组、菠菜介绍原文与菜谱关联', () => {
   assert.ok(spinach.recipes.every(r => r.id && r.name))
 
   assert.equal(guide.getIngredient('not-exist'), null)
-  assert.ok(guide.getIngredient('radish').pending, '占位条目应标记待补录')
+  // 内容仍为空的条目必须标记待补录，避免空介绍被当成完整内容展示（全填满时自动通过）
+  for (const item of guide.ingredients) {
+    const empty = !item.therapy && !(item.storage && item.storage.length) && !(item.tips && item.tips.length)
+    if (empty) assert.ok(item.pending, `${item.id} 空内容条目应标记待补录`)
+  }
 })
 
 test('食材指南两个页面结构完整且走主题', () => {

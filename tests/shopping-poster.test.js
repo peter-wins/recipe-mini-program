@@ -10,14 +10,11 @@ test('采购页顶部插画：引用包内新图，CSS 拼的旧插画零件已�
   const wxml = fs.readFileSync(path.join(root, 'pages/shopping/index.wxml'), 'utf8')
   const wxss = fs.readFileSync(path.join(root, 'pages/shopping/index.wxss'), 'utf8')
 
-  assert.ok(wxml.includes('src="/assets/shopping-hero.png"'), '顶部插画引用新的包内图片')
+  assert.ok(wxml.includes('src="{{heroSrc}}"'), '顶部插画引用云端图片地址')
   assert.ok(!/shopping-hero-leaf|shopping-hero-tomato|shopping-hero-basket/.test(wxml + wxss), '旧的 CSS 插画零件应删除')
-  const png = fs.readFileSync(path.join(root, 'assets/shopping-hero.png'))
-  assert.equal(png.toString('ascii', 1, 4), 'PNG', '插画文件是 PNG')
-  const imgW = png.readUInt32BE(16)
-  const imgH = png.readUInt32BE(20)
-  const ratio = imgW / imgH
-  assert.ok(ratio > 1.55 && ratio < 1.7, '插画为约 1.64:1 的横版')
+  // 插画已移出代码包改走云存储 CDN，包内不应再有该 PNG
+  assert.ok(!fs.existsSync(path.join(root, 'assets/shopping-hero.png')), '插画不应再打包进代码包')
+  const ratio = 1.64 // 378:230 横版
 
   assert.ok(/\.shopping-hero-art \{[^}]*position: absolute/.test(wxss), '插画改为绝对定位，脱离页头行')
   assert.match(wxss, /\.shopping-hero-art \{[^}]*bottom: 100%/, '插画底边紧贴卡片上边线，不重叠')

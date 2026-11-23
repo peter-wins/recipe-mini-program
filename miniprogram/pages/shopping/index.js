@@ -3,13 +3,15 @@ const { listShopping, removeShoppingItem, saveManualShopping, manualNameLimit, m
   buyShoppingItems, undoShoppingPurchase } = require('../../shopping')
 const { buildLayout, buildText, draw, usageNote } = require('../../shopping-poster')
 const { guideCover } = require('../../guide-data')
+const { pageImage } = require('../../recipe-image')
 
 const undoWindow = 10000
 
 Page({
   data: {
     items: [], updating: false, manualOpen: false, focusQuantity: false, manualNameLimit, manualQuantityLimit,
-    selecting: false, selectedCount: 0, undoCount: 0, posterWidth: 750, posterHeight: 412, usageNote
+    selecting: false, selectedCount: 0, undoCount: 0, posterWidth: 750, posterHeight: 412, usageNote,
+    heroSrc: pageImage('shopping-hero.png')
   },
 
   onShow() {

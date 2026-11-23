@@ -2,7 +2,13 @@ const developmentImageBase = 'http://192.168.1.81:8088'
 const cloudImageEnv = 'recipe-dev-d9gsv38lz1ade2114'
 const cloudStorageBase = 'cloud://' + cloudImageEnv + '.7265-recipe-dev-d9gsv38lz1ade2114-1404757921/'
 const cloudImageBase = cloudStorageBase + 'recipe-covers/'
+// 页面装饰大图走云存储 CDN（公开读），避免打包进代码包触发「图片音频资源不超过 200K」检查。
+const pageImageBase = 'https://7265-recipe-dev-d9gsv38lz1ade2114-1404757921.tcb.qcloud.la/page-images/'
 const useLocalImagesInDevelopment = false
+
+function pageImage(name) {
+  return pageImageBase + name
+}
 
 function isDevelopmentCoverUrl(url) {
   return url.indexOf(developmentImageBase + '/') === 0
@@ -23,4 +29,4 @@ function recipeImage(coverPath) {
   return getCoverUrl(coverPath, miniProgram && miniProgram.envVersion)
 }
 
-module.exports = { cloudImageEnv, cloudStorageBase, getCoverUrl, recipeImage, isDevelopmentCoverUrl }
+module.exports = { cloudImageEnv, cloudStorageBase, pageImageBase, pageImage, getCoverUrl, recipeImage, isDevelopmentCoverUrl }

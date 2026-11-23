@@ -2,6 +2,7 @@ const { getCatalogSource, getIngredientOptions, getIngredientGroups, searchIngre
 const { readKitchen, saveInventory } = require('../../inventory')
 const { countShoppingItems } = require('../../shopping')
 const { guideCover } = require('../../guide-data')
+const { pageImage } = require('../../recipe-image')
 const { applyTheme } = require('../../theme')
 
 const fridgeGroups = getIngredientGroups()
@@ -36,7 +37,7 @@ Page({
     ingredientLimit: inventoryPageSize,
     banners: [{
       title: '用现有食材做道好菜',
-      image: '/assets/banner-cook.png'
+      image: pageImage('banner-cook.png')
     }],
     ...ingredientView([], '', 0, inventoryPageSize)
   },

@@ -9,7 +9,7 @@
         </view>
       </view>
       <view class="shopping-add-actions">
-        <image class="shopping-hero-art" src="/assets/shopping-hero.png" mode="aspectFit" aria-hidden="true"/>
+        <image class="shopping-hero-art" src="{{heroSrc}}" mode="aspectFit" aria-hidden="true"/>
         <button class="shopping-add" bindtap="{{manualOpen ? 'closeManualEntry' : 'openManualEntry'}}" aria-expanded="{{manualOpen}}" hover-class="shopping-action-pressed">
           <image src="{{icons.path('plus')}}" aria-hidden="true"/>手动添加
         </button>
