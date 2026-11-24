@@ -49,7 +49,12 @@
         </view>
       </view>
 
-      <view class="list-heading recipe-section">
+      <view class="recipe-jump">
+        <button class="recipe-jump-item" bindtap="jumpToSection" data-section="ingredients" aria-label="跳到食材清单">食材清单</button>
+        <button class="recipe-jump-item" bindtap="jumpToSection" data-section="method" aria-label="跳到做法步骤">做法步骤</button>
+      </view>
+
+      <view id="ingredients" class="list-heading recipe-section">
         <text class="section">食材清单</text>
         <button wx:if="{{inventoryReady && (purchaseItems.length || hasSavedPurchase)}}" class="link" bindtap="savePurchaseItems" disabled="{{savingPurchase}}" loading="{{savingPurchase}}">{{hasSavedPurchase ? '更新采购项' : '加入采购清单'}}</button>
         <navigator wx:else class="link" url="/pages/shopping/index">看采购清单 ›</navigator>

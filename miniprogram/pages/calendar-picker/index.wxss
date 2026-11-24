@@ -1,7 +1,7 @@
 .calendar-picker-screen { padding-bottom: calc(155rpx + env(safe-area-inset-bottom)); }
 .calendar-picker-heading { gap: 12rpx; margin-top: 16rpx; }
 .calendar-picker-context { display: flex; flex-wrap: wrap; align-items: baseline; gap: 8rpx 18rpx; min-width: 0; }
-.calendar-picker-pairings { padding: 0 0 0 12rpx; font-size: 25rpx; white-space: nowrap; }
-.calendar-picker-context .section { font-size: 48rpx; line-height: 1.25; }
-.calendar-picker-context .subtle { font-size: 25rpx; }
+.calendar-picker-pairings { padding: 0 0 0 12rpx; font-size: var(--fs-sm, 24rpx); white-space: nowrap; }
+.calendar-picker-context .section { font-size: var(--fs-2xl, 44rpx); line-height: 1.25; }
+.calendar-picker-context .subtle { font-size: var(--fs-sm, 24rpx); }
 .calendar-picker-current { margin-top: 8rpx; overflow-wrap: anywhere; }

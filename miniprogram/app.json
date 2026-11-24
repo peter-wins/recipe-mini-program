@@ -1,7 +1,8 @@
 {
   "entryPagePath": "pages/home/index",
-  "pages": ["pages/home/index", "pages/fridge/index", "pages/fridge-matches/index", "pages/surprise/index", "pages/recipe/index", "pages/shopping/index", "pages/meal-calendar/index", "pages/calendar-picker/index", "pages/compose-meal/index", "pages/records/index", "pages/about/index", "pages/appearance/index", "pages/guide/index", "pages/guide-detail/index", "pages/index/index"],
+  "pages": ["pages/home/index", "pages/fridge/index", "pages/fridge-matches/index", "pages/surprise/index", "pages/recipe/index", "pages/shopping/index", "pages/meal-calendar/index", "pages/calendar-picker/index", "pages/compose-meal/index", "pages/records/index", "pages/about/index", "pages/privacy/index", "pages/appearance/index", "pages/guide/index", "pages/guide-detail/index", "pages/index/index"],
   "lazyCodeLoading": "requiredComponents",
+  "sitemapLocation": "sitemap.json",
   "window": {
     "navigationBarTitleText": "吃饭搭子",
     "navigationBarBackgroundColor": "#FFF8F0",

@@ -258,7 +258,7 @@ test('同一功能复用同一图标：所有页面日历都走唯一 SVG 映射
   const mealsWxml = read('pages/meals/index.wxml')
   assert.ok(/meal-calendar-link[\s\S]*?<image class="meal-calendar-icon"[\s\S]*?<text>做饭日历<\/text>[\s\S]*?<\/navigator>/.test(mealsWxml), '搭配页日历入口应带「做饭日历」文字')
   const mealsWxss = read('pages/meals/index.wxss')
-  assert.ok(/\.meal-calendar-link \{[\s\S]*?border-radius: 20rpx;[\s\S]*?font-size: 24rpx;/.test(mealsWxss), '日历入口应为胶囊样式')
+  assert.ok(/\.meal-calendar-link \{[\s\S]*?border-radius: 20rpx;[\s\S]*?font-size: (24rpx|var\(--fs-sm, 24rpx\));/.test(mealsWxss), '日历入口应为胶囊样式')
 })
 
 test('首页三个「查看更多」入口字号与颜色统一', () => {
@@ -267,7 +267,7 @@ test('首页三个「查看更多」入口字号与颜色统一', () => {
   const fridge = wxss.match(/\.home-fridge-link \{[^}]*\}/)
   assert.ok(dinner && fridge, '缺少入口样式')
   for (const rule of [dinner[0], fridge[0]]) {
-    assert.ok(rule.includes('font-size: 24rpx'), '三处入口字号应统一为 24rpx')
+    assert.ok(/font-size: (24rpx|var\(--fs-sm, 24rpx\))/.test(rule), '三处入口字号应统一为 24rpx')
     assert.ok(rule.includes('var(--theme-accent-text'), '颜色应走主题变量')
   }
   assert.ok(!fridge[0].includes('#96512f'), '不应残留偏红的旧色值')
@@ -561,7 +561,8 @@ test('食材指南两个页面结构完整且走主题', () => {
   assert.ok((listWxml.match(/<recipe-cover/g) || []).length >= 1, '列表页应用封面组件渲染食材图')
   assert.ok((detailWxml.match(/<recipe-cover/g) || []).length >= 2, '详情页食材图与关联菜谱图都应走封面组件')
   assert.equal(guideData.getIngredient('cabbage').image, cloudStorageBase + 'guide-covers/cabbage.png', '已配图的占位食材从云端加载')
-  assert.equal(guideData.getIngredient('egg').image, '/assets/guide-spinach.svg', '未配图的占位食材仍用旧图')
+  assert.equal(guideData.getIngredient('egg').image, cloudStorageBase + 'guide-covers/egg.png', '鸡蛋已配真图，从云端加载')
+  assert.equal(guideData.bundled.filter(item => !item.image).length, 0, '全部 18 条已配齐，无占位食材')
   const fs = require('fs')
   const png = fs.readFileSync('guide-covers/spinach.png')
   assert.equal(png.readUInt32BE(16), 1200, '宽度应为 1200')
@@ -569,11 +570,11 @@ test('食材指南两个页面结构完整且走主题', () => {
   assert.equal(png[25], 6, '应为 RGBA 透明 PNG（颜色类型 6）')
 })
 
-test('食材插画按 id 复用：只返回云端真图，占位与未知食材返回空', () => {
+test('食材插画按 id 复用：只返回云端真图，未知食材返回空', () => {
   const { guideCover } = require('../miniprogram/guide-data')
   assert.match(guideCover('spinach'), /^cloud:\/\/.*guide-covers\/spinach\.png$/, '菠菜有云端真图')
-  assert.match(guideCover('cabbage'), /^cloud:\/\//, '已配图占位食材返回云端图')
-  assert.equal(guideCover('egg'), '', '未配图占位食材不返回占位 SVG')
+  assert.match(guideCover('cabbage'), /^cloud:\/\//, '已配图的占位食材返回云端图')
+  assert.match(guideCover('egg'), /^cloud:\/\/.*guide-covers\/egg\.png$/, '鸡蛋已配真图，从云端加载')
   assert.equal(guideCover('unknown-id'), '', '未知食材返回空')
   assert.equal(guideCover(''), '', '空 id 返回空')
 })
@@ -689,4 +690,41 @@ test('食材指南发布校验：版本号、数量与已有 ID 保护', () => {
   assert.throws(() => validateGuide({ groups, ingredients: bundled.slice(1) }), /缺少已有食材 ID/)
   assert.throws(() => validateGuide({ groups: [], ingredients: bundled }), /分组格式/)
   assert.throws(() => parseRelease(JSON.stringify({ schemaVersion: 2, version: 'c'.repeat(32), ingredientCount: bundled.length, ...source })), /发布版本/)
+})
+
+test('关于页有隐私说明与数据来源两个入口，名称与品牌定稿一致', () => {
+  const wxml = read('pages/about/index.wxml')
+  const js = read('pages/about/index.js')
+  const wxss = read('pages/about/index.wxss')
+  // 隐私说明入口
+  assert.ok(wxml.includes('url="/pages/privacy/index"'), '关于页需有隐私说明入口')
+  assert.ok(wxml.includes('隐私说明'))
+  // 数据来源署名
+  assert.ok(wxml.includes('数据来源'), '关于页需有数据来源区')
+  assert.ok(js.includes('HowToCook'), '需署名 HowToCook')
+  assert.ok(js.includes('EveryDay_Food'), '需署名每日食光')
+  assert.ok(js.includes('MIT'), '需标注 MIT')
+  // 名称统一为品牌简称
+  assert.ok(js.includes("appName: '吃饭搭子'"), '关于页名称应为「吃饭搭子」')
+  // 卡片跟随主题，不再写死白色
+  assert.ok(!/background:\s*#fff\s*;/.test(wxss), '卡片底色应走主题变量')
+  // 有返回按钮和分享
+  assert.ok(wxml.includes('bindtap="goBack"'), '关于页需有返回按钮')
+  assert.ok(js.includes('onShareAppMessage'), '关于页应可分享')
+})
+
+test('隐私说明页已注册，且如实覆盖云端收集的数据项', () => {
+  const app = JSON.parse(read('app.json'))
+  assert.ok(app.pages.includes('pages/privacy/index'), '隐私说明页需注册')
+  const js = read('pages/privacy/index.js')
+  // 逐项对应云函数 syncKitchen 真实收集的字段
+  for (const key of ['openid', '冰箱', '收藏', '日历']) {
+    assert.ok(js.includes(key), `隐私说明需覆盖：${key}`)
+  }
+  // 不收集的项也要写明
+  for (const key of ['位置', '相册', '手机号']) {
+    assert.ok(js.includes(key), `需说明不收集：${key}`)
+  }
+  const wxml = read('pages/privacy/index.wxml')
+  assert.ok(wxml.includes('隐私说明'), '页面需有标题')
 })

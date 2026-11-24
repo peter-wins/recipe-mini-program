@@ -1,7 +1,7 @@
 <wxs src="../../icons.wxs" module="icons" />
 <view class="theme-page theme-{{themeId}} fridge-fill">
   <view class="screen">
-    <swiper class="fridge-banner" indicator-dots="{{banners.length > 1}}" indicator-color="rgba(255,255,255,0.6)" indicator-active-color="#994017" autoplay circular interval="4000" duration="400" aria-label="做菜灵感轮播">
+    <swiper class="fridge-banner" indicator-dots="{{banners.length > 1}}" indicator-color="rgba(255,255,255,0.6)" indicator-active-color="#994017" circular duration="400" aria-label="做菜灵感轮播">
       <swiper-item wx:for="{{banners}}" wx:key="title">
         <button class="fridge-banner-slide" bindtap="openFridgeMatches" hover-class="fridge-banner-pressed" aria-label="用现有食材做道好菜，查看匹配菜谱">
           <image class="fridge-banner-image" src="{{item.image}}" aria-hidden="true"/>

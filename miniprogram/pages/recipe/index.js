@@ -53,8 +53,24 @@ Page({
       timerRunning: false,
       timerDone: false
     })
-    if (recipe) this.recordHistory(recipe.id)
-    else if (canFetch) return this.loadMissingRecipe()
+    if (recipe) {
+      this.applyRecipeTitle(recipe)
+      this.recordHistory(recipe.id)
+    } else if (canFetch) return this.loadMissingRecipe()
+  },
+
+  // 每道菜的标题单独成句，供搜一搜按菜名收录。
+  applyRecipeTitle(recipe) {
+    if (!recipe || !recipe.name || typeof wx.setNavigationBarTitle !== 'function') return
+    const title = recipe.minutes ? `${recipe.name}做法 · ${recipe.minutes}分钟` : `${recipe.name}做法`
+    wx.setNavigationBarTitle({ title })
+  },
+
+  // 跳转条：食材清单与做法步骤互相直达，省掉逐屏滑动。
+  jumpToSection({ currentTarget } = {}) {
+    const section = currentTarget && currentTarget.dataset ? currentTarget.dataset.section : ''
+    if (!section) return
+    wx.pageScrollTo({ selector: '#' + section, duration: 200 })
   },
 
   async loadMissingRecipe() {
@@ -79,12 +95,30 @@ Page({
   onShareAppMessage() {
     const recipe = this.data.recipe
     const share = {
-      title: recipe ? `这道${recipe.name}，分享给你` : '吃饭得有谱，今晚吃什么',
+      title: recipe ? this.buildShareTitle(recipe) : '今晚吃什么？打开冰箱看看，吃什么就有了谱',
       path: recipe ? '/pages/recipe/index?id=' + encodeURIComponent(recipe.id) : '/pages/home/index'
     }
     const image = recipe && recipe.image
     if (image && /^https?:\/\//.test(image)) share.imageUrl = image
     return share
+  },
+
+  // 朋友圈分享（需在后台开启「分享到朋友圈」），标题带菜名便于站外搜索。
+  onShareTimeline() {
+    const recipe = this.data.recipe
+    if (!recipe) return { title: '今晚吃什么？打开冰箱看看，吃什么就有了谱' }
+    return {
+      title: this.buildShareTitle(recipe),
+      query: 'id=' + encodeURIComponent(recipe.id)
+    }
+  },
+
+  // 分享卡片标题放钩子：菜名 + 耗时 + 用料，比「分享给你」更容易被点开。
+  buildShareTitle(recipe) {
+    const parts = [`${recipe.name}，${recipe.minutes ? recipe.minutes + '分钟搞定' : '在家就能做'}`]
+    const count = (recipe.required || []).length
+    if (count) parts.push(`用料${count}样`)
+    return parts.join('，')
   },
 
   refreshRecipeRecords() {
@@ -111,6 +145,7 @@ Page({
       const recipe = getRecipe(this.recipeId)
       if (!recipe) return
       this.setData({ recipe, recipeStatus: '' })
+      this.applyRecipeTitle(recipe)
       this.recordHistory(recipe.id)
     }
     this.refreshKitchenData()

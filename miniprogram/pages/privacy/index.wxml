@@ -1,0 +1,40 @@
+<wxs src="../../icons.wxs" module="icons" />
+<view class="privacy-page theme-page theme-{{themeId}}">
+  <view class="privacy-inner">
+    <view class="privacy-head">
+      <view class="privacy-title">{{appName}} · 隐私说明</view>
+      <view class="privacy-updated">更新于 {{updatedLabel}}</view>
+    </view>
+
+    <view class="privacy-card">
+      <view class="privacy-section-title">我们收集什么</view>
+      <view class="privacy-hint">只收集让功能跑起来必需的数据。</view>
+      <view wx:for="{{collected}}" wx:key="title" class="privacy-item">
+        <view class="privacy-item-title">{{item.title}}</view>
+        <view class="privacy-item-body">{{item.body}}</view>
+      </view>
+    </view>
+
+    <view class="privacy-card">
+      <view class="privacy-section-title">用来做什么</view>
+      <view wx:for="{{purposes}}" wx:key="*this" class="privacy-note">{{item}}</view>
+    </view>
+
+    <view class="privacy-card">
+      <view class="privacy-section-title">不收集什么</view>
+      <view wx:for="{{notCollected}}" wx:key="*this" class="privacy-note">{{item}}</view>
+    </view>
+
+    <view class="privacy-card">
+      <view class="privacy-section-title">存在哪里</view>
+      <view class="privacy-para">{{storageNote}}</view>
+    </view>
+
+    <view class="privacy-card">
+      <view class="privacy-section-title">你的权利</view>
+      <view class="privacy-para">{{contactNote}}</view>
+    </view>
+
+    <button class="privacy-back" bindtap="goBack" aria-label="返回">返回</button>
+  </view>
+</view>

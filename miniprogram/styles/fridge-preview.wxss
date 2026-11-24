@@ -7,7 +7,7 @@
 .match-fridge-header { gap: 12rpx; }
 .match-fridge-link {
   padding: 0;
-  font-size: 26rpx;
+  font-size: var(--fs-md, 28rpx);
   line-height: 66rpx;
 }
 .match-fridge-items { display: flex; flex-wrap: wrap; gap: 10rpx; margin-top: 10rpx; }
@@ -18,8 +18,8 @@
   border-radius: 999rpx;
   background: var(--theme-neutral, #f2eee4);
   color: var(--theme-text, #5d4037);
-  font-size: 24rpx;
+  font-size: var(--fs-sm, 24rpx);
   overflow-wrap: anywhere;
 }
 .match-fridge-extra, .match-fridge-empty { color: var(--theme-muted, #75665e); }
-.match-fridge-empty { margin-top: 6rpx; font-size: 25rpx; }
+.match-fridge-empty { margin-top: 6rpx; font-size: var(--fs-sm, 24rpx); }

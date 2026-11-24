@@ -4,7 +4,7 @@
     <view class="page-head shopping-head">
       <view class="row shopping-head-row">
         <view class="shopping-head-copy">
-          <view class="shopping-title">采购清单</view>
+          <view class="shopping-title">{{items.length ? '还差 ' + items.length + ' 样' : '采购清单'}}</view>
           <view class="shopping-subtitle">{{usageNote}}</view>
         </view>
       </view>

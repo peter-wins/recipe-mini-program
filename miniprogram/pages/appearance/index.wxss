@@ -1,5 +1,5 @@
 .appearance-page { min-height: 100vh; padding: 12rpx 28rpx 60rpx; box-sizing: border-box; }
-.appearance-intro { margin: 12rpx 8rpx 28rpx; color: var(--theme-muted, #75665e); font-size: 25rpx; line-height: 1.6; }
+.appearance-intro { margin: 12rpx 8rpx 28rpx; color: var(--theme-muted, #75665e); font-size: var(--fs-sm, 24rpx); line-height: 1.6; }
 .appearance-options { display: flex; flex-direction: column; gap: 20rpx; }
 .appearance-option {
   display: flex;
@@ -27,5 +27,5 @@
 .appearance-preview-bar { width: 44rpx; height: 8rpx; border-radius: 999rpx; }
 .appearance-preview-card { height: 20rpx; border-radius: 8rpx; background: rgba(255, 255, 255, .85); }
 .appearance-option-copy { display: flex; flex: 1; align-items: center; justify-content: space-between; min-width: 0; }
-.appearance-option-name { color: var(--theme-text, #4e342c); font-size: 30rpx; font-weight: 700; }
-.appearance-option-check { color: var(--theme-accent-text, #994017); font-size: 23rpx; }
+.appearance-option-name { color: var(--theme-text, #4e342c); font-size: var(--fs-lg, 32rpx); font-weight: 700; }
+.appearance-option-check { color: var(--theme-accent-text, #994017); font-size: var(--fs-sm, 24rpx); }

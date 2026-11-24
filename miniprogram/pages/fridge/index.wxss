@@ -19,7 +19,7 @@
   padding: 0;
   border-radius: var(--card-radius, 28rpx);
   overflow: hidden;
-  background: #f6d9a8;
+  background: var(--theme-tint-1, #f6d9a8);
   color: var(--theme-accent-text, #783414);
   text-align: left;
   line-height: 1.35;
@@ -28,8 +28,8 @@
 .fridge-banner-pressed { opacity: .8; }
 .fridge-banner-image { position: absolute; inset: 0; width: 100%; height: 100%; }
 .fridge-banner-copy { position: absolute; left: 28rpx; top: 56rpx; max-width: 62%; }
-.fridge-banner-title { font-size: 32rpx; font-weight: 750; line-height: 1.3; }
-.fridge-banner-action { position: absolute; left: 28rpx; bottom: 24rpx; font-size: 23rpx; font-weight: 650; }
+.fridge-banner-title { font-size: var(--fs-lg, 32rpx); font-weight: 750; line-height: 1.3; }
+.fridge-banner-action { position: absolute; left: 28rpx; bottom: 24rpx; font-size: var(--fs-sm, 24rpx); font-weight: 650; }
 
 .fridge-search-row { display: flex; align-items: center; gap: 16rpx; }
 .fridge-search-row .recipe-search { flex: 1; min-width: 0; }
@@ -56,7 +56,7 @@
   border-radius: 999rpx;
   background: var(--theme-accent-text, #994017);
   color: #fff;
-  font-size: 20rpx;
+  font-size: var(--fs-xs, 22rpx);
   font-weight: 700;
   line-height: 30rpx;
   text-align: center;
@@ -81,20 +81,20 @@
 .fridge-group {
   flex-shrink: 0;
   padding: 0 18rpx;
-  border-radius: 16rpx;
+  border-radius: 999rpx;
   background: transparent;
   color: var(--theme-muted, #67554c);
-  font-size: 25rpx;
+  font-size: var(--fs-sm, 24rpx);
   line-height: 88rpx;
 }
 .fridge-group-active { background: var(--theme-selected, #ffe8d5); color: var(--theme-accent-text, #783414); font-weight: 700; }
 .fridge-options-scroll { flex: 1; min-height: 0; height: 0; }
-.fridge-options { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12rpx; }
+.fridge-options { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12rpx; }
 .fridge-option {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: 10rpx;
+  justify-content: flex-start;
+  gap: 14rpx;
   min-width: 0;
   min-height: 88rpx;
   padding: 12rpx 14rpx;
@@ -102,13 +102,13 @@
   border-radius: 14rpx;
   background: var(--theme-soft, #fffaf5);
   color: var(--theme-text, #5d4037);
-  font-size: 27rpx;
+  font-size: var(--fs-md, 28rpx);
   line-height: 1.35;
   text-align: left;
 }
 /* 有插画的食材在名称左侧显示缩略图，尺寸跟行内容高度（64rpx）一致，不撑高行 */
 .fridge-option-cover { flex: 0 0 64rpx; width: 64rpx; height: 64rpx; border-radius: 10rpx; overflow: hidden; }
-.fridge-option-name { min-width: 0; overflow-wrap: anywhere; }
+.fridge-option-name { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .fridge-option-mark { flex-shrink: 0; color: var(--theme-accent-text, #994017); font-weight: 700; }
 .fridge-option-remove {
   display: flex;
@@ -120,12 +120,12 @@
   border: 2rpx solid currentColor;
   border-radius: 50%;
   color: #75665e;
-  font-size: 19rpx;
+  font-size: var(--fs-xs, 22rpx);
   font-weight: 600;
   line-height: 1;
 }
 .fridge-option-checked { background: var(--theme-selected, #ffe8d5); border-color: var(--theme-selected-border, #e9a879); color: var(--theme-accent-text, #783414); }
 .fridge-empty { padding: 30rpx 0; }
 .fridge-more { display: block; margin: 14rpx auto 0; }
-.fridge-inventory-note { margin-top: 2rpx; color: var(--theme-muted, #75665e); font-size: 22rpx; }
-.fridge-clear { padding-right: 0; color: var(--state-danger, #c04040); font-size: 24rpx; }
+.fridge-inventory-note { margin-top: 2rpx; color: var(--theme-muted, #75665e); font-size: var(--fs-xs, 22rpx); }
+.fridge-clear { padding-right: 0; color: var(--state-danger, #c04040); font-size: var(--fs-sm, 24rpx); }

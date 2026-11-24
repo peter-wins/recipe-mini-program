@@ -27,4 +27,4 @@
   background: var(--theme-muted, #75665e);
   content: '';
 }
-.recipe-search-input { flex: 1; min-width: 0; height: 84rpx; font-size: 29rpx; }
+.recipe-search-input { flex: 1; min-width: 0; height: 84rpx; font-size: var(--fs-lg, 32rpx); }

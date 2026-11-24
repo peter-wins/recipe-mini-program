@@ -217,7 +217,7 @@ test('菜谱搜索支持多个食材及别名，菜名精确命中优先', () =>
 })
 
 test('菜谱 ID 唯一，原有菜谱和新轻食的食材及做法完整', () => {
-  assert.equal(recipes.filter(recipe => !recipe.light).length, 363)
+  assert.equal(recipes.filter(recipe => !recipe.light).length, 374)
   assert.equal(recipes.filter(recipe => recipe.light).length, 52)
   assert.equal(new Set(recipes.map(recipe => recipe.id)).size, recipes.length)
   for (const recipe of recipes) {
@@ -1041,6 +1041,7 @@ test('详情页计时条可暂停、继续并在到点时提醒', () => {
     setStorageSync: (key, value) => storage.set(key, structuredClone(value)),
     showToast: options => toasts.push(options.title),
     vibrateShort: () => {},
+    setNavigationBarTitle: () => {},
     pageScrollTo: () => {}
   }
   global.setInterval = callback => { tick = callback; return 1 }
@@ -1162,4 +1163,99 @@ test('陈皮排骨汤去重，电器标签同时匹配菜名与做法步骤', ()
   assert.ok(tags('皮蛋瘦肉粥').includes('电饭煲'))
   assert.ok(tags('甜辣烤全翅').includes('空气炸锅'))
   assert.ok(tags('炸薯条').includes('空气炸锅'))
+})
+
+test('搜一搜收录：sitemap 允许内容页、屏蔽个人数据页', () => {
+  const fs = require('fs')
+  const path = require('path')
+  const root = path.join(__dirname, '..', 'miniprogram')
+  const app = JSON.parse(fs.readFileSync(path.join(root, 'app.json'), 'utf8'))
+  assert.equal(app.sitemapLocation, 'sitemap.json', 'app.json 需声明 sitemapLocation')
+  const sitemap = JSON.parse(fs.readFileSync(path.join(root, 'sitemap.json'), 'utf8'))
+  const rules = sitemap.rules
+  assert.equal(rules[rules.length - 1].action, 'allow')
+  assert.equal(rules[rules.length - 1].page, '*')
+  const blocked = rules.filter(rule => rule.action === 'disallow').map(rule => rule.page)
+  for (const page of ['pages/records/index', 'pages/shopping/index', 'pages/fridge/index']) {
+    assert.ok(blocked.includes(page), page + ' 不应被索引')
+  }
+  for (const page of blocked) {
+    assert.ok(app.pages.includes(page), page + ' 必须是真实页面')
+  }
+})
+
+test('菜谱详情页标题带菜名与耗时，供长尾搜索命中', () => {
+  const originalWx = global.wx
+  const originalPage = global.Page
+  const storage = new Map()
+  let title = ''
+  global.wx = {
+    getStorageSync: key => (storage.has(key) ? structuredClone(storage.get(key)) : ''),
+    setStorageSync: (key, value) => storage.set(key, structuredClone(value)),
+    showToast: () => {},
+    pageScrollTo: () => {},
+    setNavigationBarTitle: options => { title = options.title }
+  }
+  let registered
+  global.Page = page => { registered = page }
+  delete require.cache[require.resolve('../miniprogram/pages/recipe/index')]
+  require('../miniprogram/pages/recipe/index')
+  try {
+    const page = { ...registered, data: JSON.parse(JSON.stringify(registered.data)) }
+    page.setData = function (update) { Object.assign(this.data, update) }
+    const recipe = getRecipe('tomato-eggs')
+    page.onLoad({ id: 'tomato-eggs' })
+    assert.ok(title.includes(recipe.name), '标题需含菜名')
+    assert.ok(title.includes(String(recipe.minutes)), '标题需含耗时')
+    const share = page.onShareAppMessage()
+    assert.ok(share.title.includes(recipe.name))
+    assert.ok(share.title.includes(String(recipe.minutes)))
+    const timeline = page.onShareTimeline()
+    assert.equal(timeline.query, 'id=' + encodeURIComponent(recipe.id))
+    assert.ok(timeline.title.includes(recipe.name))
+  } finally {
+    global.wx = originalWx
+    global.Page = originalPage
+  }
+})
+
+test('详情页食材/步骤跳转条可达，锚点存在', () => {
+  const fs = require('fs')
+  const path = require('path')
+  const wxml = fs.readFileSync(path.join(__dirname, '../miniprogram/pages/recipe/index.wxml'), 'utf8')
+  assert.ok(wxml.includes('bindtap="jumpToSection"'), '跳转条需绑定 jumpToSection')
+  assert.ok(wxml.includes('id="ingredients"'), '食材清单需有锚点 id')
+  assert.ok(wxml.includes('id="method"'), '做法步骤需有锚点 id')
+  assert.ok(wxml.includes('data-section="ingredients"'))
+  assert.ok(wxml.includes('data-section="method"'))
+
+  const originalWx = global.wx
+  const originalPage = global.Page
+  const scrolled = []
+  global.wx = {
+    getStorageSync: () => '',
+    setStorageSync: () => {},
+    showToast: () => {},
+    setNavigationBarTitle: () => {},
+    pageScrollTo: options => scrolled.push(options)
+  }
+  let registered
+  global.Page = page => { registered = page }
+  delete require.cache[require.resolve('../miniprogram/pages/recipe/index')]
+  require('../miniprogram/pages/recipe/index')
+  try {
+    const page = { ...registered, data: {} }
+    page.setData = function (update) { Object.assign(this.data, update) }
+    page.jumpToSection({ currentTarget: { dataset: { section: 'method' } } })
+    assert.equal(scrolled.length, 1)
+    assert.equal(scrolled[0].selector, '#method')
+    page.jumpToSection({ currentTarget: { dataset: { section: 'ingredients' } } })
+    assert.equal(scrolled[1].selector, '#ingredients')
+    // 无参数时不应报错
+    page.jumpToSection()
+    assert.equal(scrolled.length, 2)
+  } finally {
+    global.wx = originalWx
+    global.Page = originalPage
+  }
 })

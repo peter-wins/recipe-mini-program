@@ -6,12 +6,15 @@
 .match-tabs { display: flex; flex-shrink: 0; align-items: center; gap: 16rpx; }
 .match-tab {
   position: relative;
+  display: flex;
+  align-items: center;
+  min-height: 88rpx;
   padding: 0 2rpx;
   border-radius: 0;
   background: transparent;
   color: var(--theme-muted, #75665e);
-  font-size: 25rpx;
-  line-height: 72rpx;
+  font-size: var(--fs-sm, 24rpx);
+  line-height: 1.4;
   white-space: nowrap;
 }
 .match-tab-active {

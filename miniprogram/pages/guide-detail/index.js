@@ -30,7 +30,8 @@ Page({
   },
 
   applyItem(item) {
-    wx.setNavigationBarTitle({ title: item.name })
+    // 标题带「怎么挑怎么存」这类搜索词，比只有食材名更容易被搜到。
+    wx.setNavigationBarTitle({ title: `${item.name}怎么挑怎么存` })
     this.setData({ item })
   },
 

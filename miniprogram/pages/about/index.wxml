@@ -1,21 +1,52 @@
 <wxs src="../../icons.wxs" module="icons" />
 <view class="about-page theme-page theme-{{themeId}}">
-  <view class="about-hero">
-    <view class="about-logo" aria-hidden="true">
-      <image src="{{icons.path('chef')}}"/>
+  <view class="about-inner">
+    <view class="about-hero">
+      <view class="about-logo" aria-hidden="true">
+        <image src="{{icons.path('chef')}}"/>
+      </view>
+      <view class="about-name">{{appName}}</view>
+      <view class="about-slogan">{{slogan}}</view>
     </view>
-    <view class="about-name">{{appName}}</view>
-    <view class="about-slogan">{{slogan}}</view>
-  </view>
 
-  <view class="about-card">
-    <view class="about-row">
-      <text class="about-row-label">当前版本</text>
-      <text class="about-row-value">{{versionLabel}}</text>
+    <view class="about-card">
+      <view class="about-row">
+        <text class="about-row-label">当前版本</text>
+        <text class="about-row-value">{{versionLabel}}</text>
+      </view>
+
+      <view class="about-section-title">本次更新</view>
+      <view wx:for="{{releaseNotes}}" wx:key="*this" class="about-note">{{item}}</view>
     </view>
-    <view class="about-section-title">本次更新</view>
-    <view wx:for="{{releaseNotes}}" wx:key="*this" class="about-note">{{item}}</view>
-  </view>
 
-  <view class="about-footer">让每一餐都有好心情</view>
+    <view class="about-card">
+      <view class="about-section-title about-section-first">关于这个小程序</view>
+      <navigator class="about-link" url="/pages/privacy/index" hover-class="pressed">
+        <text class="about-link-title">隐私说明</text>
+        <text class="about-link-hint">收集哪些数据、存在哪里</text>
+        <text class="about-arrow">›</text>
+      </navigator>
+      <button class="about-link" open-type="contact">
+        <text class="about-link-title">意见反馈</text>
+        <text class="about-link-hint">用着不顺手的地方告诉我</text>
+        <text class="about-arrow">›</text>
+      </button>
+    </view>
+
+    <view class="about-card">
+      <view class="about-section-title about-section-first">数据来源</view>
+      <view class="about-source-hint">菜谱来自这些开源项目，感谢作者。</view>
+      <view wx:for="{{sources}}" wx:key="name" class="about-source">
+        <view class="about-source-copy">
+          <text class="about-source-name">{{item.name}}</text>
+          <text class="about-source-detail">{{item.detail}}</text>
+        </view>
+        <button class="about-source-copy-btn" data-url="{{item.url}}" bindtap="copySource" aria-label="复制 {{item.name}} 链接">复制链接</button>
+      </view>
+    </view>
+
+    <button class="about-back" bindtap="goBack" aria-label="返回">返回</button>
+
+    <view class="about-footer">让每一餐都有好心情</view>
+  </view>
 </view>

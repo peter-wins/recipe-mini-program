@@ -1,13 +1,13 @@
 .discovery-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 22rpx 18rpx; }
-.discovery-tile { min-width: 0; overflow: hidden; border-radius: var(--card-radius, 28rpx); background: var(--theme-surface, #fff); box-shadow: 0 7rpx 20rpx rgba(72, 48, 34, .045); }
+.discovery-tile { min-width: 0; overflow: hidden; border-radius: var(--card-radius, 28rpx); background: var(--theme-surface, #fff); border: 1rpx solid var(--theme-border, #f0e4d8); }
 .discovery-tile.card-pressed { background: var(--theme-soft, #fff3e8); }
 .discovery-media { position: relative; padding-top: 71%; overflow: hidden; }
 .discovery-photo { position: absolute; inset: 0; display: block; width: 100%; height: 100%; background: var(--theme-placeholder, #f4e5d7); }
-.discovery-no-photo { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10rpx; color: var(--theme-muted, #75665e); font-size: 25rpx; }
+.discovery-no-photo { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10rpx; color: var(--theme-muted, #75665e); font-size: var(--fs-sm, 24rpx); }
 .discovery-no-photo image { width: 44rpx; height: 44rpx; }
 .discovery-body { padding: 17rpx 18rpx 20rpx; }
-.discovery-name { overflow: hidden; font-size: 28rpx; font-weight: 650; line-height: 1.4; text-overflow: ellipsis; white-space: nowrap; }
-.discovery-meta { display: flex; align-items: center; gap: 6rpx; margin-top: 8rpx; color: var(--theme-muted, #75665e); font-size: 24rpx; }
+.discovery-name { overflow: hidden; font-size: var(--fs-md, 28rpx); font-weight: 650; line-height: 1.4; text-overflow: ellipsis; white-space: nowrap; }
+.discovery-meta { display: flex; align-items: center; gap: 6rpx; margin-top: 8rpx; color: var(--theme-muted, #75665e); font-size: var(--fs-sm, 24rpx); }
 .discovery-clock {
   position: relative;
   flex: 0 0 19rpx;
@@ -32,9 +32,9 @@
   column-gap: 12rpx;
   margin-top: 6rpx;
   color: var(--theme-muted, #75665e);
-  font-size: 23rpx;
+  font-size: var(--fs-sm, 24rpx);
 }
-.recipe-stock { display: flex; align-items: center; gap: 7rpx; color: var(--stock-ready, #397454); font-size: 23rpx; overflow-wrap: anywhere; }
+.recipe-stock { display: flex; align-items: center; gap: 7rpx; color: var(--stock-ready, #397454); font-size: var(--fs-sm, 24rpx); overflow-wrap: anywhere; }
 .discovery-body .recipe-stock { margin-top: 10rpx; }
 .recipe-stock text { min-width: 0; }
 .recipe-stock-ready { flex-shrink: 0; }
