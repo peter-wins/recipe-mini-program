@@ -85,6 +85,9 @@
   background: var(--theme-soft, #fff0e5);
   font-size: var(--fs-sm, 24rpx);
 }
+/* 本按钮带 .link 类，会被 app.wxss 的 button.link[disabled]{background:transparent} 置空底色，
+   禁用时要自己把浅底留住，否则胶囊变空心框。 */
+button.purchase-cta[disabled] { background: var(--theme-soft, #fff0e5); }
 .purchase-summary { display: flex; align-items: center; flex-wrap: wrap; gap: 4rpx; margin-bottom: 12rpx; }
 .shopping-note { color: var(--theme-muted, #75665e); font-size: var(--fs-sm, 24rpx); }
 .purchase-summary .link { padding: 0 8rpx; line-height: 62rpx; font-size: var(--fs-sm, 24rpx); }
