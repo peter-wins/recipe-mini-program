@@ -85,11 +85,14 @@
   line-height: 58rpx;
   min-height: 58rpx;
   border: 1rpx solid var(--theme-selected-border, #d9b59a);
+  border-radius: var(--r-full, 999rpx);
   background: var(--theme-soft, #fff0e5);
   color: var(--theme-accent-text, #994017);
   font-size: var(--fs-sm, 24rpx);
   font-weight: 600;
+  transition: opacity .15s, transform .15s;
 }
+.purchase-cta.hover { opacity: .6; }
 button.purchase-cta[disabled] { background: var(--theme-soft, #fff0e5); color: var(--state-disabled, #8f8177); }
 .purchase-summary { display: flex; align-items: center; flex-wrap: wrap; gap: 4rpx; margin-bottom: 12rpx; }
 .shopping-note { color: var(--theme-muted, #75665e); font-size: var(--fs-sm, 24rpx); }
