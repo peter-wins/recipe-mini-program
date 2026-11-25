@@ -6,7 +6,7 @@
 .surprise-card {
   overflow: hidden;
   border: 1rpx solid var(--theme-border, #f0e4d8);
-  border-radius: 28rpx;
+  border-radius: var(--r-lg, 28rpx);
   background: #fff;
 }
 .surprise-image {
@@ -40,7 +40,7 @@
   height: 96rpx;
   padding: 0;
   border: none;
-  border-radius: 999rpx;
+  border-radius: var(--r-full, 999rpx);
   font-size: var(--fs-lg, 32rpx);
   font-weight: 700;
   line-height: 96rpx;
@@ -52,6 +52,6 @@
 .surprise-btn-hover { opacity: .86; }
 .surprise-tip { margin-top: 24rpx; font-size: var(--fs-sm, 24rpx); color: var(--theme-muted, #75665e); text-align: center; }
 
-.surprise-empty { padding: 80rpx 40rpx; border-radius: 28rpx; background: #fff; border: 1rpx solid var(--theme-border, #f0e4d8); text-align: center; }
+.surprise-empty { padding: 80rpx 40rpx; border-radius: var(--r-lg, 28rpx); background: #fff; border: 1rpx solid var(--theme-border, #f0e4d8); text-align: center; }
 .surprise-empty-title { font-size: var(--fs-xl, 36rpx); font-weight: 700; }
 .surprise-empty-text { margin: 18rpx 0 36rpx; font-size: var(--fs-md, 28rpx); color: var(--theme-muted, #75665e); line-height: 1.7; }

@@ -53,7 +53,7 @@
   box-sizing: border-box;
   padding: 0 7rpx;
   border: 2rpx solid var(--theme-page-bg, #fff8f0);
-  border-radius: 999rpx;
+  border-radius: var(--r-full, 999rpx);
   background: var(--theme-accent-text, #994017);
   color: #fff;
   font-size: var(--fs-xs, 22rpx);
@@ -62,7 +62,7 @@
   text-align: center;
 }
 .fridge-edit { flex: 1; display: flex; flex-direction: column; min-height: 0; margin-top: 24rpx; }
-.recipe-search.fridge-search { margin-bottom: 0; border-radius: 22rpx; }
+.recipe-search.fridge-search { margin-bottom: 0; }
 .fridge-search .search-mark { border-color: #75665e; }
 .fridge-search .search-mark::after { background: #75665e; }
 .fridge-picker-head {
@@ -81,7 +81,7 @@
 .fridge-group {
   flex-shrink: 0;
   padding: 0 18rpx;
-  border-radius: 999rpx;
+  border-radius: var(--r-full, 999rpx);
   background: transparent;
   color: var(--theme-muted, #67554c);
   font-size: var(--fs-sm, 24rpx);
@@ -89,7 +89,7 @@
 }
 .fridge-group-active { background: var(--theme-selected, #ffe8d5); color: var(--theme-accent-text, #783414); font-weight: 700; }
 .fridge-options-scroll { flex: 1; min-height: 0; height: 0; }
-.fridge-options { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12rpx; }
+.fridge-options { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--sp-4, 16rpx); }
 .fridge-option {
   display: flex;
   align-items: center;

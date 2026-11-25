@@ -160,7 +160,7 @@
   margin: 0;
   padding: 0;
   border: 1rpx solid var(--theme-accent, #FF8A3D);
-  border-radius: 999rpx;
+  border-radius: var(--r-full, 999rpx);
   background: #fff;
   color: var(--theme-accent-text, #994017);
   font-size: var(--fs-md, 28rpx);
@@ -192,7 +192,7 @@
   flex: 0 0 104rpx;
   min-height: 64rpx;
   padding: 0;
-  border-radius: 999rpx;
+  border-radius: var(--r-full, 999rpx);
   background: var(--theme-accent-solid, #c24610);
   color: #fff;
   font-size: var(--fs-sm, 24rpx);
@@ -212,7 +212,7 @@
   min-height: 76rpx;
   padding: 0 20rpx;
   border: 1rpx solid var(--theme-border, #f0e4d8);
-  border-radius: 999rpx;
+  border-radius: var(--r-full, 999rpx);
   background: var(--theme-soft, #fff0e5);
   color: var(--theme-accent-text, #994017);
   font-size: var(--fs-md, 28rpx);

@@ -9,7 +9,7 @@
   padding: 20rpx;
   box-sizing: border-box;
   border: 2rpx solid transparent;
-  border-radius: 28rpx;
+  border-radius: var(--r-lg, 28rpx);
   background: #fff;
   text-align: left;
 }
@@ -24,7 +24,7 @@
   box-sizing: border-box;
   border-radius: 16rpx;
 }
-.appearance-preview-bar { width: 44rpx; height: 8rpx; border-radius: 999rpx; }
+.appearance-preview-bar { width: 44rpx; height: 8rpx; border-radius: var(--r-full, 999rpx); }
 .appearance-preview-card { height: 20rpx; border-radius: 8rpx; background: rgba(255, 255, 255, .85); }
 .appearance-option-copy { display: flex; flex: 1; align-items: center; justify-content: space-between; min-width: 0; }
 .appearance-option-name { color: var(--theme-text, #4e342c); font-size: var(--fs-lg, 32rpx); font-weight: 700; }

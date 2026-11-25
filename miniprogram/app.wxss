@@ -12,6 +12,24 @@ page {
   --fs-2xl: 44rpx;
   --fs-3xl: 52rpx;
 
+  /* 间距令牌（4rpx 基准，8 档）：只用精确匹配，不改变现有视觉 */
+  --sp-1: 4rpx;
+  --sp-2: 8rpx;
+  --sp-3: 12rpx;
+  --sp-4: 16rpx;
+  --sp-5: 20rpx;
+  --sp-6: 24rpx;
+  --sp-7: 28rpx;
+  --sp-8: 32rpx;
+
+  /* 圆角令牌：--card-radius 是卡片圆的唯一真源，--r-lg 引用它避免两份值 */
+  --card-radius: 28rpx;
+  --r-sm: 12rpx;
+  --r-md: 18rpx;
+  --r-lg: var(--card-radius);
+  --r-xl: 36rpx;
+  --r-full: 999rpx;
+
   background: #FFF8F0;
   color: var(--theme-text, #5D4037);
   font-family: system-ui, sans-serif;
@@ -83,7 +101,7 @@ button[disabled] { opacity: 1; color: var(--state-disabled, #8f8177); }
 .link[disabled], .text-btn[disabled] { background: transparent; }
 
 .primary, .secondary, .text-btn, .icon-btn, .danger-btn, .link, .chip {
-  border-radius: 999rpx;
+  border-radius: var(--r-full, 999rpx);
   transition: opacity .15s, transform .15s;
 }
 .primary, .secondary, .danger-btn { padding: 0 32rpx; font-weight: 600; }
@@ -158,7 +176,7 @@ button[disabled] { opacity: 1; color: var(--state-disabled, #8f8177); }
   width: 104rpx;
   height: 88rpx;
   overflow: hidden;
-  border-radius: 12rpx;
+  border-radius: var(--r-sm, 12rpx);
 }
 .recipe-text { min-width: 0; flex: 1; }
 .recipe-name { font-weight: 700; font-size: var(--fs-xl, 36rpx); }
@@ -304,7 +322,6 @@ button[disabled] { opacity: 1; color: var(--state-disabled, #8f8177); }
   --theme-tint-2: #e4ecdf;
   --theme-tint-3: #f2e6dd;
   --theme-tint-4: #eee6ec;
-  --card-radius: 28rpx;
   --stock-ready: #397454;
   --stock-missing: #c04040;
   --theme-accent-icon: brightness(.68) sepia(.8) saturate(4);
@@ -329,6 +346,7 @@ button[disabled] { opacity: 1; color: var(--state-disabled, #8f8177); }
   --theme-tint-2: #dcead6;
   --theme-tint-3: #e9efe2;
   --theme-tint-4: #e2ebe6;
+  --theme-surface: #fff;
   --theme-accent-icon: grayscale(1) brightness(.65) sepia(1) hue-rotate(58deg) saturate(2);
 }
 .theme-blue {
@@ -348,5 +366,6 @@ button[disabled] { opacity: 1; color: var(--state-disabled, #8f8177); }
   --theme-tint-2: #dceaf5;
   --theme-tint-3: #e6eef8;
   --theme-tint-4: #e4e9f6;
+  --theme-surface: #fff;
   --theme-accent-icon: grayscale(1) brightness(.65) sepia(1) hue-rotate(158deg) saturate(3);
 }

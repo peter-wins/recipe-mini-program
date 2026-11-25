@@ -70,7 +70,7 @@
 .shopping-select[disabled] .shopping-check { border-color: var(--state-disabled, #8f8177); }
 .shopping-row-selected .shopping-select[disabled] .shopping-check { border-color: var(--state-disabled, #8f8177); background: var(--state-disabled, #8f8177); }
 .shopping-export { display: flex; gap: 16rpx; margin-top: 20rpx; }
-.shopping-export .shopping-export-action { display: flex; flex: 1; align-items: center; justify-content: center; gap: 10rpx; min-width: 0; padding: 0 8rpx; border-radius: 999rpx; font-size: var(--fs-sm, 24rpx); }
+.shopping-export .shopping-export-action { display: flex; flex: 1; align-items: center; justify-content: center; gap: 10rpx; min-width: 0; padding: 0 8rpx; border-radius: var(--r-full, 999rpx); font-size: var(--fs-sm, 24rpx); }
 .shopping-export-action image { width: 30rpx; height: 30rpx; filter: var(--theme-accent-icon); }
 .shopping-poster-canvas { position: fixed; left: -9999rpx; top: 0; width: 750px; height: 1px; pointer-events: none; }
 .shopping-entry { display: block; }

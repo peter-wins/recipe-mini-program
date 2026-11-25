@@ -15,7 +15,7 @@
   box-sizing: border-box;
   max-width: 100%;
   padding: 8rpx 16rpx;
-  border-radius: 999rpx;
+  border-radius: var(--r-full, 999rpx);
   background: var(--theme-neutral, #f2eee4);
   color: var(--theme-text, #5d4037);
   font-size: var(--fs-sm, 24rpx);

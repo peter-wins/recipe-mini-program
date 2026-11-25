@@ -1,13 +1,12 @@
 @import "../../styles/recipe-search.wxss";
 
-.picker-search { border-radius: 20rpx; }
 .picker-scenes { display: flex; gap: 12rpx; margin-top: 16rpx; overflow-x: auto; scrollbar-width: none; }
 .picker-scene {
   flex-shrink: 0;
   min-height: 88rpx;
   padding: 0 24rpx;
   border: 2rpx solid var(--theme-border, #eadfd4);
-  border-radius: 28rpx;
+  border-radius: var(--r-lg, 28rpx);
   background: transparent;
   color: var(--theme-muted, #75665e);
   font-size: var(--fs-sm, 24rpx);
@@ -25,7 +24,7 @@
 .picker-filter.is-active { color: var(--theme-accent-text, #994017); font-weight: 700; }
 .picker-caret { width: 9rpx; height: 9rpx; margin-top: -4rpx; border: solid currentColor; border-width: 0 2rpx 2rpx 0; transform: rotate(45deg); }
 .picker-clear { min-width: 62rpx; padding: 0; color: var(--theme-muted, #75665e); font-size: var(--fs-xl, 36rpx); line-height: 72rpx; }
-.picker-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16rpx; }
+.picker-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--sp-4, 16rpx); }
 .picker-choice {
   position: relative;
   display: flex;

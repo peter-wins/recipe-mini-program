@@ -21,7 +21,7 @@
   flex-direction: column;
   gap: 5rpx;
   border: 1rpx solid transparent;
-  border-radius: 18rpx;
+  border-radius: var(--r-md, 18rpx);
   background: transparent;
   font-size: var(--fs-md, 28rpx);
   line-height: 1.2;
@@ -31,7 +31,7 @@
 .calendar-dots { display: flex; justify-content: center; gap: 4rpx; height: 7rpx; }
 .calendar-dot { width: 7rpx; height: 7rpx; border-radius: 50%; background: var(--theme-accent-text, #994017); }
 .calendar-agenda { padding: 20rpx 0 4rpx; }
-.calendar-intent { margin-bottom: 14rpx; padding: 8rpx 12rpx 8rpx 20rpx; border-radius: 18rpx; background: var(--theme-selected, #fbecdc); font-size: var(--fs-md, 28rpx); }
+.calendar-intent { margin-bottom: 14rpx; padding: 8rpx 12rpx 8rpx 20rpx; border-radius: var(--r-md, 18rpx); background: var(--theme-selected, #fbecdc); font-size: var(--fs-md, 28rpx); }
 .calendar-intent .subtle { display: block; font-size: var(--fs-sm, 24rpx); }
 .calendar-meals { padding: 0 22rpx; }
 .calendar-meal { padding: 8rpx 0 14rpx; }
@@ -47,7 +47,7 @@
 .calendar-meal-menu { color: var(--theme-muted, #75665e); font-size: var(--fs-2xl, 44rpx); letter-spacing: 2rpx; text-align: right; }
 .calendar-plan-name { min-width: 0; font-size: var(--fs-sm, 24rpx); line-height: 1.4; overflow-wrap: anywhere; }
 .calendar-dishes { display: grid; gap: 18rpx; padding: 0 0 16rpx; }
-.calendar-dishes-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18rpx 14rpx; }
+.calendar-dishes-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--sp-4, 16rpx); }
 .calendar-dish { display: flex; align-items: center; gap: 18rpx; min-width: 0; border-radius: 16rpx; }
 .calendar-dish-cover { width: 138rpx; height: 138rpx; flex-shrink: 0; overflow: hidden; border-radius: 16rpx; }
 .calendar-dish-copy { flex: 1; min-width: 0; }

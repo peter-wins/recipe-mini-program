@@ -22,7 +22,7 @@
   flex: 0 0 160rpx;
   width: 160rpx;
   height: 100%;
-  border-radius: 18rpx;
+  border-radius: var(--r-md, 18rpx);
   background: var(--theme-neutral, #f1e6d9);
   padding: 8rpx;
 }
@@ -30,7 +30,7 @@
   display: block;
   width: 100%;
   padding: 0 12rpx;
-  border-radius: 12rpx;
+  border-radius: var(--r-sm, 12rpx);
   background: transparent;
   color: var(--theme-muted, #67554c);
   font-size: var(--fs-sm, 24rpx);
@@ -40,13 +40,13 @@
 }
 .guide-group-active { background: var(--theme-surface, #fff); color: var(--theme-accent-text, #783414); font-weight: 700; }
 .guide-list-scroll { flex: 1; min-width: 0; height: 100%; }
-.guide-list { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14rpx; }
+.guide-list { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--sp-4, 16rpx); }
 .guide-card {
   display: block;
   padding: 0;
   overflow: hidden;
   border: 1rpx solid var(--theme-border, #eadfd4);
-  border-radius: 18rpx;
+  border-radius: var(--r-md, 18rpx);
   background: var(--theme-surface, #fff);
   min-height: 0;
   line-height: normal;
@@ -70,7 +70,7 @@
   padding: 0 24rpx;
   overflow: hidden;
   border: 1rpx solid var(--theme-border, #f0e4d8);
-  border-radius: 999rpx;
+  border-radius: var(--r-full, 999rpx);
   background: var(--theme-soft, #fff0e5);
   color: var(--theme-accent-text, #994017);
   font-size: var(--fs-sm, 24rpx);

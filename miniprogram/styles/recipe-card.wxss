@@ -1,4 +1,4 @@
-.discovery-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 22rpx 18rpx; }
+.discovery-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--sp-4, 16rpx); }
 .discovery-tile { min-width: 0; overflow: hidden; border-radius: var(--card-radius, 28rpx); background: var(--theme-surface, #fff); border: 1rpx solid var(--theme-border, #f0e4d8); }
 .discovery-tile.card-pressed { background: var(--theme-soft, #fff3e8); }
 .discovery-media { position: relative; padding-top: 71%; overflow: hidden; }

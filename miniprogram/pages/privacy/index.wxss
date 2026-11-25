@@ -1,5 +1,5 @@
 .privacy-page { min-height: 100vh; box-sizing: border-box; }
-.privacy-inner { max-width: 900rpx; margin: 0 auto; padding: 40rpx 28rpx 80rpx; box-sizing: border-box; }
+.privacy-inner { max-width: 900rpx; margin: 0 auto; padding: 40rpx var(--sp-8, 32rpx) 80rpx; box-sizing: border-box; }
 
 .privacy-head { padding: 12rpx 8rpx 28rpx; }
 .privacy-title { color: var(--theme-text, #4e342c); font-size: var(--fs-2xl, 44rpx); font-weight: 700; line-height: 1.25; }

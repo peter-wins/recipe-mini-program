@@ -16,7 +16,7 @@
   min-height: 88rpx;
   padding: 0 16rpx;
   border: 1rpx solid var(--theme-border, #eadfce);
-  border-radius: 999rpx;
+  border-radius: var(--r-full, 999rpx);
   background: var(--theme-soft, #f8eadc);
   color: var(--theme-accent-text, #994017);
   font-size: var(--fs-sm, 24rpx);
@@ -104,7 +104,7 @@
 .meal-plan-note { font-size: var(--fs-sm, 24rpx); }
 .meal-card-stock { flex-shrink: 0; margin-top: 4rpx; margin-right: 10rpx; white-space: nowrap; }
 .meal-card-menu { flex-shrink: 0; padding: 0 4rpx; color: var(--theme-muted, #75665e); font-size: var(--fs-2xl, 44rpx); line-height: 60rpx; letter-spacing: 2rpx; text-align: right; }
-.meal-dishes { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12rpx; margin-top: 17rpx; }
+.meal-dishes { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--sp-4, 16rpx); margin-top: 17rpx; }
 .meal-dishes-single { grid-template-columns: minmax(0, 1fr); }
 .meal-dish { display: block; min-width: 0; border-radius: 16rpx; }
 .meal-swap-hint { margin-top: 14rpx; color: var(--theme-accent-text, #994017); font-size: var(--fs-sm, 24rpx); }

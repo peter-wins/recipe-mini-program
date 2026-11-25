@@ -5,7 +5,7 @@
   min-height: 86rpx;
   padding: 0 24rpx;
   border: 1rpx solid var(--theme-border, #f0e4d8);
-  border-radius: 999rpx;
+  border-radius: var(--r-full, 999rpx);
   background: #fff;
 }
 .search-mark {
