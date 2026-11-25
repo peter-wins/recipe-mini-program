@@ -161,3 +161,71 @@ test('云端菜谱整版切换，旧 ID 可用，断网使用缓存，错误版�
   await missing.onLoad({ id: 'missing-recipe' })
   assert.equal(missing.data.recipeStatus, 'notFound')
 })
+
+test('云端菜谱换版只刷栈顶页，其余页面靠 onShow 兜底（有意设计，不要改成全刷）', async t => {
+  // 为什么只刷栈顶：栈内其余页面的 onShow 都会调自己的 refreshCatalogData，
+  // 全刷等于在 onShow 之前多做一次，没有收益；而 meal-calendar 的 refreshPlanningData
+  // 在正常分支上有 wx.showToast（pages/meal-calendar/index.js:40），
+  // 后台页面被刷时会误弹提示，records / shopping 的 failure 更是 showModal。
+  // 所以这里锁定「只刷栈顶」，不是遗漏。
+  const { ingredients, recipes } = require('../miniprogram/data')
+  const { cloudImageEnv, cloudStorageBase } = require('../miniprogram/recipe-image')
+  const { syncCatalog } = require('../miniprogram/cloud-catalog')
+
+  const source = { ingredients, recipes }
+  const manifest = { schemaVersion: 1, recipeCount: recipes.length, version: 'd'.repeat(32) }
+  const published = JSON.stringify({ ...manifest, ...source })
+  const files = new Map()
+  const previousWx = global.wx
+  const previousGetPages = global.getCurrentPages
+  const originalNow = Date.now
+  const originalWarn = console.warn
+  t.after(() => {
+    global.wx = previousWx
+    global.getCurrentPages = previousGetPages
+    Date.now = originalNow
+    console.warn = originalWarn
+  })
+  // 模块级 activeVersion 在同进程内跨测试保留，这里推到检查间隔之后再跑，
+  // 否则版本号若与上一条测试相同会命中「版本未变」提前返回。
+  Date.now = () => 1e12
+  console.warn = () => {}
+  // 两层页面栈：首页 → 采购清单（栈顶）。只该刷新栈顶的采购清单，首页交给 onShow。
+  const refreshed = []
+  global.getCurrentPages = () => [
+    { refreshCatalogData() { refreshed.push('home') } },
+    { refreshCatalogData() { refreshed.push('shopping') } }
+  ]
+  global.wx = {
+    env: { USER_DATA_PATH: '/local' },
+    cloud: {
+      database({ env }) {
+        assert.equal(env, cloudImageEnv)
+        return { collection: () => ({ doc: () => ({ async get() { return { data: manifest } } }) }) }
+      },
+      async downloadFile({ fileID }) {
+        assert.equal(fileID, cloudStorageBase + 'recipe-catalog/v1/' + manifest.version + '.json')
+        files.set('/download', published)
+        return { tempFilePath: '/download' }
+      }
+    },
+    getFileSystemManager() {
+      return {
+        accessSync(path) { if (!files.has(path)) throw new Error('ENOENT') },
+        readFileSync: path => files.get(path),
+        readFile({ filePath, success }) { success({ data: files.get(filePath) }) },
+        writeFile({ filePath, data, success }) { files.set(filePath, data); success() },
+        rename({ oldPath, newPath, success }) { files.set(newPath, files.get(oldPath)); files.delete(oldPath); if (success) success() }
+      }
+    }
+  }
+
+  await syncCatalog({ force: true })
+  assert.deepEqual(refreshed, ['shopping'], '只刷新栈顶页，栈内其他页面交给 onShow 兜底')
+
+  // 栈顶页面没有 refreshCatalogData 时不能抛错（组件页 / 弹层页也会进栈）。
+  refreshed.length = 0
+  global.getCurrentPages = () => [{ noCatalogRefresh() {} }]
+  await syncCatalog({ force: true })
+  assert.deepEqual(refreshed, [], '栈顶没有刷新方法时静默跳过，不抛错')
+})

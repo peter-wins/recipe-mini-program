@@ -22,6 +22,14 @@
       </view>
     </view>
 
+    <view wx:if="{{syncState === 'loading'}}" class="sync-bar" aria-live="polite">
+      <view class="sync-bar-dot" aria-hidden="true"></view>
+      <text class="sync-bar-text">正在更新食材指南…</text>
+    </view>
+    <view wx:elif="{{syncState === 'offline'}}" class="sync-bar sync-bar-offline" aria-live="polite">
+      <text class="sync-bar-text">暂时连不上云端，先用手机里的指南</text>
+    </view>
+
     <view class="guide-body">
       <scroll-view wx:if="{{!searching}}" class="guide-groups" scroll-y enhanced show-scrollbar="{{false}}">
         <button wx:for="{{groups}}" wx:key="*this" class="guide-group {{groupIndex === index ? 'guide-group-active' : ''}}" data-index="{{index}}" bindtap="selectGroup" aria-pressed="{{groupIndex === index}}">{{item}}</button>

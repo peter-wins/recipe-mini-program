@@ -1,6 +1,7 @@
 const { applyTheme } = require('../../theme')
 const { listIngredients, getGuideGroups } = require('../../guide-data')
 const { readHistory, saveHistory, clearHistory } = require('../../search-history')
+const { subscribe } = require('../../cloud-guide')
 
 Page({
   data: {
@@ -10,11 +11,20 @@ Page({
     searching: false,
     focused: false,
     searchHistory: [],
-    visibleIngredients: []
+    visibleIngredients: [],
+    syncState: 'idle'   // idle | loading | offline
   },
 
   onLoad() {
+    // 云端整版替换期间给局部反馈，避免列表毫无征兆地整体换掉。
+    this.unsubscribeSync = subscribe(({ status }) => {
+      if (this.data.syncState !== status) this.setData({ syncState: status })
+    })
     this.refreshGuideData()
+  },
+
+  onUnload() {
+    if (typeof this.unsubscribeSync === 'function') this.unsubscribeSync()
   },
 
   onShow() {

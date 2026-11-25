@@ -56,6 +56,10 @@ async function checkRelease() {
   activeVersion = source.version
   cacheRelease(fs, text)
 
+  // 只刷栈顶页是有意设计，不要改成全刷：10 个页面里 9 个的 onShow 会各自刷新，
+  // compose-meal 则由 recipe-picker 的 pageLifetimes.show 兜底，全刷只是多做一次；
+  // 而 meal-calendar 的 refreshPlanningData 在正常分支上有 wx.showToast
+  // （pages/meal-calendar/index.js:40），后台页面被刷时会误弹提示。
   const pages = typeof getCurrentPages === 'function' ? getCurrentPages() : []
   const page = pages[pages.length - 1]
   if (page && typeof page.refreshCatalogData === 'function') page.refreshCatalogData()

@@ -137,3 +137,79 @@ test('食材指南构建脚本产出版本化发布文件', () => {
   assert.ok(Array.isArray(release.groups) && release.groups.length)
   assert.ok(release.ingredients.some(item => item.id === 'spinach'))
 })
+
+test('食材指南同步会广播 loading/idle 状态，页面可订阅与退订', async t => {
+  const { bundled, getGuideGroups, replaceGuide } = require('../miniprogram/guide-data')
+  const { cloudImageEnv, cloudStorageBase } = require('../miniprogram/recipe-image')
+  const { syncGuide, subscribe } = require('../miniprogram/cloud-guide')
+
+  const source = { groups: getGuideGroups(), ingredients: bundled }
+  const manifest = { schemaVersion: 1, ingredientCount: source.ingredients.length, version: 'b'.repeat(32) }
+  const published = JSON.stringify({ ...manifest, ...source })
+  let now = 1000
+  let online = true
+  const files = new Map()
+  const previousWx = global.wx
+  const previousGetPages = global.getCurrentPages
+  const originalNow = Date.now
+  const originalWarn = console.warn
+  t.after(() => {
+    global.wx = previousWx
+    global.getCurrentPages = previousGetPages
+    Date.now = originalNow
+    console.warn = originalWarn
+    replaceGuide({ groups: source.groups, ingredients: bundled })
+  })
+  Date.now = () => now
+  console.warn = () => {}
+  global.getCurrentPages = () => []
+  global.wx = {
+    env: { USER_DATA_PATH: '/local' },
+    cloud: {
+      database({ env }) {
+        assert.equal(env, cloudImageEnv)
+        return { collection: () => ({ doc: () => ({ async get() {
+          if (!online) throw new Error('offline')
+          return { data: manifest }
+        } }) }) }
+      },
+      async downloadFile({ fileID }) {
+        assert.equal(fileID, cloudStorageBase + 'guide-catalog/v1/' + manifest.version + '.json')
+        files.set('/download', published)
+        return { tempFilePath: '/download' }
+      }
+    },
+    getFileSystemManager() {
+      return {
+        accessSync(path) { if (!files.has(path)) throw new Error('ENOENT') },
+        readFileSync: path => files.get(path),
+        readFile({ filePath, success }) { success({ data: files.get(filePath) }) },
+        writeFile({ filePath, data, success }) { files.set(filePath, data); success() },
+        rename({ oldPath, newPath, success }) { files.set(newPath, files.get(oldPath)); files.delete(oldPath); if (success) success() }
+      }
+    }
+  }
+
+  // 成功路径：loading → idle
+  const states = []
+  const unsubscribe = subscribe(({ status }) => states.push(status))
+  await syncGuide()
+  assert.deepEqual(states, ['loading', 'idle'], '同步期间先广播 loading，完成后回到 idle')
+
+  // 退订后不再收到状态
+  unsubscribe()
+  now += 6 * 60 * 1000
+  await syncGuide()
+  assert.deepEqual(states, ['loading', 'idle'], '退订后不再回调')
+
+  // 同一进程内已成功同步过（activeVersion 有值），此时失败应静默降级为 idle。
+  online = false
+  const degraded = []
+  const unsubscribeDegraded = subscribe(({ status }) => degraded.push(status))
+  await syncGuide({ force: true })
+  unsubscribeDegraded()
+  assert.deepEqual(degraded, ['loading', 'idle'], '有可用版本时失败静默降级，不打扰用户')
+
+  // 非函数入参不应抛错，且返回可调用的退订函数
+  assert.doesNotThrow(() => subscribe(null)())
+})
