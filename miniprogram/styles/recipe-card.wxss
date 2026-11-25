@@ -6,7 +6,7 @@
 .discovery-no-photo { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10rpx; color: var(--theme-muted, #75665e); font-size: var(--fs-sm, 24rpx); }
 .discovery-no-photo image { width: 44rpx; height: 44rpx; }
 .discovery-body { padding: 17rpx 18rpx 20rpx; }
-.discovery-name { overflow: hidden; font-size: var(--fs-md, 28rpx); font-weight: 650; line-height: 1.4; text-overflow: ellipsis; white-space: nowrap; }
+.discovery-name { overflow: hidden; font-size: var(--fs-md, 28rpx); font-weight: 600; line-height: 1.4; text-overflow: ellipsis; white-space: nowrap; }
 .discovery-meta { display: flex; align-items: center; gap: 6rpx; margin-top: 8rpx; color: var(--theme-muted, #75665e); font-size: var(--fs-sm, 24rpx); }
 .discovery-clock {
   position: relative;

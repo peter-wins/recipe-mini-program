@@ -4,7 +4,7 @@
 .meal-hero { flex-wrap: wrap; align-items: center; gap: 12rpx; }
 .meal-hero-copy { flex: 1 1 240rpx; }
 .meal-hero-copy, .meal-card-copy { min-width: 0; }
-.meal-page-title { font-size: var(--fs-3xl, 52rpx); font-weight: 750; line-height: 1.2; }
+.meal-page-title { font-size: var(--fs-3xl, 52rpx); font-weight: 700; line-height: 1.2; }
 .meal-subtitle { margin-top: 7rpx; font-size: var(--fs-sm, 24rpx); }
 .meal-add, .meal-buy {
   box-sizing: border-box;
@@ -20,7 +20,7 @@
   background: var(--theme-soft, #f8eadc);
   color: var(--theme-accent-text, #994017);
   font-size: var(--fs-sm, 24rpx);
-  font-weight: 650;
+  font-weight: 600;
   line-height: 1.3;
   white-space: nowrap;
 }
@@ -144,7 +144,7 @@
   background: var(--theme-selected, #fbecdc);
   color: var(--theme-accent-text, #994017);
   font-size: var(--fs-md, 28rpx);
-  font-weight: 650;
+  font-weight: 600;
   line-height: 80rpx;
 }
 .meal-expand-arrow {

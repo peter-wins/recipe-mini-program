@@ -1,5 +1,8 @@
 <view class="theme-page theme-{{themeId}}">
 <view class="screen">
+  <view class="page-head">
+    <view class="headline">{{pageTitle}}</view>
+  </view>
   <view wx:if="{{hasHistory}}" class="records-actions">
     <button class="link" bindtap="clearHistory">清空历史</button>
   </view>

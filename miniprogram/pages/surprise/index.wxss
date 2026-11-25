@@ -1,6 +1,6 @@
 .surprise-screen { padding-top: 40rpx; }
 .surprise-head { margin-bottom: 28rpx; }
-.surprise-title { font-size: var(--fs-2xl, 44rpx); font-weight: 800; color: var(--theme-text, #3d2b21); letter-spacing: 1rpx; }
+.surprise-title { font-size: var(--fs-2xl, 44rpx); font-weight: 700; color: var(--theme-text, #3d2b21); letter-spacing: 1rpx; }
 .surprise-sub { margin-top: 10rpx; font-size: var(--fs-md, 28rpx); color: var(--theme-muted, #75665e); }
 
 .surprise-card {
@@ -20,11 +20,11 @@
   align-items: center;
   justify-content: center;
   font-size: var(--fs-2xl, 44rpx);
-  font-weight: 800;
+  font-weight: 700;
   color: var(--theme-accent-text, #994017);
 }
 .surprise-body { padding: 32rpx 30rpx 34rpx; }
-.surprise-name { font-size: var(--fs-2xl, 44rpx); font-weight: 800; color: var(--theme-text, #3d2b21); }
+.surprise-name { font-size: var(--fs-2xl, 44rpx); font-weight: 700; color: var(--theme-text, #3d2b21); }
 .surprise-reason {
   margin-top: 14rpx;
   font-size: var(--fs-md, 28rpx);

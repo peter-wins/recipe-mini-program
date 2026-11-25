@@ -38,7 +38,7 @@ page {
 }
 .headline {
   font-size: var(--fs-3xl, 52rpx);
-  font-weight: 800;
+  font-weight: 700;
   line-height: 1.2;
   letter-spacing: 2rpx;
 }
@@ -80,7 +80,7 @@ button[disabled] { opacity: .55; color: var(--state-disabled, #b9aca2); }
   border-radius: 999rpx;
   transition: opacity .15s, transform .15s;
 }
-.primary, .secondary, .danger-btn { padding: 0 32rpx; font-weight: 650; }
+.primary, .secondary, .danger-btn { padding: 0 32rpx; font-weight: 600; }
 
 /* 主要操作：主题主色 */
 .primary {
@@ -128,8 +128,8 @@ button[disabled] { opacity: .55; color: var(--state-disabled, #b9aca2); }
 
 /* ---------- 列表标题 ---------- */
 .list-heading { margin-top: 36rpx; padding-bottom: 16rpx; }
-.section { font-weight: 750; font-size: var(--fs-xl, 36rpx); color: var(--theme-text, #5D4037); }
-.empty { color: var(--theme-muted, #75665e); padding: 32rpx 0; text-align: center; }
+.section { font-weight: 700; font-size: var(--fs-xl, 36rpx); color: var(--theme-text, #5D4037); }
+.empty { color: var(--theme-muted, #75665e); font-size: var(--fs-md, 28rpx); line-height: 1.6; padding: 48rpx 0; text-align: center; }
 
 /* ---------- 菜谱卡片 ---------- */
 .recipe-card {

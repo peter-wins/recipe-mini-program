@@ -14,7 +14,7 @@
   padding-right: 24rpx;
 }
 .guide-intro { margin-top: 8rpx; }
-.guide-intro .section { font-size: var(--fs-xl, 36rpx); }
+.guide-intro .section { font-size: var(--fs-3xl, 52rpx); }
 .guide-intro .subtle { margin-top: 6rpx; }
 .recipe-search.guide-search { margin-top: 18rpx; margin-bottom: 18rpx; }
 .guide-body { flex: 1; display: flex; gap: 16rpx; min-height: 0; }
@@ -54,7 +54,7 @@
 .guide-card-image { height: 132rpx; display: flex; align-items: center; justify-content: center; overflow: hidden; }
 .guide-card-image .guide-card-cover { width: 100%; height: 100%; }
 .guide-card-copy { padding: 12rpx 14rpx 16rpx; text-align: left; }
-.guide-card-name { color: var(--theme-text, #5d4037); font-size: var(--fs-md, 28rpx); font-weight: 650; }
+.guide-card-name { color: var(--theme-text, #5d4037); font-size: var(--fs-md, 28rpx); font-weight: 600; }
 .guide-card-count { margin-top: 4rpx; color: var(--theme-muted, #75665e); font-size: var(--fs-xs, 22rpx); }
 .guide-empty { padding: 40rpx 0; }
 

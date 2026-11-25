@@ -161,6 +161,9 @@
   <meal-pairings wx:elif="{{view === 'meals'}}" id="meal-pairings" inventory="{{selected}}" inventory-ready="{{inventoryReady}}" calendar-date="{{calendarDate}}" calendar-slot="{{calendarSlot}}"/>
 
   <block wx:elif="{{view === 'profile'}}">
+    <view class="page-head">
+      <view class="headline">我的</view>
+    </view>
     <view class="profile-head">
       <view class="profile-avatar" aria-hidden="true"><image src="{{icons.path('chef')}}"/></view>
       <view class="profile-copy">

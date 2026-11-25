@@ -2,7 +2,7 @@
 .privacy-inner { max-width: 900rpx; margin: 0 auto; padding: 40rpx 28rpx 80rpx; box-sizing: border-box; }
 
 .privacy-head { padding: 12rpx 8rpx 28rpx; }
-.privacy-title { color: var(--theme-text, #4e342c); font-size: var(--fs-2xl, 44rpx); font-weight: 750; line-height: 1.25; }
+.privacy-title { color: var(--theme-text, #4e342c); font-size: var(--fs-2xl, 44rpx); font-weight: 700; line-height: 1.25; }
 .privacy-updated { margin-top: 10rpx; color: var(--theme-muted, #75665e); font-size: var(--fs-sm, 24rpx); }
 
 .privacy-card {

@@ -7,11 +7,11 @@ const { readFavorites } = require('../../favorites')
 const titles = { history: '浏览历史', cooked: '烹饪记录', favorites: '我的收藏' }
 
 Page({
-  data: { type: 'history', recipes: [], hasHistory: false },
+  data: { type: 'history', recipes: [], hasHistory: false, pageTitle: '浏览历史' },
 
   onLoad(options) {
     const type = options.type === 'cooked' || options.type === 'favorites' ? options.type : 'history'
-    this.setData({ type })
+    this.setData({ type, pageTitle: titles[type] })
     wx.setNavigationBarTitle({ title: titles[type] })
   },
 

@@ -19,7 +19,7 @@
 }
 .match-tab-active {
   color: var(--theme-accent-text, #994017);
-  font-weight: 650;
+  font-weight: 600;
 }
 .match-tab-active::before {
   position: absolute;

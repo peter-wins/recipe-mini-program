@@ -1,7 +1,7 @@
 .shopping-head { padding: 12rpx 0 24rpx; }
 .shopping-head-row { gap: 16rpx; min-height: 148rpx; }
 .shopping-head-copy { flex: 1; min-width: 0; }
-.shopping-title { color: var(--theme-text, #4e342c); font-size: var(--fs-3xl, 52rpx); font-weight: 750; line-height: 1.2; }
+.shopping-title { color: var(--theme-text, #4e342c); font-size: var(--fs-3xl, 52rpx); font-weight: 700; line-height: 1.2; }
 .shopping-subtitle { margin-top: 7rpx; color: var(--theme-muted, #75665e); font-size: var(--fs-sm, 24rpx); }
 /* 菜篮插画：悬浮在添加卡片上方，底边紧贴卡片上边线，像放在卡片上 */
 .shopping-hero-art {
@@ -88,7 +88,7 @@
 .shopping-entry-actions { display: flex; justify-content: flex-end; align-items: center; gap: 12rpx; margin-top: 14rpx; }
 /* 「加入清单」与文字「取消」视觉齐平：局部降到 76rpx，不改全局最小点击区规范 */
 .shopping-entry-actions .primary { min-height: 76rpx; line-height: 76rpx; }
-.shopping-item-name { display: inline; min-width: 0; font-size: var(--fs-lg, 32rpx); font-weight: 650; line-height: 1.35; overflow-wrap: anywhere; }
+.shopping-item-name { display: inline; min-width: 0; font-size: var(--fs-lg, 32rpx); font-weight: 600; line-height: 1.35; overflow-wrap: anywhere; }
 .shopping-quantity { min-width: 0; color: var(--theme-muted, #75665e); font-size: var(--fs-sm, 24rpx); overflow-wrap: anywhere; }
 .shopping-chevron { flex: 0 0 12rpx; height: 12rpx; margin: 0 4rpx; border-top: 2rpx solid var(--theme-muted, #75665e); border-right: 2rpx solid var(--theme-muted, #75665e); transform: rotate(45deg); }
 .shopping-chevron-open { transform: rotate(135deg); }
