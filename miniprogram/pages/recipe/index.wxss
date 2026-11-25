@@ -76,6 +76,15 @@
 .fact-editable { color: var(--theme-accent-text, #994017); }
 .recipe-section { margin-top: 26rpx; min-height: 62rpx; padding-bottom: 10rpx; }
 .recipe-section .link { line-height: 62rpx; }
+/* 「加入采购清单」是本页唯一转化动作，用描边胶囊与普通「查看更多」区分开，但仍留在标题行内不破坏布局 */
+.purchase-cta {
+  padding: 0 20rpx;
+  line-height: 58rpx;
+  min-height: 58rpx;
+  border: 1rpx solid var(--theme-selected-border, #d9b59a);
+  background: var(--theme-soft, #fff0e5);
+  font-size: var(--fs-sm, 24rpx);
+}
 .purchase-summary { display: flex; align-items: center; flex-wrap: wrap; gap: 4rpx; margin-bottom: 12rpx; }
 .shopping-note { color: var(--theme-muted, #75665e); font-size: var(--fs-sm, 24rpx); }
 .purchase-summary .link { padding: 0 8rpx; line-height: 62rpx; font-size: var(--fs-sm, 24rpx); }
@@ -84,6 +93,8 @@
 .ingredient-section + .ingredient-section { border-top: 1rpx solid var(--theme-border, #f0e4d8); }
 .ingredient-section.ingredient-continuation { padding-top: 0; border-top: 0; }
 .ingredient-heading { padding: 0 2rpx 6rpx; color: var(--theme-muted, #75665e); font-size: var(--fs-sm, 24rpx); font-weight: 600; }
+/* 可选食材标题：与必需食材之间留一点呼吸，但比独立分组紧凑。必须写在 .ingredient-heading 之后。 */
+.ingredient-heading.ingredient-heading-optional { padding-top: 14rpx; }
 .ingredient-line {
   display: flex;
   align-items: center;
@@ -152,7 +163,7 @@
 .detail-saved { color: var(--theme-accent-text, #994017); font-weight: 700; }
 .detail-saved image { filter: var(--theme-accent-icon); }
 .detail-prev { color: var(--theme-accent-text, #994017); line-height: 86rpx; }
-.detail-prev[disabled] { background: transparent; color: var(--state-disabled, #8f8177); }
+button.detail-prev[disabled] { background: transparent; color: var(--state-disabled, #8f8177); }
 .detail-bar .detail-prev { flex: 0 0 118rpx; }
 .detail-timer {
   flex: 0 0 130rpx;

@@ -56,7 +56,7 @@
 
       <view id="ingredients" class="list-heading recipe-section">
         <text class="section">食材清单</text>
-        <button wx:if="{{inventoryReady && (purchaseItems.length || hasSavedPurchase)}}" class="link" bindtap="savePurchaseItems" disabled="{{savingPurchase}}" loading="{{savingPurchase}}">{{hasSavedPurchase ? '更新采购项' : '加入采购清单'}}</button>
+        <button wx:if="{{inventoryReady && (purchaseItems.length || hasSavedPurchase)}}" class="link purchase-cta" bindtap="savePurchaseItems" disabled="{{savingPurchase}}" loading="{{savingPurchase}}" hover-class="hover">{{hasSavedPurchase ? '更新采购项' : '加入采购清单'}}</button>
         <navigator wx:else class="link" url="/pages/shopping/index">看采购清单 ›</navigator>
       </view>
       <view wx:if="{{inventoryReady}}" class="purchase-summary">
@@ -67,7 +67,8 @@
       <view class="ingredient-list">
         <block wx:for="{{recipe.groups}}" wx:key="key" wx:for-item="group">
           <view wx:if="{{group.items.length}}" class="ingredient-section {{group.key === 'optional' ? 'ingredient-continuation' : ''}}">
-            <view wx:if="{{group.key !== 'optional'}}" class="ingredient-heading">{{group.key === 'required' ? '食材' : group.label}}</view>
+            <!-- 可选食材也要有标题：否则与必需食材视觉连成一张表，做菜时会误当必需品准备 -->
+            <view class="ingredient-heading {{group.key === 'optional' ? 'ingredient-heading-optional' : ''}}">{{group.key === 'required' ? '食材' : (group.key === 'optional' ? '可选（不影响成菜）' : group.label)}}</view>
             <block wx:for="{{group.items}}" wx:key="rowKey">
               <button wx:if="{{inventoryReady && group.key === 'required'}}" class="ingredient-line purchase-line" bindtap="togglePurchaseItem" data-id="{{item.id}}" aria-pressed="{{!!purchaseNeeded[item.id]}}" aria-label="{{item.name + (purchaseNeeded[item.id] ? '，待买，点按取消勾选' : '，手边有，点按勾选为待买')}}">
                 <template is="ingredientText" data="{{item, showStatus: true, needed: purchaseNeeded[item.id]}}"/>
