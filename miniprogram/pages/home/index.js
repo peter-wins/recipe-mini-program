@@ -291,6 +291,11 @@ Page({
     this.updateResults({ librarySearch: '' })
   },
 
+  // 空态出路：一次清掉搜索词与三个筛选，回到全量列表。
+  clearLibraryFilters() {
+    this.updateResults({ ...defaultLibraryFilters })
+  },
+
   changeCategory(event) {
     this.updateResults({ categoryIndex: Number(event.detail.value) })
   },

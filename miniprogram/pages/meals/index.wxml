@@ -90,7 +90,7 @@
       </scroll-view>
       <view class="meal-sheet-actions">
         <button class="link" bindtap="closeMealShopping">取消</button>
-        <button class="primary" bindtap="confirmMealShopping">加入采购清单</button>
+        <button class="primary" bindtap="confirmMealShopping" hover-class="hover">加入采购清单</button>
       </view>
     </view>
   </view>

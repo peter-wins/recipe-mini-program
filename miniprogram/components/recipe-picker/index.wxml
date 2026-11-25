@@ -49,7 +49,7 @@
           </view>
         </scroll-view>
       </view>
-      <button class="primary picker-confirm" bindtap="confirm" disabled="{{!selected.length || busy}}" loading="{{busy}}">{{confirmText}}</button>
+      <button class="primary picker-confirm" bindtap="confirm" disabled="{{!selected.length || busy}}" loading="{{busy}}" hover-class="hover">{{confirmText}}</button>
     </view>
   </view>
 </view>

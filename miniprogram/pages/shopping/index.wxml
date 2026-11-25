@@ -31,10 +31,13 @@
       </view>
       <view class="shopping-entry-actions">
         <button class="link" bindtap="closeManualEntry">取消</button>
-        <button class="primary" form-type="submit">加入清单</button>
+        <button class="primary" form-type="submit" hover-class="hover">加入清单</button>
       </view>
     </form>
-    <view wx:if="{{!items.length && !manualOpen}}" class="empty">目前没有待买的东西。</view>
+    <view wx:if="{{!items.length && !manualOpen}}" class="empty">
+      <view>目前没有待买的东西。</view>
+      <navigator class="secondary empty-action" url="/pages/home/index?view=library" open-type="redirect" hover-class="hover">去菜谱挑食材</navigator>
+    </view>
     <block wx:if="{{items.length}}">
       <view class="shopping-list">
         <view class="row shopping-list-head">

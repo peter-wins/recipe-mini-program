@@ -100,3 +100,4 @@
   line-height: 86rpx;
 }
 .detail-state-retry { display: block; margin: 12rpx auto 0; }
+.detail-state-primary.hover { opacity: .75; transform: scale(.98); }

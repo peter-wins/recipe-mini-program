@@ -152,7 +152,7 @@
 .detail-saved { color: var(--theme-accent-text, #994017); font-weight: 700; }
 .detail-saved image { filter: var(--theme-accent-icon); }
 .detail-prev { color: var(--theme-accent-text, #994017); line-height: 86rpx; }
-.detail-prev[disabled] { background: transparent; color: #8a7b70; }
+.detail-prev[disabled] { background: transparent; color: var(--state-disabled, #8f8177); }
 .detail-bar .detail-prev { flex: 0 0 118rpx; }
 .detail-timer {
   flex: 0 0 130rpx;

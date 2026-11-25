@@ -151,7 +151,10 @@
         </picker>
       </view>
     </view>
-    <view wx:if="{{!results.length}}" class="empty">没有找到符合条件的菜谱。</view>
+    <view wx:if="{{!results.length}}" class="empty">
+      <view>没有找到符合条件的菜谱。</view>
+      <button wx:if="{{librarySearch || categoryIndex || tagIndex || methodIndex}}" class="secondary empty-action" bindtap="clearLibraryFilters" hover-class="hover">清除筛选</button>
+    </view>
     <view wx:else class="discovery-grid library-grid">
       <template wx:for="{{libraryCards}}" wx:key="id" is="discoveryTile" data="{{recipe: item, showNutrition: (tagIndex || methodIndex) && !!item.nutrition}}"/>
     </view>

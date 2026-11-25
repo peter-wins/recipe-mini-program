@@ -61,7 +61,7 @@ page, .theme-page {
   --state-warning-soft: #fdf1dc;
   --state-success: #397454;
   --state-success-soft: #e7f2ea;
-  --state-disabled: #b9aca2;
+  --state-disabled: #8f8177;
 }
 
 button {
@@ -74,7 +74,13 @@ button {
   min-height: 88rpx; /* 统一最小点击区 */
 }
 button::after { border: 0; }
-button[disabled] { opacity: .55; color: var(--state-disabled, #b9aca2); }
+button[disabled] { opacity: 1; color: var(--state-disabled, #8f8177); }
+/* 禁用态独立中性底：只给有底色的按钮，文字型按钮保持透明（避免禁用时变灰块） */
+.primary[disabled], .secondary[disabled] {
+  background: var(--theme-neutral, #f1e6d9);
+  border-color: var(--theme-border, #f0e4d8);
+}
+.link[disabled], .text-btn[disabled] { background: transparent; }
 
 .primary, .secondary, .text-btn, .icon-btn, .danger-btn, .link, .chip {
   border-radius: 999rpx;
@@ -130,6 +136,8 @@ button[disabled] { opacity: .55; color: var(--state-disabled, #b9aca2); }
 .list-heading { margin-top: 36rpx; padding-bottom: 16rpx; }
 .section { font-weight: 700; font-size: var(--fs-xl, 36rpx); color: var(--theme-text, #5D4037); }
 .empty { color: var(--theme-muted, #75665e); font-size: var(--fs-md, 28rpx); line-height: 1.6; padding: 48rpx 0; text-align: center; }
+/* 空态出路：一句解释 + 一个可点的下一步，避免用户卡在死胡同 */
+.empty-action { display: inline-block; margin-top: 24rpx; min-height: 88rpx; padding: 0 40rpx; line-height: 88rpx; font-size: var(--fs-md, 28rpx); }
 
 /* ---------- 菜谱卡片 ---------- */
 .recipe-card {
@@ -276,7 +284,7 @@ button[disabled] { opacity: .55; color: var(--state-disabled, #b9aca2); }
 .cooking-progress { margin-bottom: 10rpx; color: var(--theme-accent-text, #994017); font-size: var(--fs-md, 28rpx); }
 .cooking-step { font-size: var(--fs-xl, 36rpx); }
 .cooking-controls { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12rpx; margin-top: 14rpx; }
-.cooking-controls button[disabled] { background: transparent; color: #897f72; }
+.cooking-controls button[disabled] { background: transparent; color: var(--state-disabled, #8f8177); }
 
 .theme-page {
   --theme-page-bg: #fff8f0;

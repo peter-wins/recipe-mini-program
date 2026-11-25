@@ -131,12 +131,12 @@
       <image class="meal-calendar-icon" src="{{icons.path('calendar')}}" aria-hidden="true"/>
       <text>安排到日历</text>
     </button>
-    <button class="primary" bindtap="startCooking">开始烹饪</button>
+    <button class="primary" bindtap="startCooking" hover-class="hover">开始烹饪</button>
   </block>
   <block wx:else>
     <button class="detail-prev" disabled="{{cookingIndex === 0}}" bindtap="previousStep">上一步</button>
     <button wx:if="{{recipe.steps[cookingIndex].seconds}}" class="detail-timer" bindtap="startStepTimer" data-step="{{recipe.steps[cookingIndex].number}}" data-seconds="{{recipe.steps[cookingIndex].seconds}}" data-label="{{recipe.steps[cookingIndex].timerText}}" aria-label="为当前步骤计时 {{recipe.steps[cookingIndex].timerText}}">⏱ 计时</button>
-    <button class="primary" bindtap="nextStep">{{cookingIndex === recipe.steps.length - 1 ? '完成' : '下一步'}}</button>
+    <button class="primary" bindtap="nextStep" hover-class="hover">{{cookingIndex === recipe.steps.length - 1 ? '完成' : '下一步'}}</button>
   </block>
 </view>
 </view>

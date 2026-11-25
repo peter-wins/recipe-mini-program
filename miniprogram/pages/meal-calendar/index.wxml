@@ -92,7 +92,7 @@
       </scroll-view>
       <view class="row calendar-purchase-actions">
         <navigator class="calendar-shopping-link" url="/pages/shopping/index" bindtap="closePurchasePreview">采购清单 ›</navigator>
-        <button wx:if="{{purchasePreview.items.length}}" class="primary" bindtap="confirmPurchasePreview">加入采购清单</button>
+        <button wx:if="{{purchasePreview.items.length}}" class="primary" bindtap="confirmPurchasePreview" hover-class="hover">加入采购清单</button>
       </view>
     </view>
   </view>
