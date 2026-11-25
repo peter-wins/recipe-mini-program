@@ -49,15 +49,9 @@
         </view>
       </view>
 
-      <view class="recipe-jump">
-        <button class="recipe-jump-item" bindtap="jumpToSection" data-section="ingredients" aria-label="跳到食材清单">食材清单</button>
-        <button class="recipe-jump-item" bindtap="jumpToSection" data-section="method" aria-label="跳到做法步骤">做法步骤</button>
-      </view>
-
       <view id="ingredients" class="list-heading recipe-section">
         <text class="section">食材清单</text>
         <button wx:if="{{inventoryReady && (purchaseItems.length || hasSavedPurchase)}}" class="purchase-cta" bindtap="savePurchaseItems" disabled="{{savingPurchase}}" loading="{{savingPurchase}}" hover-class="hover">{{hasSavedPurchase ? '更新采购项' : '加入采购清单'}}</button>
-        <navigator wx:else class="link" url="/pages/shopping/index">看采购清单 ›</navigator>
       </view>
       <view wx:if="{{inventoryReady}}" class="purchase-summary">
         <text class="shopping-note">{{hasSavedPurchase && !purchaseItems.length ? '更新后会移除这道菜的采购项' : (purchaseItems.length ? '已勾选 ' + purchaseItems.length + ' 项待买' : '这次无需补货，点食材可勾选')}}</text>
@@ -93,7 +87,6 @@
         <view class="step-actions">
           <button wx:if="{{recipe.steps[0].image}}" class="link" bindtap="toggleStepText">{{showStepText ? '看步骤图' : '看文字'}}</button>
           <button wx:if="{{cookingIndex >= 0}}" class="link" bindtap="endCooking">看全部</button>
-          <text wx:else class="subtle">{{recipe.steps.length}} 步</text>
         </view>
       </view>
       <block wx:if="{{cookingIndex >= 0}}">

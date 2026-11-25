@@ -233,21 +233,3 @@ button.detail-prev[disabled] { background: transparent; color: var(--state-disab
 .recipe-load-error .link { display: block; margin: 10rpx auto 0; }
 
 /* 食材 / 步骤 跳转条（P0-2）：避免只想看做法的人划过整份食材清单 */
-.recipe-jump {
-  display: flex;
-  gap: 12rpx;
-  margin: 18rpx 0 4rpx;
-}
-.recipe-jump-item {
-  flex: 1;
-  min-height: 76rpx;
-  padding: 0 20rpx;
-  border: 1rpx solid var(--theme-border, #f0e4d8);
-  border-radius: var(--r-full, 999rpx);
-  background: var(--theme-soft, #fff0e5);
-  color: var(--theme-accent-text, #994017);
-  font-size: var(--fs-md, 28rpx);
-  font-weight: 600;
-  line-height: 74rpx;
-  text-align: center;
-}

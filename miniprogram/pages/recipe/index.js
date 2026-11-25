@@ -66,13 +66,6 @@ Page({
     wx.setNavigationBarTitle({ title })
   },
 
-  // 跳转条：食材清单与做法步骤互相直达，省掉逐屏滑动。
-  jumpToSection({ currentTarget } = {}) {
-    const section = currentTarget && currentTarget.dataset ? currentTarget.dataset.section : ''
-    if (!section) return
-    wx.pageScrollTo({ selector: '#' + section, duration: 200 })
-  },
-
   async loadMissingRecipe() {
     if (this.loadingRecipe || this.data.recipe) return
     this.loadingRecipe = true

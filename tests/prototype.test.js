@@ -1258,43 +1258,14 @@ test('菜谱详情页标题带菜名与耗时，供长尾搜索命中', () => {
   }
 })
 
-test('详情页食材/步骤跳转条可达，锚点存在', () => {
+test('详情页保留食材与步骤锚点，跳转条已按产品要求移除', () => {
   const fs = require('fs')
   const path = require('path')
   const wxml = fs.readFileSync(path.join(__dirname, '../miniprogram/pages/recipe/index.wxml'), 'utf8')
-  assert.ok(wxml.includes('bindtap="jumpToSection"'), '跳转条需绑定 jumpToSection')
+  // 跳转条已移除：用户反馈两颗按钮价值不足，删掉以便食材区更紧凑
+  assert.ok(!wxml.includes('jumpToSection'), '跳转条应已移除')
+  assert.ok(!wxml.includes('recipe-jump'), '跳转条样式类不应残留')
+  // 锚点仍保留：语义结构清晰，也便于将来做目录或外部深链
   assert.ok(wxml.includes('id="ingredients"'), '食材清单需有锚点 id')
   assert.ok(wxml.includes('id="method"'), '做法步骤需有锚点 id')
-  assert.ok(wxml.includes('data-section="ingredients"'))
-  assert.ok(wxml.includes('data-section="method"'))
-
-  const originalWx = global.wx
-  const originalPage = global.Page
-  const scrolled = []
-  global.wx = {
-    getStorageSync: () => '',
-    setStorageSync: () => {},
-    showToast: () => {},
-    setNavigationBarTitle: () => {},
-    pageScrollTo: options => scrolled.push(options)
-  }
-  let registered
-  global.Page = page => { registered = page }
-  delete require.cache[require.resolve('../miniprogram/pages/recipe/index')]
-  require('../miniprogram/pages/recipe/index')
-  try {
-    const page = { ...registered, data: {} }
-    page.setData = function (update) { Object.assign(this.data, update) }
-    page.jumpToSection({ currentTarget: { dataset: { section: 'method' } } })
-    assert.equal(scrolled.length, 1)
-    assert.equal(scrolled[0].selector, '#method')
-    page.jumpToSection({ currentTarget: { dataset: { section: 'ingredients' } } })
-    assert.equal(scrolled[1].selector, '#ingredients')
-    // 无参数时不应报错
-    page.jumpToSection()
-    assert.equal(scrolled.length, 2)
-  } finally {
-    global.wx = originalWx
-    global.Page = originalPage
-  }
 })
