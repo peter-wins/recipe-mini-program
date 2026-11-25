@@ -69,13 +69,20 @@
           <view wx:if="{{group.items.length}}" class="ingredient-section {{group.key === 'optional' ? 'ingredient-continuation' : ''}}">
             <!-- 可选食材也要有标题：否则与必需食材视觉连成一张表，做菜时会误当必需品准备 -->
             <view class="ingredient-heading {{group.key === 'optional' ? 'ingredient-heading-optional' : ''}}">{{group.key === 'required' ? '食材' : (group.key === 'optional' ? '可选（不影响成菜）' : group.label)}}</view>
-            <block wx:for="{{group.items}}" wx:key="rowKey">
-              <button wx:if="{{inventoryReady && group.key === 'required'}}" class="ingredient-line purchase-line" bindtap="togglePurchaseItem" data-id="{{item.id}}" aria-pressed="{{!!purchaseNeeded[item.id]}}" aria-label="{{item.name + (purchaseNeeded[item.id] ? '，待买，点按取消勾选' : '，手边有，点按勾选为待买')}}">
-                <template is="ingredientText" data="{{item, showStatus: true, needed: purchaseNeeded[item.id]}}"/>
-              </button>
-              <view wx:else class="ingredient-line {{inventoryReady && group.key === 'optional' ? 'ingredient-line-aligned' : ''}}">
-                <template is="ingredientText" data="{{item, optional: group.key === 'optional'}}"/>
-              </view>
+            <!-- 辅料（油盐酱醋等常备调料）按名称并列成一段，省略用量：这些用量对备菜帮助很小，
+                 却是清单里最长的一段（全库占 39% 的食材行）。用量仍保留在数据里，采购清单不受影响。 -->
+            <view wx:if="{{group.key === 'pantry'}}" class="ingredient-pantry">
+              <block wx:for="{{group.items}}" wx:key="rowKey"><text wx:if="{{index > 0}}" class="ingredient-pantry-sep">、</text><text class="ingredient-pantry-item">{{item.name}}</text></block>
+            </view>
+            <block wx:else>
+              <block wx:for="{{group.items}}" wx:key="rowKey">
+                <button wx:if="{{inventoryReady && group.key === 'required'}}" class="ingredient-line purchase-line" bindtap="togglePurchaseItem" data-id="{{item.id}}" aria-pressed="{{!!purchaseNeeded[item.id]}}" aria-label="{{item.name + (purchaseNeeded[item.id] ? '，待买，点按取消勾选' : '，手边有，点按勾选为待买')}}">
+                  <template is="ingredientText" data="{{item, showStatus: true, needed: purchaseNeeded[item.id]}}"/>
+                </button>
+                <view wx:else class="ingredient-line {{inventoryReady && group.key === 'optional' ? 'ingredient-line-aligned' : ''}}">
+                  <template is="ingredientText" data="{{item, optional: group.key === 'optional'}}"/>
+                </view>
+              </block>
             </block>
           </view>
         </block>
