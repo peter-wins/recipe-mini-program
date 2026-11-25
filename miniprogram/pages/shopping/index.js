@@ -1,4 +1,5 @@
 const { applyTheme } = require('../../theme')
+const { failure, success } = require('../../feedback')
 const { listShopping, removeShoppingItem, saveManualShopping, manualNameLimit, manualQuantityLimit,
   buyShoppingItems, undoShoppingPurchase } = require('../../shopping')
 const { buildLayout, buildText, draw, usageNote } = require('../../shopping-poster')
@@ -32,7 +33,11 @@ Page({
     try {
       this.refreshItems()
     } catch {
-      wx.showToast({ title: '暂时无法读取清单', icon: 'none' })
+      failure({
+        title: '没法读取清单',
+        content: '手机存储这次没读到，重试一次通常就好了。',
+        onRetry: () => this.refreshKitchenData()
+      })
     }
   },
 
@@ -79,6 +84,8 @@ Page({
   addManualItem(event) {
     if (!this.data.manualOpen) return
     const { name = '', quantity = '' } = event.detail.value
+    // 失败重试要能带上刚才填的内容，不能被清掉。
+    this.pendingManual = { name, quantity }
     if (!name.trim()) {
       wx.showToast({ title: '请输入要买的东西', icon: 'none' })
       return
@@ -90,9 +97,16 @@ Page({
       }
       this.refreshItems()
       this.closeManualEntry()
-      wx.showToast({ title: '已保存到采购清单', icon: 'success' })
+      success('已加到采购清单')
     } catch {
-      wx.showToast({ title: '添加失败，请重试', icon: 'none' })
+      failure({
+        title: '没加进去',
+        content: '这一项没保存成功，再试一次。',
+        onRetry: () => {
+          const pending = this.pendingManual
+          if (pending) this.addManualItem({ detail: { value: pending } })
+        }
+      })
     }
   },
 
@@ -118,7 +132,11 @@ Page({
       }
       this.refreshItems()
     } catch {
-      wx.showToast({ title: '更新失败，请重试', icon: 'none' })
+      failure({
+        title: '没更新成功',
+        content: '清单这次没改上，再试一次。',
+        onRetry: () => this.buyItems(keys)
+      })
     } finally {
       this.setData({ updating: false })
     }
@@ -142,7 +160,10 @@ Page({
       this.refreshItems()
       wx.showToast({ title: restored ? '已放回采购清单' : '清单已是最新', icon: 'none' })
     } catch {
-      wx.showToast({ title: '撤销失败，请重试', icon: 'none' })
+      failure({
+        title: '撤销没成功',
+        content: '刚才那步没恢复，再点一次撤销。'
+      })
     }
   },
 
@@ -152,9 +173,13 @@ Page({
     try {
       const updated = removeShoppingItem(event.currentTarget.dataset.key)
       this.refreshItems()
-      if (updated) wx.showToast({ title: '已从清单移除', icon: 'success' })
+      if (updated) success('已从清单移除')
     } catch {
-      wx.showToast({ title: '更新失败，请重试', icon: 'none' })
+      failure({
+        title: '没删掉',
+        content: '这项还在清单里，再试一次。',
+        onRetry: () => this.removeItem(event)
+      })
     } finally {
       this.setData({ updating: false })
     }
@@ -166,7 +191,10 @@ Page({
     wx.setClipboardData({
       data: buildText(items),
       success: () => wx.showToast({ title: '已复制，去粘贴吧', icon: 'success' }),
-      fail: () => wx.showToast({ title: '复制失败，请重试', icon: 'none' })
+      fail: () => failure({
+        title: '复制没成功',
+        content: '可以长按文字手动复制。'
+      })
     })
   },
 
@@ -178,7 +206,10 @@ Page({
     this.setData({ posterWidth: layout.width, posterHeight: layout.height })
 
     const finish = () => wx.hideLoading()
-    const fail = message => { finish(); wx.showToast({ title: message, icon: 'none' }) }
+    const fail = message => {
+      finish()
+      failure({ title: '图片没存下来', content: message })
+    }
 
     const saveImage = filePath => {
       wx.saveImageToPhotosAlbum({
@@ -197,7 +228,10 @@ Page({
               }
             })
           } else {
-            wx.showToast({ title: '保存失败，请重试', icon: 'none' })
+            failure({
+              title: '图片没存下来',
+              content: '可能是相册权限没开，可以在设置里打开后再试。'
+            })
           }
         }
       })

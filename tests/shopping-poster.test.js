@@ -245,10 +245,12 @@ test('复制失败时给出提示，不误报成功', () => {
   }
 
   const toasts = []
+  const modals = []
   try {
     global.wx = {
       setClipboardData: options => options.fail(),
-      showToast: options => toasts.push(options.title)
+      showToast: options => toasts.push(options.title),
+      showModal: options => modals.push(options)
     }
     const page = {
       ...definition,
@@ -256,7 +258,9 @@ test('复制失败时给出提示，不误报成功', () => {
       setData(update) { Object.assign(this.data, update) }
     }
     page.copyTextList()
-    assert.ok(toasts.includes('复制失败，请重试'))
+    // 按设计指南 2.3，失败改用模态对话框告知，不用一闪而过的 toast
+    assert.ok(modals.length > 0, '失败应弹出模态提示')
+    assert.ok(/复制/.test(modals[0].title), '提示应说明是复制失败')
     assert.ok(!toasts.includes('已复制，去粘贴吧'), '失败不应提示成功')
   } finally {
     global.wx = previousWx

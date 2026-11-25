@@ -1,4 +1,5 @@
 const { applyTheme } = require('../../theme')
+const { failure, success } = require('../../feedback')
 const { readActivity, clearBrowsingHistory } = require('../../activity')
 const { getRecipe } = require('../../catalog')
 const { readFavorites } = require('../../favorites')
@@ -30,7 +31,11 @@ Page({
       const recipes = ids.map(id => getRecipe(id)).filter(Boolean)
       this.setData({ recipes, hasHistory: type === 'history' && ids.length > 0 })
     } catch {
-      wx.showToast({ title: '暂时无法读取使用记录', icon: 'none' })
+      failure({
+        title: '没法读取记录',
+        content: '手机存储这次没读到，重试一次通常就好。',
+        onRetry: () => this.refreshRecipeRecords()
+      })
     }
   },
 
@@ -44,9 +49,13 @@ Page({
         try {
           clearBrowsingHistory()
           this.refreshRecipeRecords()
-          wx.showToast({ title: '已清空', icon: 'success' })
+          success('已清空')
         } catch {
-          wx.showToast({ title: '清空失败，请重试', icon: 'none' })
+          failure({
+            title: '没清空成功',
+            content: '记录还在，再试一次。',
+            onRetry: () => this.clearHistory()
+          })
         }
       }
     })
