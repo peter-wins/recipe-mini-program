@@ -93,12 +93,14 @@ button {
 }
 button::after { border: 0; }
 button[disabled] { opacity: 1; color: var(--state-disabled, #8f8177); }
+/* 微信基础库对 button[disabled] 有默认样式层，普通类选择器压不住，需带 button 标签提高特异性 */
+button.link[disabled], button.text-btn[disabled], button.primary[disabled], button.secondary[disabled] { color: var(--state-disabled, #8f8177); }
 /* 禁用态独立中性底：只给有底色的按钮，文字型按钮保持透明（避免禁用时变灰块） */
-.primary[disabled], .secondary[disabled] {
+button.primary[disabled], button.secondary[disabled] {
   background: var(--theme-neutral, #f1e6d9);
   border-color: var(--theme-border, #f0e4d8);
 }
-.link[disabled], .text-btn[disabled] { background: transparent; }
+button.link[disabled], button.text-btn[disabled] { background: transparent; }
 
 .primary, .secondary, .text-btn, .icon-btn, .danger-btn, .link, .chip {
   border-radius: var(--r-full, 999rpx);
