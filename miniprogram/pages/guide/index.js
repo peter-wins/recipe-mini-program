@@ -1,5 +1,6 @@
 const { applyTheme } = require('../../theme')
 const { listIngredients, getGuideGroups } = require('../../guide-data')
+const { readHistory, saveHistory, clearHistory } = require('../../search-history')
 
 Page({
   data: {
@@ -7,6 +8,8 @@ Page({
     groupIndex: 0,
     search: '',
     searching: false,
+    focused: false,
+    searchHistory: [],
     visibleIngredients: []
   },
 
@@ -51,6 +54,37 @@ Page({
       ? all.filter(item => item.name.includes(query))
       : all.filter(item => item.group === groups[this.data.groupIndex])
     this.setData({ search, searching: Boolean(query), visibleIngredients })
+  },
+
+  focusSearch() {
+    this.setData({ focused: true, searchHistory: readHistory('ingredient') })
+  },
+
+  blurSearch() {
+    this.setData({ focused: false })
+  },
+
+  confirmSearch(e) {
+    const word = e && e.detail ? e.detail.value : this.data.search
+    this.setData({ searchHistory: saveHistory('ingredient', word), focused: false })
+  },
+
+  useSearchHistory(e) {
+    const { word } = e.currentTarget.dataset
+    if (!word) return
+    saveHistory('ingredient', word)
+    const all = listIngredients()
+    this.setData({
+      search: word,
+      searching: true,
+      focused: false,
+      searchHistory: readHistory('ingredient'),
+      visibleIngredients: all.filter(item => item.name.includes(word))
+    })
+  },
+
+  clearSearchHistory() {
+    this.setData({ searchHistory: clearHistory('ingredient') })
   },
 
   clearSearch() {

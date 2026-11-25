@@ -57,3 +57,24 @@
 .guide-card-name { color: var(--theme-text, #5d4037); font-size: var(--fs-md, 28rpx); font-weight: 650; }
 .guide-card-count { margin-top: 4rpx; color: var(--theme-muted, #75665e); font-size: var(--fs-xs, 22rpx); }
 .guide-empty { padding: 40rpx 0; }
+
+/* 搜索历史（设计指南 3.1） */
+.search-history { padding: 12rpx 4rpx 8rpx; }
+.search-history-head { display: flex; align-items: center; justify-content: space-between; }
+.search-history-label { color: var(--theme-muted, #75665e); font-size: var(--fs-sm, 24rpx); }
+.search-history-clear { min-height: 44rpx; line-height: 44rpx; font-size: var(--fs-sm, 24rpx); }
+.search-history-list { display: flex; flex-wrap: wrap; gap: 12rpx; margin-top: 12rpx; }
+.search-history-word {
+  max-width: 100%;
+  min-height: 64rpx;
+  padding: 0 24rpx;
+  overflow: hidden;
+  border: 1rpx solid var(--theme-border, #f0e4d8);
+  border-radius: 999rpx;
+  background: var(--theme-soft, #fff0e5);
+  color: var(--theme-accent-text, #994017);
+  font-size: var(--fs-sm, 24rpx);
+  line-height: 62rpx;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}

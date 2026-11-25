@@ -8,8 +8,18 @@
 
     <view class="recipe-search guide-search">
       <view class="search-mark" aria-hidden="true"></view>
-      <input class="recipe-search-input" value="{{search}}" bindinput="searchIngredients" confirm-type="search" placeholder="搜索食材，如 菠菜"/>
+      <input class="recipe-search-input" value="{{search}}" bindinput="searchIngredients" bindfocus="focusSearch" bindblur="blurSearch" bindconfirm="confirmSearch" confirm-type="search" placeholder="搜索食材，如 菠菜"/>
       <button wx:if="{{search}}" class="link" bindtap="clearSearch">清除</button>
+    </view>
+
+    <view wx:if="{{focused && searchHistory.length}}" class="search-history">
+      <view class="search-history-head">
+        <text class="search-history-label">最近搜过</text>
+        <button class="link search-history-clear" bindtap="clearSearchHistory">清空</button>
+      </view>
+      <view class="search-history-list">
+        <button wx:for="{{searchHistory}}" wx:key="*this" class="search-history-word" data-word="{{item}}" bindtap="useSearchHistory">{{item}}</button>
+      </view>
     </view>
 
     <view class="guide-body">

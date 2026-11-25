@@ -14,6 +14,14 @@
 
 <view class="theme-page theme-{{themeId}}">
 <view class="screen has-nav {{view === 'match' ? 'home-screen' : ''}}">
+  <view wx:if="{{syncState === 'loading'}}" class="sync-bar" aria-live="polite">
+    <view class="sync-bar-dot" aria-hidden="true"></view>
+    <text class="sync-bar-text">正在更新菜谱…</text>
+  </view>
+  <view wx:elif="{{syncState === 'offline'}}" class="sync-bar sync-bar-offline" aria-live="polite">
+    <text class="sync-bar-text">暂时连不上云端，先用手机里的菜谱</text>
+  </view>
+
   <block wx:if="{{view === 'match'}}">
     <view class="home-greeting">
       <view class="home-title-row">
@@ -111,8 +119,17 @@
     </view>
     <view class="recipe-search library-search">
       <view class="search-mark" aria-hidden="true"></view>
-      <input class="recipe-search-input" value="{{librarySearch}}" focus="{{librarySearchFocused}}" bindinput="searchLibrary" bindblur="blurLibrarySearch" confirm-type="search" placeholder="搜菜名或食材"/>
+      <input class="recipe-search-input" value="{{librarySearch}}" focus="{{librarySearchFocused}}" bindinput="searchLibrary" bindblur="blurLibrarySearch" bindconfirm="confirmLibrarySearch" confirm-type="search" placeholder="搜菜名或食材"/>
       <button wx:if="{{librarySearch}}" class="link" bindtap="clearLibrarySearch">清除</button>
+    </view>
+    <view wx:if="{{librarySearchFocused && searchHistory.length}}" class="search-history">
+      <view class="search-history-head">
+        <text class="search-history-label">最近搜过</text>
+        <button class="link search-history-clear" bindtap="clearSearchHistory">清空</button>
+      </view>
+      <view class="search-history-list">
+        <button wx:for="{{searchHistory}}" wx:key="*this" class="search-history-word" data-word="{{item}}" bindtap="useSearchHistory">{{item}}</button>
+      </view>
     </view>
     <view class="library-scenes">
       <button wx:for="{{sceneTags}}" wx:key="*this" class="library-scene {{tagIndex === index ? 'library-scene-active' : ''}}" data-index="{{index}}" bindtap="selectSceneTag" aria-pressed="{{tagIndex === index}}">{{item}}</button>

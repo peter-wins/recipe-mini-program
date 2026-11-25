@@ -1,4 +1,6 @@
 const { applyTheme } = require('../../theme')
+const { subscribe } = require('../../cloud-catalog')
+const { readHistory, saveHistory, clearHistory } = require('../../search-history')
 const { getCatalogSource, getRecipeCategories, fatLossTag, getRecipe, matchRecipes, groupFridgeMatches } = require('../../catalog')
 const { readFavorites } = require('../../favorites')
 const { readKitchen, summarizeInventory } = require('../../inventory')
@@ -39,6 +41,8 @@ const viewTitles = {
 
 Page({
   data: {
+    syncState: 'idle',   // idle | loading | offline
+    searchHistory: [],
     view: 'match',
     themeName: '暖杏',
     selected: [],
@@ -65,6 +69,10 @@ Page({
   },
 
   onLoad({ view, date, slot } = {}) {
+    // 云端菜谱同步期间的局部反馈，避免用户以为没反应。
+    this.unsubscribeSync = subscribe(({ status }) => {
+      if (this.data.syncState !== status) this.setData({ syncState: status })
+    })
     if (view === 'library') {
       this.openAllRecipes()
       return
@@ -82,6 +90,10 @@ Page({
       title: recipe ? `今天吃什么？试试${recipe.name}` : '今天吃什么？打开冰箱看看，吃什么就有了谱',
       path: '/pages/home/index'
     }
+  },
+
+  onUnload() {
+    if (typeof this.unsubscribeSync === 'function') this.unsubscribeSync()
   },
 
   onShow() {
@@ -233,6 +245,7 @@ Page({
   },
 
   openRecipeSearch() {
+    this.setData({ searchHistory: readHistory('recipe') })
     this.showView('library', { librarySearchFocused: true })
   },
 
@@ -251,6 +264,27 @@ Page({
 
   searchLibrary(event) {
     this.updateResults({ librarySearch: event.detail.value })
+  },
+
+  // 键盘上点「搜索」时把关键词记进历史。
+  confirmLibrarySearch(event) {
+    const word = event && event.detail ? event.detail.value : this.data.librarySearch
+    const list = saveHistory('recipe', word)
+    this.setData({ searchHistory: list, librarySearchFocused: false })
+    if (word !== this.data.librarySearch) this.updateResults({ librarySearch: word || '' })
+  },
+
+  // 点历史词直接搜，不用再打字。
+  useSearchHistory(event) {
+    const { word } = event.currentTarget.dataset
+    if (!word) return
+    saveHistory('recipe', word)
+    this.setData({ searchHistory: readHistory('recipe'), librarySearchFocused: false })
+    this.updateResults({ librarySearch: word })
+  },
+
+  clearSearchHistory() {
+    this.setData({ searchHistory: clearHistory('recipe') })
   },
 
   clearLibrarySearch() {
