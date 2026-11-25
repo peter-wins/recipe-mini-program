@@ -56,7 +56,7 @@
 
       <view id="ingredients" class="list-heading recipe-section">
         <text class="section">食材清单</text>
-        <button wx:if="{{inventoryReady && (purchaseItems.length || hasSavedPurchase)}}" class="link purchase-cta" bindtap="savePurchaseItems" disabled="{{savingPurchase}}" loading="{{savingPurchase}}" hover-class="hover">{{hasSavedPurchase ? '更新采购项' : '加入采购清单'}}</button>
+        <button wx:if="{{inventoryReady && (purchaseItems.length || hasSavedPurchase)}}" class="purchase-cta" bindtap="savePurchaseItems" disabled="{{savingPurchase}}" loading="{{savingPurchase}}" hover-class="hover">{{hasSavedPurchase ? '更新采购项' : '加入采购清单'}}</button>
         <navigator wx:else class="link" url="/pages/shopping/index">看采购清单 ›</navigator>
       </view>
       <view wx:if="{{inventoryReady}}" class="purchase-summary">
