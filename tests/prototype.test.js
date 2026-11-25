@@ -890,7 +890,7 @@ test('采购按同一食材合并，兼容计量求和，原用量和菜名可�
       [getRecipe('egg-fried-rice').name, '1 个']
     ])
     const garlic = items.find(item => item.key === 'garlic')
-    assert.equal(garlic.quantity, '若干')
+    assert.equal(garlic.quantity, '适量 + 2瓣')
     assert.deepEqual(garlic.details.map(item => item.quantity), ['适量', '2瓣'])
     assert.equal(items.find(item => item.key === 'porkBelly').quantity, '700 克')
     const ketchup = items.find(item => item.name === '番茄酱')
@@ -902,6 +902,45 @@ test('采购按同一食材合并，兼容计量求和，原用量和菜名可�
     assert.deepEqual(readKitchen().inventory, ['garlic'])
     assert.equal(readKitchen().shopping.length, 7)
     assert.equal(removeShoppingItem(garlic.key, true), false)
+  } finally {
+    global.wx = originalWx
+  }
+})
+
+test('单位不可相加时用量拼接显示，明细过多才省略，不再整体退化成「若干」', () => {
+  const originalWx = global.wx
+  const entry = (id, quantity, recipeId = 'tomato-eggs') => ({ recipeId, id, quantity })
+  let stored = {
+    inventory: [],
+    shopping: [
+      // 两条用量单位不同，无法求和：应逐条拼接
+      entry('ginger', '两片'),
+      entry('ginger', '10g', 'egg-fried-rice'),
+      // 五条：应省略后面的，保留前四条加「等」
+      entry('garlic', '1个'),
+      entry('garlic', '3瓣', 'egg-fried-rice'),
+      entry('garlic', '10g', 'tomato-noodles'),
+      entry('garlic', '2片', 'soup-tomato'),
+      entry('garlic', '适量', 'other-dish'),
+      // 用量全为空：不能拼出 undefined
+      entry('porkBelly', ''),
+      entry('porkBelly', '', 'egg-fried-rice')
+    ]
+  }
+  try {
+    global.wx = {
+      getStorageSync: () => stored,
+      setStorageSync: (key, value) => { stored = value }
+    }
+    const { listShopping } = require('../miniprogram/shopping')
+    const items = listShopping()
+    const ginger = items.find(item => item.key === 'ginger')
+    assert.equal(ginger.quantity, '两片 + 10g')
+    const garlic = items.find(item => item.key === 'garlic')
+    assert.equal(garlic.quantity, '1个 + 3瓣 + 10g + 2片 等')
+    const pork = items.find(item => item.key === 'porkBelly')
+    assert.equal(pork.quantity, '用量见明细')
+    assert.ok(!/undefined|null|NaN/.test(items.map(item => item.quantity).join(' ')), '拼接结果不含 undefined/null')
   } finally {
     global.wx = originalWx
   }

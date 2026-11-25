@@ -30,7 +30,10 @@ function shoppingIngredientId(id) {
 
 function displayQuantity(item) {
   if (item.recipeId === manualSource) return item.quantity || '用量待定'
-  return item.quantity || item.amount + ' ' + item.unit
+  if (item.quantity) return item.quantity
+  // 用量与计量都缺失时不能拼出「undefined undefined」，交给上层显示兜底文案。
+  if (item.amount === undefined || item.amount === null || !item.unit) return ''
+  return item.amount + ' ' + item.unit
 }
 
 function exactQuantity(item) {
@@ -42,6 +45,21 @@ function exactQuantity(item) {
   if (countUnits.has(unit)) return { amount: number, unit }
   const metric = metricUnits.get(unit)
   return metric ? { amount: number * metric[1], unit: metric[0] } : null
+}
+
+// 单位不一致时无法求和，把明细里的用量拼成可读值，不再整体丢弃成「若干」。
+// 只有明细条数多到读不下去时才省略，避免多数场景被截成半截数字。
+const combinedQuantityLimit = 4
+function combinedQuantity(details) {
+  const quantities = []
+  for (const detail of details) {
+    const quantity = detail && detail.quantity
+    const value = quantity === undefined || quantity === null ? '' : String(quantity).trim()
+    if (value && !quantities.includes(value)) quantities.push(value)
+  }
+  if (!quantities.length) return '用量见明细'
+  if (quantities.length <= combinedQuantityLimit) return quantities.join(' + ')
+  return quantities.slice(0, combinedQuantityLimit).join(' + ') + ' 等'
 }
 
 function groupShoppingItems(items) {
@@ -74,7 +92,7 @@ function groupShoppingItems(items) {
     const manualQuantity = measured.find(item => item.recipeId === manualSource)
     let quantity = displayQuantity(measured[0] || entries[0])
     if (measured.length && !manualQuantity && packagedSeasonings.has(name) && !hasPackageQuantity) quantity = '1 份'
-    else if (measured.length > 1) quantity = total ? total.amount + ' ' + total.unit : '若干'
+    else if (measured.length > 1) quantity = total ? total.amount + ' ' + total.unit : combinedQuantity(measured.map(item => ({ quantity: displayQuantity(item) })))
     return { key, name, ...total, quantity, details, canRestock: Boolean(ingredientName) }
   })
 }
