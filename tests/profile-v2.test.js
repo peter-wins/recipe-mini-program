@@ -563,16 +563,21 @@ test('食材指南两个页面结构完整且走主题', () => {
   assert.equal(guideData.getIngredient('cabbage').image, cloudStorageBase + 'guide-covers/cabbage.png', '已配图的占位食材从云端加载')
   assert.equal(guideData.getIngredient('egg').image, cloudStorageBase + 'guide-covers/egg.png', '鸡蛋已配真图，从云端加载')
   assert.equal(guideData.bundled.filter(item => !item.image).length, 0, '全部 18 条已配齐，无占位食材')
-  // 源图在 guide-covers/，该目录被 .gitignore 排除，只存在于有资产的开发机。
-  // 资产缺失时跳过尺寸校验，避免新克隆的仓库因缺图整项失败。
+})
+
+// 源图放在 guide-covers/，该目录被 .gitignore 排除，只存在于有资产的开发机。
+// 独立成项并显式 skip：缺图时输出 skipped，而不是伪装成 pass。
+test('菠菜源图尺寸与透明通道', (t) => {
   const fs = require('fs')
   const spinachPath = 'guide-covers/spinach.png'
-  if (fs.existsSync(spinachPath)) {
-    const png = fs.readFileSync(spinachPath)
-    assert.equal(png.readUInt32BE(16), 1200, '宽度应为 1200')
-    assert.equal(png.readUInt32BE(20), 600, '高度应为 600')
-    assert.equal(png[25], 6, '应为 RGBA 透明 PNG（颜色类型 6）')
+  if (!fs.existsSync(spinachPath)) {
+    t.skip('缺 guide-covers/spinach.png，跳过尺寸校验')
+    return
   }
+  const png = fs.readFileSync(spinachPath)
+  assert.equal(png.readUInt32BE(16), 1200, '宽度应为 1200')
+  assert.equal(png.readUInt32BE(20), 600, '高度应为 600')
+  assert.equal(png[25], 6, '应为 RGBA 透明 PNG（颜色类型 6）')
 })
 
 test('食材插画按 id 复用：只返回云端真图，未知食材返回空', () => {
