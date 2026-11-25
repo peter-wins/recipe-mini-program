@@ -61,7 +61,7 @@ page {
   letter-spacing: 2rpx;
 }
 .page-head > .subtle { margin-top: 16rpx; }
-.subtle, .recipe-note, .recipe-aside, .group-label { color: var(--theme-muted, #75665e); font-size: var(--fs-md, 28rpx); }
+.subtle, .recipe-note, .recipe-aside { color: var(--theme-muted, #75665e); font-size: var(--fs-md, 28rpx); }
 
 .row, .list-heading, .recipe-aside {
   display: flex;
@@ -128,7 +128,7 @@ button.link[disabled], button.text-btn[disabled] { background: transparent; }
   font-weight: 600;
 }
 .link { line-height: 76rpx; }
-/* 图标按钮：正方形点击区 */
+/* 图标按钮：正方形点击区（规范第 5 条五类按钮之一，当前页面未直接使用，保留体系完整性） */
 .icon-btn {
   display: inline-flex;
   align-items: center;
@@ -188,7 +188,7 @@ button.link[disabled], button.text-btn[disabled] { background: transparent; }
 .missing { color: var(--theme-accent-text, #994017); }
 
 /* 兼容旧列表行（采购等） */
-.recipe-row, .purchase-row {
+.purchase-row {
   padding: 24rpx 26rpx;
   border: 1rpx solid var(--theme-border, #f0e4d8);
   border-radius: var(--card-radius, 28rpx);
@@ -206,28 +206,8 @@ button.link[disabled], button.text-btn[disabled] { background: transparent; }
   font-size: var(--fs-md, 28rpx);
   color: var(--theme-text, #5D4037);
 }
-.chosen {
-  background: var(--theme-selected, #ffe8d5);
-  border-color: var(--theme-selected-border, #f2b28a);
-  color: var(--theme-accent-text, #994017);
-  font-weight: 600;
-}
-.ingredient-group { margin-top: 34rpx; }
-.ingredient-group .section, .group-label { font-size: var(--fs-md, 28rpx); font-weight: 700; color: var(--theme-text, #5D4037); }
-.group-label { display: inline-block; padding-left: 18rpx; border-left: 6rpx solid var(--theme-accent, #ff8a3d); line-height: 1.4; }
 .actions { margin-top: 18rpx; }
 
-/* ---------- 缺食材提示 ---------- */
-.shortage {
-  margin-top: 20rpx;
-  border-radius: 24rpx;
-  background: var(--theme-soft, #fff4ec);
-  border: 1rpx solid var(--theme-border, #ffd9ba);
-  padding: 26rpx 28rpx;
-}
-.shortage .section { font-size: var(--fs-lg, 32rpx); color: var(--theme-accent-text, #994017); }
-.shortage .primary { line-height: 64rpx; padding: 0 26rpx; font-size: var(--fs-md, 28rpx); }
-.shortage .link { line-height: 64rpx; font-size: var(--fs-md, 28rpx); }
 
 /* ---------- 详情：食材 / 步骤 ---------- */
 .group {
@@ -329,9 +309,6 @@ button.link[disabled], button.text-btn[disabled] { background: transparent; }
 .recipe-bar .link { flex: 0 0 144rpx; text-align: center; }
 .recipe-bar .primary { flex: 1; }
 .cooking-progress { margin-bottom: 10rpx; color: var(--theme-accent-text, #994017); font-size: var(--fs-md, 28rpx); }
-.cooking-step { font-size: var(--fs-xl, 36rpx); }
-.cooking-controls { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12rpx; margin-top: 14rpx; }
-.cooking-controls button[disabled] { background: transparent; color: var(--state-disabled, #8f8177); }
 
 .theme-page {
   --theme-page-bg: #fff8f0;
