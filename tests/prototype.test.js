@@ -318,6 +318,26 @@ test('常用食材别名、辅料和蛋清在库存判断与采购中使用同�
   assert.ok(getPurchaseItems(getRecipe(tomatoEggs), [white]).some(item => item.id === 'egg'))
 })
 
+test('可选食材默认不进采购清单，用户勾选后才加入', () => {
+  const { getPurchaseItems } = require('../miniprogram/shopping')
+  const recipe = getRecipe('aquatic_hong-shao-yu')
+  const optional = recipe.groups.find(group => group.key === 'optional')
+  assert.ok(optional && optional.items.length, '该用例菜谱应有可选食材')
+
+  // 默认：只买必需的，可选的一律不进清单
+  const defaults = getPurchaseItems(recipe, [], {})
+  assert.ok(defaults.length > 0, '空冰箱时应有必需采购项')
+  for (const item of optional.items) {
+    assert.ok(!defaults.some(entry => entry.id === item.id), `可选食材「${item.name}」不应当默认进清单`)
+  }
+
+  // 用户主动勾选后加入
+  const picked = optional.items[0]
+  const withOptional = getPurchaseItems(recipe, [], { [picked.id]: true })
+  assert.ok(withOptional.some(entry => entry.id === picked.id), '勾选后的可选食材应进清单')
+  assert.equal(withOptional.length, defaults.length + 1, '只多出勾选的那一项')
+})
+
 test('拆开组合食材检查库存，普通用水保留原用量但不列为缺料', () => {
   const soup = 'soup_xi-hong-shi-ji-dan-tang'
   const stock = ['tomato', 'egg', 'scallion', 'ginger']

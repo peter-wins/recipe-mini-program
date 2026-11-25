@@ -245,8 +245,9 @@ Page({
   togglePurchaseItem(event) {
     if (!this.selection || !this.data.recipe) return
     const { id } = event.currentTarget.dataset
-    const required = this.data.recipe.groups.find(group => group.key === 'required')
-    if (!required.items.some(item => item.id === id)) return
+    // 必需食材可勾选，可选食材也可（用户想吃香菜、小米椒时能一起买）；辅料不参与。
+    const pickable = this.data.recipe.groups.filter(group => group.key === 'required' || group.key === 'optional')
+    if (!pickable.some(group => group.items.some(item => item.id === id))) return
 
     const needed = !this.data.purchaseNeeded[id]
     if (needed === !availableIngredients(this.selection).has(id)) delete this.purchaseOverrides[id]

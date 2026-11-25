@@ -165,9 +165,13 @@ function saveMealShopping(recipeIds, sourceKeys, { countRepeated = false } = {})
 function getPurchaseItems(recipe, inventory, overrides = {}) {
   const available = availableIngredients(inventory)
   const required = recipe.groups.find(group => group.key === 'required')
-  return required.items.filter(item => typeof overrides[item.id] === 'boolean'
+  const optional = recipe.groups.find(group => group.key === 'optional')
+  const requiredItems = required.items.filter(item => typeof overrides[item.id] === 'boolean'
     ? overrides[item.id]
     : !available.has(item.id))
+  // 可选食材默认不进采购清单，只有用户主动勾选（overrides 为 true）才加入。
+  const optionalItems = (optional ? optional.items : []).filter(item => overrides[item.id] === true)
+  return requiredItems.concat(optionalItems)
 }
 
 function hasRecipeShopping(recipeId, shopping) {

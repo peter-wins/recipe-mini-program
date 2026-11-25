@@ -70,10 +70,11 @@
             </view>
             <block wx:else>
               <block wx:for="{{group.items}}" wx:key="rowKey">
-                <button wx:if="{{inventoryReady && group.key === 'required'}}" class="ingredient-line purchase-line" bindtap="togglePurchaseItem" data-id="{{item.id}}" aria-pressed="{{!!purchaseNeeded[item.id]}}" aria-label="{{item.name + (purchaseNeeded[item.id] ? '，待买，点按取消勾选' : '，手边有，点按勾选为待买')}}">
-                  <template is="ingredientText" data="{{item, showStatus: true, needed: purchaseNeeded[item.id]}}"/>
+                <!-- 可选食材同样可勾选：默认不买，用户想吃香菜、小米椒时点一下即可加入采购清单 -->
+                <button wx:if="{{inventoryReady}}" class="ingredient-line purchase-line" bindtap="togglePurchaseItem" data-id="{{item.id}}" aria-pressed="{{!!purchaseNeeded[item.id]}}" aria-label="{{item.name + (purchaseNeeded[item.id] ? '，待买，点按取消勾选' : '，点按勾选为待买')}}">
+                  <template is="ingredientText" data="{{item, showStatus: true, needed: purchaseNeeded[item.id], optional: group.key === 'optional'}}"/>
                 </button>
-                <view wx:else class="ingredient-line {{inventoryReady && group.key === 'optional' ? 'ingredient-line-aligned' : ''}}">
+                <view wx:else class="ingredient-line {{group.key === 'optional' ? 'ingredient-line-aligned' : ''}}">
                   <template is="ingredientText" data="{{item, optional: group.key === 'optional'}}"/>
                 </view>
               </block>
