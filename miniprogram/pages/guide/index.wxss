@@ -13,9 +13,36 @@
   padding-left: 24rpx;
   padding-right: 24rpx;
 }
-.guide-intro { margin-top: 8rpx; }
+.guide-intro { margin-top: 8rpx; position: relative; }
 .guide-intro .section { font-size: var(--fs-3xl, 52rpx); }
 .guide-intro .subtle { margin-top: 6rpx; }
+
+/* 同步状态：叠在标题行右侧空白，绝对定位不占文档流。
+   本页是 height:100vh 固定高度布局，任何占位元素都会挤掉列表可视高度；
+   而 offline 在「从未成功同步过」的设备上会长期停留，不能按短暂提示处理。 */
+.guide-sync {
+  position: absolute;
+  top: 0;
+  right: 0;
+  max-width: 286rpx;
+  display: flex;
+  align-items: center;
+  gap: 8rpx;
+  white-space: nowrap;
+}
+.guide-sync-text { font-size: var(--fs-xs, 22rpx); line-height: 1.4; }
+/* loading 短暂，给足动效提示 */
+.guide-sync-loading .guide-sync-text { color: var(--theme-accent-text, #994017); }
+.guide-sync-dot {
+  flex-shrink: 0;
+  width: 12rpx;
+  height: 12rpx;
+  border-radius: 50%;
+  background: var(--theme-accent-text, #994017);
+  animation: sync-pulse 1.1s ease-in-out infinite;
+}
+/* offline 长期存在，弱化到一行灰色小字，不抢标题和列表的注意力 */
+.guide-sync-offline .guide-sync-text { color: var(--theme-muted, #75665e); }
 .recipe-search.guide-search { margin-top: 18rpx; margin-bottom: 18rpx; }
 .guide-body { flex: 1; display: flex; gap: 16rpx; min-height: 0; }
 .guide-groups {

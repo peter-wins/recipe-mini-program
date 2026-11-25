@@ -164,3 +164,31 @@ test('食材详情页：初始即 loading，不存在时进 notFound，不会留
     global.Page = previousPage
   }
 })
+
+test('食材指南的同步提示不占文档流，且 offline 比 loading 视觉更轻', () => {
+  const wxml = read('pages/guide/index.wxml')
+  const wxss = read('pages/guide/index.wxss')
+  const cloud = read('cloud-guide.js')
+
+  // 同步模块要能广播状态，页面才有东西可显示
+  assert.ok(cloud.includes('subscribe'), 'cloud-guide 需暴露状态订阅')
+  assert.ok(/notify\(\{ status: 'loading' \}\)/.test(cloud), '同步开始要发 loading')
+  assert.ok(wxml.includes("syncState === 'loading'"), '指南页要渲染加载态')
+  assert.ok(wxml.includes("syncState === 'offline'"), '指南页要渲染离线态')
+
+  // 本页是 height:100vh 固定高度布局，提示条绝不能占位，否则长期断网用户的列表被永久挤掉
+  assert.ok(/\.guide-sync\s*\{[^}]*position:\s*absolute/.test(wxss), '同步提示必须绝对定位，不占文档流')
+  assert.ok(!/class="sync-bar/.test(wxml), '指南页不用占位的整条样式，避免挤掉列表高度')
+
+  // offline 在从未同步成功的设备上是长期状态，视觉要比 loading 轻
+  assert.ok(/\.guide-sync-offline[^}]*--theme-muted/.test(wxss), 'offline 用弱化的次要文字色')
+
+  // 绝对定位下文案必须短，长了会换行或溢出
+  const texts = wxml.match(/>[^<>{}]*<\/text>/g) || []
+  const syncTexts = texts.filter(t => /正在更新|云端未连接|暂时连不上/.test(t))
+  assert.ok(syncTexts.length >= 2, '两种状态都要有文案')
+  for (const t of syncTexts) {
+    const plain = t.replace(/[><\/text]/g, '').trim()
+    assert.ok(plain.length <= 8, `同步提示文案要短于 8 字，实际「${plain}」`)
+  }
+})

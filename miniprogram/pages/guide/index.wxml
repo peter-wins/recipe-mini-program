@@ -4,6 +4,14 @@
     <view class="guide-intro">
       <view class="section">认识食材，做对菜</view>
       <view class="subtle">挑得新鲜、存得妥当、吃得明白</view>
+      <!-- 同步状态叠在标题行右侧的空白处，不占文档流，避免挤掉列表高度。 -->
+      <view wx:if="{{syncState === 'loading'}}" class="guide-sync guide-sync-loading" aria-live="polite">
+        <view class="guide-sync-dot" aria-hidden="true"></view>
+        <text class="guide-sync-text">正在更新</text>
+      </view>
+      <view wx:elif="{{syncState === 'offline'}}" class="guide-sync guide-sync-offline" aria-live="polite">
+        <text class="guide-sync-text">云端未连接</text>
+      </view>
     </view>
 
     <view class="recipe-search guide-search">
@@ -20,14 +28,6 @@
       <view class="search-history-list">
         <button wx:for="{{searchHistory}}" wx:key="*this" class="search-history-word" data-word="{{item}}" bindtap="useSearchHistory">{{item}}</button>
       </view>
-    </view>
-
-    <view wx:if="{{syncState === 'loading'}}" class="sync-bar" aria-live="polite">
-      <view class="sync-bar-dot" aria-hidden="true"></view>
-      <text class="sync-bar-text">正在更新食材指南…</text>
-    </view>
-    <view wx:elif="{{syncState === 'offline'}}" class="sync-bar sync-bar-offline" aria-live="polite">
-      <text class="sync-bar-text">暂时连不上云端，先用手机里的指南</text>
     </view>
 
     <view class="guide-body">
