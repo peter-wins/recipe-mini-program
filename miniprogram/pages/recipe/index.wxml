@@ -85,7 +85,7 @@
       <view id="method" class="list-heading recipe-section">
         <text class="section">做法步骤</text>
         <view class="step-actions">
-          <button wx:if="{{recipe.steps[0].image}}" class="link" bindtap="toggleStepText">{{showStepText ? '看步骤图' : '看文字'}}</button>
+          <button wx:if="{{recipe.steps[0].image}}" class="link" bindtap="toggleStepText">{{showStepText ? '看步骤图' : '看文字步骤'}}</button>
           <button wx:if="{{cookingIndex >= 0}}" class="link" bindtap="endCooking">看全部</button>
         </view>
       </view>
