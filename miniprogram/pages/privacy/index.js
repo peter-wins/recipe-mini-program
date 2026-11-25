@@ -40,11 +40,6 @@ Page({
     applyTheme(this)
   },
 
-  goBack() {
-    if (getCurrentPages().length > 1) wx.navigateBack()
-    else wx.reLaunch({ url: '/pages/home/index' })
-  },
-
   onShareAppMessage() {
     return {
       title: '吃饭搭子 · 隐私说明',

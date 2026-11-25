@@ -99,17 +99,5 @@
   line-height: 58rpx;
 }
 
-.about-back {
-  margin: 40rpx auto 0;
-  min-height: 88rpx;
-  padding: 0 56rpx;
-  border: 1rpx solid var(--theme-border, #f0e4d8);
-  border-radius: 999rpx;
-  background: var(--theme-surface, #fff);
-  color: var(--theme-accent-text, #994017);
-  font-size: var(--fs-md, 28rpx);
-  font-weight: 600;
-  line-height: 86rpx;
-}
 
 .about-footer { margin-top: 32rpx; color: var(--theme-muted, #75665e); font-size: var(--fs-sm, 24rpx); text-align: center; }

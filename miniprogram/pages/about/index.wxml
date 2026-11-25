@@ -45,8 +45,6 @@
       </view>
     </view>
 
-    <button class="about-back" bindtap="goBack" aria-label="返回">返回</button>
-
     <view class="about-footer">让每一餐都有好心情</view>
   </view>
 </view>

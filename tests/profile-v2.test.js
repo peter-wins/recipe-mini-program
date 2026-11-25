@@ -708,8 +708,7 @@ test('关于页有隐私说明与数据来源两个入口，名称与品牌定�
   assert.ok(js.includes("appName: '吃饭搭子'"), '关于页名称应为「吃饭搭子」')
   // 卡片跟随主题，不再写死白色
   assert.ok(!/background:\s*#fff\s*;/.test(wxss), '卡片底色应走主题变量')
-  // 有返回按钮和分享
-  assert.ok(wxml.includes('bindtap="goBack"'), '关于页需有返回按钮')
+  // 返回交给原生导航栏（设计指南 2.1），页内不重复造；分享要有
   assert.ok(js.includes('onShareAppMessage'), '关于页应可分享')
 })
 

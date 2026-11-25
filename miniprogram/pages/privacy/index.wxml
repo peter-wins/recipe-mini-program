@@ -35,6 +35,5 @@
       <view class="privacy-para">{{contactNote}}</view>
     </view>
 
-    <button class="privacy-back" bindtap="goBack" aria-label="返回">返回</button>
   </view>
 </view>

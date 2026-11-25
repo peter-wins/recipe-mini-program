@@ -30,11 +30,6 @@ Page({
     applyTheme(this)
   },
 
-  goBack() {
-    if (getCurrentPages().length > 1) wx.navigateBack()
-    else wx.reLaunch({ url: '/pages/home/index' })
-  },
-
   copySource(e) {
     const { url } = e.currentTarget.dataset
     if (!url) return

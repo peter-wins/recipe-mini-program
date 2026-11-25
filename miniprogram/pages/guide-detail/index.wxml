@@ -37,4 +37,16 @@
       </button>
     </view>
   </view>
+
+  <view wx:elif="{{status === 'loading'}}" class="screen detail-state" aria-live="polite">
+    <view class="detail-state-loading" aria-hidden="true"></view>
+    <view class="detail-state-text">正在打开这份食材指南…</view>
+  </view>
+
+  <view wx:else class="screen detail-state">
+    <view class="detail-state-title">没找到这个食材</view>
+    <view class="detail-state-text">可能是链接失效，或者这份介绍还没收录。</view>
+    <button class="detail-state-primary" bindtap="goGuideList">看看食材指南</button>
+    <button class="link detail-state-retry" bindtap="retryLoad">再试一次</button>
+  </view>
 </view>
