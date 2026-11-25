@@ -1,3 +1,0 @@
-<view wx:if="{{redirectFailed}}" class="screen">
-  <navigator class="link" url="/pages/home/index" open-type="redirect">进入首页</navigator>
-</view>
